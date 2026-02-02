@@ -1,66 +1,41 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import data from '../data.json';
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="container">
+      <header className="header">
+        <h1>Video Review</h1>
+        <p>Browse and review your downloaded "Antigravity" videos and transcriptions.</p>
+      </header>
+
+      <div className="grid">
+        {data.map((video, index) => (
+          <Link key={index} href={`/video/${index}`} className="video-card">
+            <div className="thumbnail-wrapper">
+              {video.thumb_path ? (
+                <img
+                  src={`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`}
+                  alt={video.title}
+                />
+              ) : (
+                <div style={{ padding: '20px', textAlign: 'center' }}>No Thumbnail</div>
+              )}
+              <div className="play-overlay">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+            <div className="video-card-content">
+              <h2>{video.title}</h2>
+              <div className="video-card-footer">
+                Click to view transcript
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </main>
   );
 }
