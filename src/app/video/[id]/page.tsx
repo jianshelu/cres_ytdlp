@@ -53,10 +53,10 @@ export default async function VideoPage({ params }: PageProps) {
                 <h1 className="text-xl font-bold truncate text-gray-200">{videoName}</h1>
             </header>
 
-            <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <main className="flex-1 flex flex-col lg:flex-row overflow-hidden h-[calc(100vh-73px)]">
                 {/* Video Column */}
-                <div className="lg:w-1/2 flex flex-col p-6 items-center justify-center bg-gray-900">
-                    <div className="w-full max-w-2xl bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-800">
+                <div className="lg:w-1/2 flex flex-col p-6 items-center justify-center bg-gray-900 overflow-y-auto">
+                    <div className="w-full max-w-2xl bg-black rounded-3xl overflow-hidden shadow-2xl ring-1 ring-gray-800">
                         <video
                             id="main-video"
                             className="w-full aspect-video object-contain"
@@ -67,21 +67,42 @@ export default async function VideoPage({ params }: PageProps) {
                         </video>
                     </div>
 
-                    <div className="mt-8 max-w-2xl w-full">
-                        <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-500 mb-2">AI Summary</h2>
-                        <p className="text-gray-400 whitespace-pre-line leading-relaxed text-sm">
-                            {transcriptData?.summary || "No summary available."}
-                        </p>
+                    <div className="mt-12 max-w-2xl w-full">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="w-2 h-8 bg-indigo-500 rounded-full"></span>
+                            <h2 className="text-xl font-bold tracking-tight">AI Insights</h2>
+                        </div>
+
+                        <div className="bg-gray-800/20 rounded-3xl p-8 border border-gray-800/50">
+                            <h3 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-4">Summary</h3>
+                            <p className="text-gray-300 whitespace-pre-line leading-relaxed text-lg">
+                                {transcriptData?.summary || "No summary available."}
+                            </p>
+
+                            {transcriptData?.keywords && transcriptData.keywords.length > 0 && (
+                                <div className="mt-10">
+                                    <h3 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-4">Key Keywords</h3>
+                                    <div className="flex flex-wrap gap-3">
+                                        {transcriptData.keywords.map((keyword: string, i: number) => (
+                                            <span key={i} className="px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-sm font-bold text-indigo-300">
+                                                #{keyword}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Karaoke Transcript Column */}
-                <div className="lg:w-1/2 bg-black relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none z-10"></div>
+                <div className="lg:w-1/2 bg-black relative h-full">
                     {transcriptData?.segments ? (
                         <KaraokeTranscript segments={transcriptData.segments} />
                     ) : (
-                        <div className="flex h-full items-center justify-center text-gray-500">No transcript available.</div>
+                        <div className="flex h-full items-center justify-center text-gray-500 italic">
+                            No transcription data found for this video.
+                        </div>
                     )}
                 </div>
             </main>

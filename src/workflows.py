@@ -34,7 +34,7 @@ class VideoProcessingWorkflow:
         # OpenAI/Llama based
         summary = await workflow.execute_activity(
             summarize_content,
-            transcript_text,
+            (transcript_text, filepath),
             start_to_close_timeout=timedelta(minutes=10)
         )
 

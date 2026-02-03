@@ -1,82 +1,120 @@
 import fs from 'fs';
 import path from 'path';
+import Link from 'next/link';
 import SearchForm from './components/SearchForm';
 
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
-    const videosDir = path.join(process.cwd(), 'public/downloads');
-
-    let videos: { name: string; url: string; summary: string }[] = [];
+    const downloadsDir = path.join(process.cwd(), 'public/downloads');
+    let videoFiles: { name: string; file: string; summary: string; keywords: string[] }[] = [];
 
     try {
-        const files = fs.readdirSync(videosDir);
+        if (fs.existsSync(downloadsDir)) {
+            const files = fs.readdirSync(downloadsDir);
 
-        // Group by base name
-        const videoFiles = files.filter(f => f.endsWith('.webm') || f.endsWith('.mp4') || f.endsWith('.mkv'));
+            // Collect all video files
+            const rawVideos = files.filter(f =>
+                f.endsWith('.webm') || f.endsWith('.mp4') || f.endsWith('.mkv')
+            );
 
-        videos = videoFiles.map(file => {
-            const baseName = path.parse(file).name;
-            const jsonFile = files.find(f => f === `${baseName}.json`);
-            let summary = "No summary available.";
+            videoFiles = rawVideos.map(file => {
+                const baseName = path.parse(file).name;
+                const jsonFile = files.find(f => f === `${baseName}.json`);
+                let summary = "Summary pending...";
+                let keywords: string[] = [];
 
-            if (jsonFile) {
-                try {
-                    const content = fs.readFileSync(path.join(videosDir, jsonFile), 'utf-8');
-                    const data = JSON.parse(content);
-                    summary = data.summary || "Summary field missing.";
-                } catch (e) {
-                    summary = "Error reading summary.";
+                if (jsonFile) {
+                    try {
+                        const content = fs.readFileSync(path.join(downloadsDir, jsonFile), 'utf-8');
+                        const data = JSON.parse(content);
+                        summary = data.summary || "No summary available.";
+                        keywords = data.keywords || [];
+                    } catch (e) {
+                        console.error(`Error reading data for ${baseName}`, e);
+                    }
                 }
-            }
 
-            return {
-                name: baseName,
-                url: `/downloads/${file}`,
-                summary
-            };
-        });
+                return {
+                    name: baseName,
+                    file: file,
+                    summary: summary,
+                    keywords: keywords
+                };
+            });
+        }
     } catch (error) {
-        console.error("Error reading video directory:", error);
+        console.error("Error reading downloads directory:", error);
     }
 
     return (
-        <div className="min-h-screen p-8 bg-gray-50 font-[family-name:var(--font-geist-sans)]">
-            <main className="max-w-4xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 text-gray-900">Processed Videos</h1>
+        <div className="min-h-screen bg-black text-white font-[family-name:var(--font-geist-sans)]">
+            <div className="max-w-7xl mx-auto px-6 py-12">
+                <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+                    <div>
+                        <h1 className="text-5xl font-black tracking-tighter bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
+                            ANTIGRAVITY
+                        </h1>
+                        <p className="text-gray-400 text-lg font-medium max-w-xl">
+                            Next-gen video analysis engine. Instant transcription, AI summarization, and key insight extraction.
+                        </p>
+                    </div>
+                    <div className="w-full md:w-96">
+                        <SearchForm />
+                    </div>
+                </header>
 
-                <SearchForm />
-
-                {videos.length === 0 ? (
-                    <div className="text-center p-12 bg-white rounded-lg shadow">
-                        <p className="text-gray-500">No videos found. Use the search to download videos.</p>
+                {videoFiles.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-20 bg-gray-900/30 rounded-3xl border border-gray-800 border-dashed">
+                        <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-6">
+                            <span className="text-2xl">🔍</span>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">No videos processed yet</h2>
+                        <p className="text-gray-500">Submit a YouTube URL above to start the analysis pipeline.</p>
                     </div>
                 ) : (
-                    <div className="grid gap-8">
-                        {videos.map((video) => (
-                            <div key={video.name} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                                <a href={`/video/${encodeURIComponent(video.name)}`} className="block hover:bg-gray-50 transition-colors">
-                                    <div className="md:flex">
-                                        <div className="md:shrink-0 bg-black flex items-center justify-center p-4">
-                                            {/* Thumbnail placeholder or small video preview */}
-                                            <div className="h-48 w-full md:w-64 bg-gray-800 flex items-center justify-center text-white">
-                                                <span className="text-4xl">▶</span>
-                                            </div>
-                                        </div>
-                                        <div className="p-8 w-full">
-                                            <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Video Analysis</div>
-                                            <h2 className="block mt-1 text-lg leading-tight font-medium text-black">{video.name}</h2>
-                                            <div className="mt-4 prose prose-indigo text-gray-500 max-h-24 overflow-hidden text-ellipsis">
-                                                <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Click to view details</h3>
-                                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {videoFiles.map((video) => (
+                            <Link
+                                href={`/video/${encodeURIComponent(video.name)}`}
+                                key={video.name}
+                                className="group relative bg-[#111] border border-gray-800 rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(79,70,229,0.15)]"
+                            >
+                                <div className="aspect-video bg-gray-900 relative overflow-hidden">
+                                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                                        <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-all">
+                                            <span className="text-2xl ml-1">▶</span>
                                         </div>
                                     </div>
-                                </a>
-                            </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+                                </div>
+
+                                <div className="p-6">
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {video.keywords.slice(0, 3).map((tag, i) => (
+                                            <span key={i} className="text-[10px] uppercase tracking-widest font-bold text-indigo-400 px-2 py-1 bg-indigo-500/10 rounded-md border border-indigo-500/20">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <h2 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-indigo-400 transition-colors">
+                                        {video.name}
+                                    </h2>
+                                    <p className="text-gray-500 text-sm line-clamp-3 leading-relaxed mb-6">
+                                        {video.summary}
+                                    </p>
+                                    <div className="pt-4 border-t border-gray-800 flex items-center justify-between">
+                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Analysis Ready</span>
+                                        <span className="text-indigo-500 font-bold text-sm flex items-center gap-2">
+                                            View Report <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 )}
-            </main>
+            </div>
         </div>
     );
 }

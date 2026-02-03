@@ -48,7 +48,10 @@ def download_video(url: str) -> str:
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
 
-    object_name = os.path.basename(filepath)
+    # Force strip directory
+    object_name = filepath.replace('\\', '/').split('/')[-1]
+    activity.logger.info(f"Uploading {object_name} to MinIO bucket {bucket_name}")
+    
     client.fput_object(bucket_name, object_name, filepath)
     activity.logger.info(f"Uploaded {object_name} to MinIO bucket {bucket_name}")
 
@@ -59,7 +62,7 @@ def download_video(url: str) -> str:
 
 @activity.defn
 def transcribe_video(object_name: str) -> str:
-    activity.logger.info(f"Transcribing file: {object_name}")
+    activity.logger.info(f"Transcribing file input param: '{object_name}'")
     
     # Download from MinIO
     client = get_minio_client()
@@ -74,9 +77,15 @@ def transcribe_video(object_name: str) -> str:
     if not os.path.exists(local_path):
         client.fget_object(bucket_name, object_name, local_path)
 
-    # Load model
-    # Force CPU to avoid CUDA OOM in this shared env
-    model = whisper.load_model("base", device="cpu") 
+    # Attempting to use GPU as requested
+    try:
+        model = whisper.load_model("base", device="cuda")
+        activity.logger.info("Whisper model loaded on device: CUDA (GPU)")
+    except Exception as e:
+        activity.logger.error(f"Failed to load on CUDA, falling back to CPU: {e}")
+        model = whisper.load_model("base", device="cpu")
+        activity.logger.info("Whisper model loaded on device: CPU")
+        
     result = model.transcribe(local_path)
     
     # Save transcript locally (temp)
@@ -96,20 +105,20 @@ def transcribe_video(object_name: str) -> str:
     return result['text']
 
 @activity.defn
-async def summarize_content(text: str) -> str:
-    activity.logger.info("Summarizing content with llama.cpp")
+
+async def summarize_content(params: tuple) -> dict:
+    text, object_name = params
+    activity.logger.info(f"Summarizing content for {object_name}")
     
-    # Truncate text if too long for prompt context to avoid errors, 
-    # though valid production approach handles chunking.
-    # Llama 3.1 8B context is large (128k) but let's be safe/efficient.
+    # Truncate text if too long for prompt context
     max_chars = 12000 
     input_text = text[:max_chars]
     
     prompt = f"""
     <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-    You are a helpful assistant efficiently summarizing video transcripts.
+    You are a helpful assistant. Result must be valid JSON with fields: 'summary' (string) and 'keywords' (list of strings).
     <|eot_id|><|start_header_id|>user<|end_header_id|>
-    Please summarize the following video transcript. Focus on key points and takeaways.
+    Summarize the transcript and extract 5 key topics/tags.
     
     TRANSCRIPT:
     {input_text}
@@ -119,16 +128,63 @@ async def summarize_content(text: str) -> str:
     payload = {
         "prompt": prompt,
         "n_predict": 512,
-        "temperature": 0.7,
-        "api_key": "not-needed" 
+        "temperature": 0.4,
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string"},
+                "keywords": {"type": "array", "items": {"type": "string"}}
+            }
+        }
     }
+    
+    summary_data = {"summary": "Failed", "keywords": []}
     
     # Call local llama.cpp server
     try:
         response = requests.post("http://localhost:8081/completion", json=payload, timeout=600)
         response.raise_for_status()
         result = response.json()
-        return result.get('content', '')
+        
+        content_str = result.get('content', '')
+        try:
+            summary_data = json.loads(content_str)
+        except json.JSONDecodeError:
+            summary_data = {"summary": content_str, "keywords": []}
+            
     except Exception as e:
         activity.logger.error(f"Summarization failed: {e}")
-        return f"Summarization failed: {e}"
+        summary_data = {"summary": f"Summarization failed: {e}", "keywords": []}
+
+    # Update the local/MinIO JSON file
+    client = get_minio_client()
+    transcript_bucket = "transcripts"
+    download_dir = "downloads"
+    base_name = os.path.splitext(object_name)[0]
+    json_filename = f"{base_name}.json"
+    local_json_path = os.path.join(download_dir, json_filename)
+    
+    # Check if we need to fetch it (if worker is on different node/pod)
+    if not os.path.exists(local_json_path):
+        try:
+             client.fget_object(transcript_bucket, json_filename, local_json_path)
+        except Exception as e:
+             activity.logger.error(f"Could not fetch existing transcript to update: {e}")
+             return summary_data # Return partial
+
+    # Update file
+    try:
+        with open(local_json_path, 'r', encoding='utf-8') as f:
+            existing_data = json.load(f)
+        
+        existing_data.update(summary_data)
+        
+        with open(local_json_path, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, indent=4, ensure_ascii=False)
+            
+        # Re-upload
+        client.fput_object(transcript_bucket, json_filename, local_json_path)
+    except Exception as e:
+        activity.logger.error(f"Failed to update JSON artifact: {e}")
+
+    return summary_data

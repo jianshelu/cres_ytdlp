@@ -7,12 +7,24 @@ from temporalio.worker import Worker
 from workflows import VideoProcessingWorkflow
 from activities import download_video, transcribe_video, summarize_content
 
+import torch
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 async def main():
     # Connect to the Temporal server using the Docker networking or localhost
     # Since we are running in the same container/network space as CLI:
     client = await Client.connect("localhost:7233")
     
     print("Worker connecting to Temporal server on localhost:7233...")
+
+    # Determine identity
+    import socket
+    hostname = socket.gethostname()
+    device_type = "gpu" if torch.cuda.is_available() else "cpu"
+    identity = f"{hostname}@{device_type}"
+    print(f"Worker Identity: {identity}")
 
     # Run the worker
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -22,6 +34,7 @@ async def main():
             workflows=[VideoProcessingWorkflow],
             activities=[download_video, transcribe_video, summarize_content],
             activity_executor=executor,
+            identity=identity,
         )
 
         print("Worker started. Waiting for tasks...")
