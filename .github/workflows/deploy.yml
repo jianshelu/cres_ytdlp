@@ -7,14 +7,18 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   filter:
     runs-on: ubuntu-latest
     outputs:
       base: ${{ steps.filter.outputs.base }}
+      image_name: ${{ steps.lowercase.outputs.image_name }}
     steps:
+      - name: Lowercase image name
+        id: lowercase
+        run: |
+          echo "image_name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
@@ -50,12 +54,12 @@ jobs:
           context: .
           file: Dockerfile.base
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-base:latest
+          tags: ${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name }}-base:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   build-app:
-    needs: build-base
+    needs: [filter, build-base]
     if: always() && (needs.build-base.result == 'success' || needs.build-base.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
@@ -82,8 +86,8 @@ jobs:
           context: .
           file: Dockerfile
           build-args: |
-            BASE_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-base:latest
+            BASE_IMAGE=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name }}-base:latest
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
