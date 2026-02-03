@@ -1,161 +1,141 @@
+import sys
 import os
-import json
+import argparse
+import asyncio
 import yt_dlp
-import whisper
-import warnings
+from temporalio.client import Client
 
-# Suppress warnings
-warnings.filterwarnings("ignore")
+# Add src to path so we can import workflows/activities as if we were inside src
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from workflows import VideoProcessingWorkflow
 
-class VideoPipeline:
-    def __init__(self, download_dir="downloads", model_size="base"):
-        self.download_dir = download_dir
-        self.model_size = model_size
-        self.model = None
-        
-        if not os.path.exists(self.download_dir):
-            os.makedirs(self.download_dir)
+# Filter Logic
+def filter_video_info(info):
+    """
+    Filter video based on duration and license.
+    Returns: True if accepted, False otherwise.
+    """
+    duration = info.get('duration', 0)
+    
+    # Duration Filter: 3 mins (180s) to 30 mins (1800s)
+    if duration < 180 or duration > 1800:
+        print(f"Skipping {info.get('title', 'Unknown')}: Duration {duration}s out of range.")
+        return False
 
-    def load_model(self):
-        if self.model is None:
-            print(f"Loading Whisper model '{self.model_size}'...")
-            self.model = whisper.load_model(self.model_size)
-            print("Model loaded.")
+    # License Filter: Check for Creative Commons
+    license_field = info.get('license', '').lower()
+    # Note: yt-dlp metadata for license can be tricky. 
+    # Often 'creative commons' is in the license field.
+    if 'creative commons' not in license_field:
+         print(f"Skipping {info.get('title', 'Unknown')}: License '{license_field}' is not Creative Commons.")
+         return False
 
-    def filter_video(self, info):
-        """
-        Custom filter function for yt-dlp.
-        Returns:
-            str: Reason for rejection (None if accepted).
-        """
-        duration = info.get('duration', 0)
-        
-        # Duration Filter: 3 mins (180s) to 30 mins (1800s)
-        if duration < 180 or duration > 1800:
-            return f"Duration {duration}s out of range (180-1800s)"
+    return True
 
-        # License Filter: Check for Creative Commons
-        # Note: If passing a direct URL that is already filtered (like User provided),
-        # this check relies on metadata presence. 
-        license_field = info.get('license', '').lower()
-        if 'creative commons' not in license_field:
-             # Just in case metadata is missing but it is CC, we might need to be careful.
-             # But for now, strict compliance.
-            return f"License '{license_field}' is not Creative Commons"
+async def main():
+    parser = argparse.ArgumentParser(description="Video Pipeline Orchestrator")
+    parser.add_argument("--url", help="YouTube URL to process (Single video mode)")
+    parser.add_argument("--search", help="Search query to find videos")
+    parser.add_argument("--limit", type=int, default=1, help="Max videos to process")
+    args = parser.parse_args()
 
-        return None # Accepted
+    if not args.url and not args.search:
+        print("Error: Must provide --url or --search")
+        sys.exit(1)
 
-    def download_videos_from_search(self, query, max_results=5):
-        """
-        Searches and downloads videos matching criteria.
-        Now supports direct URLs (including search result URLs).
-        """
-        if query.startswith("http"):
-            search_query = query
-        else:
-            search_query = f"ytsearch{max_results}:{query}"
-        
+    # Connect to Temporal Client
+    # Assuming running locally with default ports
+    try:
+        client = await Client.connect("localhost:7233")
+    except Exception as e:
+        print(f"Failed to connect to Temporal server: {e}")
+        print("Make sure Temporal is running.")
+        sys.exit(1)
+
+    urls_to_process = []
+
+    if args.url:
+        # Single URL mode - we might want to minimally validate it or just let the workflow handle it.
+        # But original script applied filters even to search results? 
+        # Original script: download_single_video -> NO filters. 
+        # So we keep that behavior: Direct URL = No checks.
+        urls_to_process.append(args.url)
+
+    if args.search:
+        print(f"Searching for: {args.search}")
         ydl_opts = {
-            'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
-            'outtmpl': f'{self.download_dir}/%(title)s.%(ext)s',
-            'match_filter': self.filter_video,
-            'noplaylist': False, # Allow playlists (search results are playlists)
-            'playlistend': max_results,
-            'quiet': False, # Set to True to reduce noise, False for debugging
-        }
-
-        downloaded_files = []
-
-        print(f"Searching for: {query}")
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            try:
-                # We need to extract info to get the filename *after* download
-                # But search returns a playlist-like object. 
-                # We can Iterate matches.
-                info = ydl.extract_info(search_query, download=True)
-                
-                if 'entries' in info:
-                    for entry in info['entries']:
-                        if entry: # Entry might be None if filtered out
-                             filename = ydl.prepare_filename(entry)
-                             downloaded_files.append(filename)
-                
-            except Exception as e:
-                print(f"An error occurred during search/download: {e}")
-
-        return downloaded_files
-
-    def download_single_video(self, url):
-        """
-        Downloads a single video by URL (for testing).
-        Note: Filters are NOT applied here to allow testing specific videos.
-        """
-        ydl_opts = {
-            'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
-            'outtmpl': f'{self.download_dir}/%(title)s.%(ext)s',
-            'noplaylist': True,
+            'quiet': True,
+            'extract_flat': True, # Don't download, just get metadata
+            'dump_single_json': True,
         }
         
-        filepath = None
+        # We search for more than limit because we filter some out
+        search_limit = args.limit * 5 
+        current_count = 0
+        
+        # Note: 'extract_flat' is fast but might not have full metadata like 'license' or precise 'duration'
+        # depending on the extractor. 
+        # To get full metadata for filtering, we might need to process entries.
+        
+        # 1. Broad Search
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
-                info = ydl.extract_info(url, download=True)
-                filepath = ydl.prepare_filename(info)
+                query = f"ytsearch{search_limit}:{args.search}"
+                search_results = ydl.extract_info(query, download=False)
             except Exception as e:
-                print(f"Error downloading {url}: {e}")
-        
-        return filepath
+                print(f"Search failed: {e}")
+                sys.exit(1)
 
-    def transcribe_file(self, filepath):
-        """
-        Transcribes the video file using Whisper and saves to JSON.
-        """
-        if not filepath or not os.path.exists(filepath):
-            print(f"File not found: {filepath}")
-            return
-
-        self.load_model()
-        
-        print(f"Transcribing: {filepath}")
-        result = self.model.transcribe(filepath)
-        
-        # Prepare output filename
-        base_name = os.path.splitext(os.path.basename(filepath))[0]
-        json_path = os.path.join(self.download_dir, f"{base_name}.json")
-        
-        with open(json_path, "w", encoding='utf-8') as f:
-            json.dump(result, f, indent=4, ensure_ascii=False)
+        # 2. Filter Candidates
+        if 'entries' in search_results:
+            candidates = search_results['entries']
+            print(f"Found {len(candidates)} potential candidates. Filtering...")
             
-        print(f"Transcribed and saved to: {json_path}")
+            for entry in candidates:
+                if current_count >= args.limit:
+                    break
+                    
+                url = entry.get('url')
+                if not url:
+                    continue
+                
+                # We need to fetch full details for this video to check License/Duration reliably
+                # extract_flat often misses License.
+                
+                print(f"Checking metadata for: {entry.get('title', 'Unknown')}")
+                # Fetch detailed info for single video (no download)
+                try:
+                    with yt_dlp.YoutubeDL({'quiet': True}) as ydl_detail:
+                         info = ydl_detail.extract_info(url, download=False)
+                         
+                         if filter_video_info(info):
+                             urls_to_process.append(info['webpage_url'])
+                             current_count += 1
+                             print(f"ACCEPTED: {info['title']}")
+                except Exception as e:
+                    print(f"Error checking video {url}: {e}")
 
+    print(f"\nDispatching {len(urls_to_process)} workflows...")
 
-def main():
-    pipeline = VideoPipeline()
-    
-    # Example usage / Test Frame
-    print("--- Video Processing Pipeline ---")
-    mode = input("Select Mode: [1] Search & Process (Production), [2] Test Single Video: ").strip()
-    
-    if mode == "1":
-        query = "Antigravity"
-        print(f"Starting auto-search for '{query}' with CC and duration filters...")
-        files = pipeline.download_videos_from_search(query, max_results=10) # Ask for more results as many will be filtered
+    import uuid
+    for url in urls_to_process:
+        # Deduplication ID
+        vid_id = url.split("v=")[-1] if "v=" in url else url[-10:]
+        # Use UUID to force new execution for testing/dev
+        workflow_id = f"video-process-{vid_id}-{uuid.uuid4().hex[:8]}"
         
-        if not files:
-            print("No videos found matching the strict criteria.")
-        
-        for file in files:
-            pipeline.transcribe_file(file)
+        try:
+            handle = await client.start_workflow(
+                VideoProcessingWorkflow.run,
+                url,
+                id=workflow_id,
+                task_queue="video-processing-queue",
+            )
+            print(f"Started Workflow: {workflow_id} (RunID: {handle.run_id})")
+        except Exception as e:
+            print(f"Failed to start workflow {workflow_id}: {e}")
 
-    elif mode == "2":
-        url = input("Enter YouTube URL for testing: ").strip()
-        if url:
-            print(f"Processing single video: {url}")
-            file = pipeline.download_single_video(url)
-            if file:
-                pipeline.transcribe_file(file)
-    else:
-        print("Invalid selection.")
+    print("Done.")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
