@@ -22,7 +22,7 @@ export default function Home() {
                 const baseName = path.parse(file).name;
                 const jsonFile = files.find(f => f === `${baseName}.json`);
                 let summary = "Summary pending...";
-                let keywords: string[] = [];
+                let keywords: { word: string; count: number }[] = [];
 
                 if (jsonFile) {
                     try {
