@@ -16,7 +16,7 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
 RUN mkdir build && cd build && \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs:$LIBRARY_PATH \
     cmake .. -DGGML_CUDA=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs && \
-    cmake --build . --config Release
+    cmake --build . --config Release -j$(nproc)
 
 # Stage 2: Final Base Image
 FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
