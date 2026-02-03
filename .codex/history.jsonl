@@ -1,0 +1,24 @@
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769720831,"text":"2. Read @README.md, @codex.log, @gemini.log for understanding project and previous polishing.\n3. @setup_local_services.sh install, start and check services.\n4. llama, whisperx models in /workspace/packages/ corresponding folders. Input video files in: /workspace/package either.\n5. Video process need LR-ASR repo: https://github.com/Junhua-Liao/LR-ASD.git, need to refer to the README or logs download dependencies/packages in advance.\n6. Project run in vast.ai instance:\n\tRTX 3060 CUDA: 12.6 VRAM: 12GB\n\tCPU:XEON E5 1660 V3\n\tRAM: 26GB\n\tDISK: 32GB OR 50GB\n\n7. Run video pipeline process, name workflows, input/output files with prefix . Concern of working on GPU.\n8. Keep existed workflows as references , terminate one if it's in idle or block status.\n8. There is same issue mention in @README.md, read and fix no output problem."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769720921,"text":"Continue."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769722485,"text":"Download small whisper model in /workspace/packages/models/whisper and run pipeline again."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769723218,"text":"Rerun."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769724372,"text":"Explain create_vertical_video function in ai-podcast-clipper-local-backend/main.py"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769725221,"text":"Write a test script for identify_moments activity to check LLM models/weights logic."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769725357,"text":"Run this test."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769725437,"text":"rerun with --mock-response"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769725595,"text":"Run test with video in MinIO."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769725608,"text":"2"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769725835,"text":"Dump transcript into JSON file and save in MinIO."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769726214,"text":"Run pipeline test, but skip process_clips, try to output clips transcripts instead. output in text format."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769726485,"text":"Attach start and end time into clips' transcripts. Keep workflow tasks in Temporal."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769726592,"text":"Yes, run in Temporal task queue."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769727104,"text":"Why failed in the beginning."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769727237,"text":"Rerun transcription pipeline test carry on Temporal."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769727479,"text":"Rerun."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769727912,"text":"Why identify_moments activity results are different:transcript-processing-.small-rerun-original.mp4\n[\n  {\n    \"end\": 72.493,\n    \"start\": 57.408\n  },\n  {\n    \"end\": 165.094,\n    \"start\": 127.584\n  },\n  {\n    \"end\": 20.096,\n    \"start\": 0.031\n  }\n]\ntranscript-processing-.small-rerun-2-original.mp4\n[\n  {\n    \"end\": 27.451,\n    \"start\": 0.031\n  },\n  {\n    \"end\": 92.9,\n    \"start\": 57.408\n  },\n  {\n    \"end\": 20.096,\n    \"start\": 0.031\n  }\n]\ntranscript-processing-.small-rerun-3-original.mp4\n[\n  {\n    \"end\": 91.198,\n    \"start\": 57.408\n  },\n  {\n    \"end\": 161.568,\n    \"start\": 127.584\n  },\n  {\n    \"end\": 20.096,\n    \"start\": 0.031\n  }\n]"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769728077,"text":"Append this explian into README.md and other operations in this session."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769728235,"text":"Append activity into code.log"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769728278,"text":"commit and push to codebase."}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769728390,"text":"where did you push, please roll back and push to my github: https://github.com/jianshelu/ai-podcast-clipper-local.git"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769728437,"text":"name: jianshelu, PAT: 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"}
+{"session_id":"019c0b92-d808-7fc3-ae7f-dfb16623f328","ts":1769728489,"text":"1st option."}

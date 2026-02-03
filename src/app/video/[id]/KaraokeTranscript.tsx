@@ -1,80 +1,118 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface Segment {
+    id: number;
     start: number;
     end: number;
     text: string;
 }
 
-interface Props {
-    videoSrc: string;
-    transcript: {
-        segments: Segment[];
-    };
-}
-
-export default function KaraokeTranscript({ videoSrc, transcript }: Props) {
+export default function KaraokeTranscript({ segments }: { segments: Segment[] }) {
     const [currentTime, setCurrentTime] = useState(0);
-    const videoRef = useRef<HTMLVideoElement>(null);
     const activeRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleTimeUpdate = () => {
-        if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime);
-        }
-    };
-
-    // Scroll active segment into view
     useEffect(() => {
-        if (activeRef.current) {
-            activeRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
+        // Try to find the video element multiple times if needed
+        let interval: NodeJS.Timeout;
+        let attempts = 0;
+
+        const findVideo = () => {
+            const video = document.getElementById('main-video') as HTMLVideoElement;
+            if (video) {
+                console.log("KaraokeTranscript: Found video element.");
+                clearInterval(interval);
+
+                const handleTimeUpdate = () => {
+                    setCurrentTime(video.currentTime);
+                };
+
+                video.addEventListener('timeupdate', handleTimeUpdate);
+                // Trigger once to sync initial state
+                setCurrentTime(video.currentTime);
+
+                return () => {
+                    video.removeEventListener('timeupdate', handleTimeUpdate);
+                };
+            }
+
+            attempts++;
+            if (attempts > 20) {
+                console.error("KaraokeTranscript: Could not find video element after 20 attempts.");
+                clearInterval(interval);
+            }
+        };
+
+        interval = setInterval(findVideo, 500);
+        findVideo(); // Try immediately
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
+
+    // Auto-scroll to active segment
+    useEffect(() => {
+        if (activeRef.current && containerRef.current) {
+            const container = containerRef.current;
+            const active = activeRef.current;
+
+            const containerHeight = container.clientHeight;
+            const activeTop = active.offsetTop;
+            const activeHeight = active.clientHeight;
+
+            const scrollValues = activeTop - (containerHeight / 2) + (activeHeight / 2);
+
+            container.scrollTo({
+                top: scrollValues,
+                behavior: 'smooth'
             });
         }
     }, [currentTime]);
 
-    const activeIndex = transcript.segments.findIndex(
-        (s) => currentTime >= s.start && currentTime <= s.end
-    );
-
     return (
-        <div className="transcript-container">
-            <div className="video-player-section">
-                <video
-                    ref={videoRef}
-                    controls
-                    src={videoSrc}
-                    onTimeUpdate={handleTimeUpdate}
-                >
-                    Your browser does not support the video tag.
-                </video>
-            </div>
+        <div
+            ref={containerRef}
+            className="h-full overflow-y-auto px-10 py-20 text-center scroll-smooth scrollbar-hide"
+            style={{
+                maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)'
+            }}
+        >
+            <div className="space-y-10 pb-[40vh]">
+                {segments.map((segment) => {
+                    const isActive = currentTime >= segment.start && currentTime < segment.end;
+                    const isPast = currentTime >= segment.end;
 
-            <div className="transcript-section">
-                <h3>Transcription</h3>
-                <div className="transcript-list">
-                    {transcript.segments.map((segment, sIdx) => {
-                        const isActive = sIdx === activeIndex;
-                        return (
-                            <div
-                                key={sIdx}
-                                ref={isActive ? activeRef : null}
-                                className={`transcript-item ${isActive ? 'active' : ''}`}
-                                onClick={() => {
-                                    if (videoRef.current) {
-                                        videoRef.current.currentTime = segment.start;
-                                        videoRef.current.play();
-                                    }
-                                }}
+                    return (
+                        <div
+                            key={segment.id}
+                            ref={isActive ? activeRef : null}
+                            onClick={() => {
+                                const video = document.getElementById('main-video') as HTMLVideoElement;
+                                if (video) {
+                                    video.currentTime = segment.start;
+                                    video.play();
+                                }
+                            }}
+                            className={`transition-all duration-500 cursor-pointer ${isActive
+                                    ? 'scale-125 opacity-100'
+                                    : 'scale-90 opacity-20 blur-[0.5px]'
+                                }`}
+                        >
+                            <p
+                                className={`text-3xl md:text-5xl font-black leading-tight tracking-tight transition-colors duration-500 ${isActive
+                                        ? 'text-white drop-shadow-[0_0_15px_rgba(99,102,241,0.8)]'
+                                        : 'text-gray-500'
+                                    }`}
                             >
-                                <div className="transcript-text">{segment.text}</div>
-                            </div>
-                        );
-                    })}
-                </div>
+                                {segment.text}
+                            </p>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
