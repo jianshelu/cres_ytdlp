@@ -128,6 +128,28 @@ a {
   color: var(--muted);
 }
 
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tag {
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+/* Frequency Colors */
+.tag-1 { background-color: #10b981; color: #fff; } /* Green */
+.tag-2 { background-color: #3b82f6; color: #fff; } /* Blue */
+.tag-3 { background-color: #f59e0b; color: #fff; } /* Yellow */
+.tag-4 { background-color: #f97316; color: #fff; } /* Orange */
+.tag-5plus { background-color: #ef4444; color: #fff; } /* Red */
+
 /* Transcript View - Stacked */
 .transcript-container {
   display: flex;

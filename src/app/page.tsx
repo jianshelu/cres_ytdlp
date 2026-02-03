@@ -29,7 +29,22 @@ export default function Home() {
             </div>
             <div className="video-card-content">
               <h2>{video.title}</h2>
-              <div className="video-card-footer">
+              <div className="keyword-tags">
+                {(video.keywords || []).map((kw, i) => {
+                  let colorClass = 'tag-1';
+                  if (kw.count === 2) colorClass = 'tag-2';
+                  else if (kw.count === 3) colorClass = 'tag-3';
+                  else if (kw.count === 4) colorClass = 'tag-4';
+                  else if (kw.count >= 5) colorClass = 'tag-5plus';
+
+                  return (
+                    <span key={i} className={`tag ${colorClass}`}>
+                      {kw.word} ({kw.count})
+                    </span>
+                  );
+                })}
+              </div>
+              <div className="video-card-footer" style={{ marginTop: '1rem' }}>
                 Click to view transcript
               </div>
             </div>
