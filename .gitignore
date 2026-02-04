@@ -35,3 +35,6 @@ build/
 
 # Docker logs
 *.log
+
+#Cache
+.cache/
