@@ -1,0 +1,244 @@
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-bg: #1a1a1a;
+  --card-hover: #252525;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --muted: #888888;
+  --border: #333333;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.video-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  background: var(--card-hover);
+  border-color: var(--accent);
+}
+
+.thumbnail-wrapper {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  background: #000;
+  position: relative;
+}
+
+.thumbnail-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.video-card:hover .play-overlay {
+  opacity: 1;
+}
+
+.video-card-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+
+.video-card-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 3rem;
+}
+
+.video-card-footer {
+  margin-top: auto;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Kwarords Tags */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-count {
+  margin-left: 0.3rem;
+  opacity: 0.7;
+  font-size: 0.7em;
+}
+
+/* Color Scale */
+.tag-1 { background: #10b981; } /* Green */
+.tag-2 { background: #3b82f6; } /* Blue */
+.tag-3 { background: #eab308; } /* Yellow */
+.tag-4 { background: #f97316; } /* Orange */
+.tag-5 { background: #ef4444; } /* Red */
+
+/* Transcript View - Stacked */
+.transcript-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  height: calc(100vh - 200px);
+  /* Keep everything in viewport */
+}
+
+.video-player-section {
+  flex-shrink: 0;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.video-player-section video {
+  width: 100%;
+  height: 100%;
+}
+
+.transcript-section {
+  flex-grow: 1;
+  overflow-y: auto;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+}
+
+.transcript-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.transcript-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcript-section::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.transcript-section::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+.transcript-section h3 {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.5rem;
+}
+
+.transcript-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.transcript-item.active .transcript-text {
+  color: #fff;
+  background: rgba(var(--accent-rgb), 0.15);
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.transcript-item {
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.timestamp {
+  display: none;
+}
