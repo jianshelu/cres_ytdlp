@@ -34,3 +34,5 @@ build/
 
 #Cache
 .cache/
+id_vast_key
+*.key

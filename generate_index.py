@@ -1,132 +1,112 @@
 import os
 import json
 import subprocess
-import re
-from collections import Counter
 
-# Configuration
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Path to the directory containing video files
-DOWNLOAD_DIR = os.path.join(SCRIPT_DIR, "web/public/downloads")
-# Path where the output JSON should be saved
-OUTPUT_JSON = os.path.join(SCRIPT_DIR, "web/src/data.json")
-# URL prefix for the web app (relative path from public/)
+# Config
+DOWNLOAD_DIR = "web/public/downloads"
+OUTPUT_JSON = "web/src/data.json"
 URL_PREFIX = "downloads/"
 
-# Simple stop words list
-STOP_WORDS = set([
-    'the', 'and', 'a', 'to', 'of', 'in', 'is', 'it', 'you', 'that', 'this', 'for', 'on', 'with', 'as', 'are', 'was', 'be', 'at', 'or', 'an', 'have', 'from', 'but', 'not', 'by', 'we', 'he', 'she', 'they', 'our', 'their', 'my', 'me', 'us', 'him', 'her', 'them', 'if', 'will', 'can', 'just', 'all', 'so', 'about', 'some', 'no', 'up', 'down', 'out', 'into', 'over', 'now', 'then', 'when', 'where', 'how', 'why', 'what', 'which', 'who', 'get', 'got', 'go', 'going', 'been', 'has', 'had', 'do', 'does', 'did', 'doing', 'one', 'two', 'three', 'like', 'good', 'would', 'could', 'should', 'very', 'really', 'more', 'less', 'than', 'only', 'also', 'too', 'very', 'here', 'there', 'very', 'really'
-])
-
 def extract_keywords(json_path):
-    if not json_path or not os.path.exists(json_path):
-        return []
-    
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
-        text = ""
-        # Handle Whisper JSON format (segments) or raw text
-        if isinstance(data, dict):
-            if 'text' in data:
-                text = data['text']
-            elif 'segments' in data:
-                text = " ".join([s.get('text', '') for s in data['segments']])
-        elif isinstance(data, list):
-            # List of segments
-            text = " ".join([s.get('text', '') for s in data])
-            
-        # Simple regex to get words, lowercase them
-        words = re.findall(r'\b\w{3,}\b', text.lower())
-        
-        # Filter stop words
-        filtered_words = [w for w in words if w not in STOP_WORDS]
-        
-        # Count frequencies
-        counts = Counter(filtered_words)
-        
-        # Get top 10 keywords as objects
-        top_keywords = [{"word": word, "count": count} for word, count in counts.most_common(10)]
-        return top_keywords
+            if 'keywords' in data:
+                # Return list of objects {word, count}
+                return [{"word": k, "count": data.get('text', '').lower().count(k.lower())} for k in data['keywords']]
     except Exception as e:
         print(f"Error extracting keywords from {json_path}: {e}")
-        return []
+    return []
 
 def generate_index():
-    # Ensure current directory is root or adjust paths 
     if not os.path.exists(DOWNLOAD_DIR):
-        print(f"Directory {DOWNLOAD_DIR} not found. Please run from project root.")
+        print(f"Directory {DOWNLOAD_DIR} does not exist.")
         return
 
-    video_extensions = ('.mp4', '.mkv', '.webm', '.avi', '.mov')
     files = os.listdir(DOWNLOAD_DIR)
-    video_files = [f for f in files if f.lower().endswith(video_extensions)]
+    video_extensions = ('.mp4', '.webm', '.mkv', '.avi', '.mov')
+    image_extensions = ('.jpg', '.webp', '.png', '.jpeg', '.JPG', '.PNG')
     
+    # Map of base_name -> {video: None, thumb: None, json: None}
+    entries_map = {}
+    
+    for f in files:
+        if f in ['data.json', 'package.json', 'tsconfig.json']:
+            continue
+            
+        base, ext = os.path.splitext(f)
+        if base not in entries_map:
+            entries_map[base] = {'video': None, 'thumb': None, 'json': None}
+        
+        if ext.lower() in video_extensions:
+            entries_map[base]['video'] = f
+        elif ext.lower() in image_extensions:
+            entries_map[base]['thumb'] = f
+        elif ext.lower() == '.json':
+            entries_map[base]['json'] = f
+
     data = []
     
-    for video in video_files:
-        full_video_path = os.path.join(DOWNLOAD_DIR, video)
-        base_name = os.path.splitext(video)[0]
-        import hashlib
-        safe_name = hashlib.md5(video.encode()).hexdigest()
+    for base_name, assets in entries_map.items():
+        video_file = assets['video']
+        thumb_filename = assets['thumb']
+        json_filename = assets['json']
         
-        # Paths relative to the public/downloads directory
-        json_filename = f"{base_name}.json"
-        thumb_filename = f"thumb_{safe_name}.jpg"
+        full_video_path = os.path.join(DOWNLOAD_DIR, video_file) if video_file else None
         
-        full_json_path = os.path.join(DOWNLOAD_DIR, json_filename)
-        full_thumb_path = os.path.join(DOWNLOAD_DIR, thumb_filename)
-        
-        # 1. Generate Thumbnail if missing
-        if not os.path.exists(full_thumb_path):
-            print(f"Generating thumbnail for {video}...")
+        # 1. Generate Thumbnail if missing AND video exists
+        if not thumb_filename and full_video_path and os.path.exists(full_video_path):
+            print(f"Generating thumbnail for {base_name}...")
+            # Try to use .jpg as default for generated
+            gen_thumb_name = f"{base_name}.jpg"
+            gen_thumb_path = os.path.join(DOWNLOAD_DIR, gen_thumb_name)
             try:
                 subprocess.run([
                     'ffmpeg', '-y', '-i', full_video_path, 
                     '-ss', '00:00:01', '-vframes', '1', 
-                    full_thumb_path
+                    gen_thumb_path
                 ], check=True, capture_output=True)
+                thumb_filename = gen_thumb_name
             except Exception as e:
-                print(f"Failed to generate thumbnail for {video}: {e}")
+                print(f"Failed to generate thumbnail for {base_name}: {e}")
         
-        # 2. Check for JSON and extract keywords
-        has_json = os.path.exists(full_json_path)
+        # 2. Check for JSON and extract metadata
         keywords = []
         summary = "Generated automatically"
-        
-        if has_json:
+        if json_filename:
+            full_json_path = os.path.join(DOWNLOAD_DIR, json_filename)
             keywords = extract_keywords(full_json_path)
             try:
                 with open(full_json_path, 'r', encoding='utf-8') as f:
                     json_data = json.load(f)
-                    if 'summary' in json_data:
+                    if isinstance(json_data, dict) and 'summary' in json_data:
                         summary = json_data['summary']
             except:
                 pass
         
         # 3. Create Entry
+        # Use existing video or assume .webm fallback for UI stability
+        final_video_name = video_file if video_file else f"{base_name}.webm"
+        
         entry = {
             "title": base_name,
-            # Web path: "downloads/video.mp4"
-            "video_path": f"{URL_PREFIX}{video}",
-            "thumb_path": f"{URL_PREFIX}{thumb_filename}" if os.path.exists(full_thumb_path) else None,
-            "json_path": f"{URL_PREFIX}{json_filename}" if has_json else None,
+            "video_path": f"{URL_PREFIX}{final_video_name}",
+            "thumb_path": f"{URL_PREFIX}{thumb_filename}" if thumb_filename else None,
+            "json_path": f"{URL_PREFIX}{json_filename}" if json_filename else None,
             "keywords": keywords,
             "summary": summary
         }
-        
         data.append(entry)
-    
+
     # Sort by title
     data.sort(key=lambda x: x['title'])
-    
+
     # Ensure output dir exists
     os.makedirs(os.path.dirname(OUTPUT_JSON), exist_ok=True)
-    
+
     with open(OUTPUT_JSON, "w", encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
-    
+
     print(f"Index generated: {OUTPUT_JSON} with {len(data)} entries.")
 
 if __name__ == "__main__":

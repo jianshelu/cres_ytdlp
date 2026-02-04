@@ -19,6 +19,7 @@ interface Props {
 export default function KaraokeTranscript({ videoSrc, poster, transcript }: Props) {
     const [currentTime, setCurrentTime] = useState(0);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const transcriptListRef = useRef<HTMLDivElement>(null);
     const activeRef = useRef<HTMLDivElement>(null);
 
     const handleTimeUpdate = () => {
@@ -27,12 +28,19 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript }: Prop
         }
     };
 
-    // Scroll active segment into view
+    // Scroll active segment into view within the list
     useEffect(() => {
-        if (activeRef.current) {
-            activeRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
+        if (activeRef.current && transcriptListRef.current) {
+            const container = transcriptListRef.current;
+            const element = activeRef.current;
+
+            // Calculate relative offset
+            const containerCenter = container.offsetHeight / 2;
+            const elementOffset = element.offsetTop - container.offsetTop;
+
+            container.scrollTo({
+                top: elementOffset - containerCenter + (element.offsetHeight / 2),
+                behavior: 'smooth'
             });
         }
     }, [currentTime]);
@@ -61,6 +69,20 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript }: Prop
                     src={videoSrc}
                     poster={poster}
                     onTimeUpdate={handleTimeUpdate}
+                    onError={(e) => {
+                        const target = e.target as HTMLVideoElement;
+                        target.style.display = 'none';
+                        if (target.parentElement) {
+                            const errDiv = document.createElement('div');
+                            errDiv.className = 'video-error';
+                            errDiv.textContent = 'Video file not found or playback error.';
+                            errDiv.style.padding = '2rem';
+                            errDiv.style.textAlign = 'center';
+                            errDiv.style.background = '#000';
+                            errDiv.style.color = '#fff';
+                            target.parentElement.appendChild(errDiv);
+                        }
+                    }}
                 >
                     Your browser does not support the video tag.
                 </video>
@@ -68,7 +90,7 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript }: Prop
 
             <div className="transcript-section">
                 <h3>Transcription</h3>
-                <div className="transcript-list">
+                <div className="transcript-list" ref={transcriptListRef}>
                     {transcript.segments.map((segment, sIdx) => {
                         const isActive = sIdx === activeIndex;
                         return (

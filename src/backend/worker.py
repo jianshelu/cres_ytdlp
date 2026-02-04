@@ -4,7 +4,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 # Import our workflow and activities
-from src.backend.workflows import VideoProcessingWorkflow, BatchProcessingWorkflow
+from src.backend.workflows import VideoProcessingWorkflow, BatchProcessingWorkflow, ReprocessVideoWorkflow
 from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos, refresh_index
 
 import torch
@@ -27,11 +27,12 @@ async def main():
     print(f"Worker Identity: {identity}")
 
     # Run the worker
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    # LIMIT CONCURRENCY to 1 to protect GPU from OOM
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         worker = Worker(
             client,
             task_queue="video-processing-queue",
-            workflows=[VideoProcessingWorkflow, BatchProcessingWorkflow],
+            workflows=[VideoProcessingWorkflow, BatchProcessingWorkflow, ReprocessVideoWorkflow],
             activities=[download_video, transcribe_video, summarize_content, search_videos, refresh_index],
             activity_executor=executor,
             identity=identity,

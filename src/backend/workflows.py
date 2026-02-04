@@ -94,3 +94,19 @@ class BatchProcessingWorkflow:
                 workflow.logger.error(f"Failed to start workflow for {url}: {e}")
                 
         return {"status": "dispatched", "count": len(results), "workflow_ids": results}
+
+@workflow.defn
+class ReprocessVideoWorkflow:
+    @workflow.run
+    async def run(self, params: tuple) -> dict:
+        text, object_name = params
+        workflow.logger.info(f"Reprocessing keywords for {object_name}")
+        
+        # summary_data contains {summary, keywords}
+        summary_data = await workflow.execute_activity(
+            summarize_content,
+            (text, object_name),
+            start_to_close_timeout=timedelta(minutes=10)
+        )
+        
+        return summary_data

@@ -4,9 +4,9 @@ set -e
 echo "Starting services..."
 
 # Start MinIO in the background
-mkdir -p /data/minio
+mkdir -p ./data/minio
 echo "Starting MinIO..."
-minio server /data/minio --address ":9000" --console-address ":9001" > /var/log/minio.log 2>&1 &
+minio server ./data/minio --address ":9000" --console-address ":9001" > /var/log/minio.log 2>&1 &
 
 # Wait for MinIO to be ready
 echo "Waiting for MinIO to start..."
@@ -44,11 +44,17 @@ until temporal operator cluster health || [ $COUNT -eq $MAX_RETRIES ]; do
 done
 
 # Start LLM Server if model is present
-if [ -d "$LLM_MODEL_PATH" ] && [ "$(ls $LLM_MODEL_PATH/*.gguf 2>/dev/null)" ]; then
-    echo "Starting LLM server..."
-    # Find the first .gguf file
-    MODEL_FILE=$(find $LLM_MODEL_PATH -name "*.gguf" | head -n 1)
-    if [ -n "$MODEL_FILE" ]; then
+# Start LLM Server if model is present
+if [ -n "$LLM_MODEL_PATH" ]; then
+    MODEL_FILE=""
+    if [ -f "$LLM_MODEL_PATH" ]; then
+        MODEL_FILE="$LLM_MODEL_PATH"
+    elif [ -d "$LLM_MODEL_PATH" ]; then
+        MODEL_FILE=$(find "$LLM_MODEL_PATH" -name "*.gguf" | head -n 1)
+    fi
+
+    if [ -n "$MODEL_FILE" ] && [ -f "$MODEL_FILE" ]; then
+        echo "Starting LLM server..."
         LLAMA_BIN=$(which llama-server || echo "/usr/bin/llama-server")
         if [ ! -f "$LLAMA_BIN" ] && [ -f "/app/llama-server" ]; then
             LLAMA_BIN="/app/llama-server"
@@ -58,10 +64,10 @@ if [ -d "$LLM_MODEL_PATH" ] && [ "$(ls $LLM_MODEL_PATH/*.gguf 2>/dev/null)" ]; t
         $LLAMA_BIN --model "$MODEL_FILE" --host 0.0.0.0 --port 8081 --n-gpu-layers 99 > /var/log/llama.log 2>&1 &
         echo "LLM server starting with model: $MODEL_FILE"
     else
-        echo "No .gguf model found in $LLM_MODEL_PATH, skipping LLM server start."
+        echo "No .gguf model found at $LLM_MODEL_PATH, skipping LLM server start."
     fi
 else
-    echo "LLM_MODEL_PATH is empty or missing, skipping LLM server start."
+    echo "LLM_MODEL_PATH is empty, skipping LLM server start."
 fi
 
 # Start FastAPI

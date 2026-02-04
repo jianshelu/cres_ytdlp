@@ -1,12 +1,42 @@
 #!/bin/bash
 set -e
 
-# Vast.ai connection details
-HOST="ssh1.vast.ai"
-PORT="12843"
-USER="root"
-SSH_KEY="/home/rama/.ssh/id_vast.ai70.69"
+# Load environment variables
+if [ -f .env ]; then
+    set -a
+    [ -f .env ] && . .env
+    set +a
+fi
+
+# Vast.ai connection details (Defaults or from .env)
+HOST="${VAST_HOST:-ssh1.vast.ai}"
+PORT="${VAST_PORT:-12843}"
+USER="${VAST_USER:-root}"
+SSH_KEY="${VAST_SSH_KEY}" # Optional, if empty will use default ssh agent/key
 TARGET_DIR="/workspace"
+
+# Determine SSH command (Configured to prefer Linux ssh in WSL for path compatibility)
+if [ -f "/usr/bin/ssh" ]; then
+    SSH_CMD="/usr/bin/ssh"
+else
+    SSH_CMD="ssh"
+fi
+
+# Construct SSH options
+SSH_OPTS="-p $PORT -o StrictHostKeyChecking=no"
+# Handle WSL /mnt/c permission issues (keys are 777 usually)
+if [[ "$SSH_KEY" == /mnt/c/* ]]; then
+    echo "Detected key on Windows partition. Copying to secure temp location to fix permissions..."
+    SECURE_KEY="$HOME/.ssh/vast_deploy_key_tmp"
+    mkdir -p "$HOME/.ssh"
+    cp "$SSH_KEY" "$SECURE_KEY"
+    chmod 600 "$SECURE_KEY"
+    SSH_KEY="$SECURE_KEY"
+fi
+
+if [ -n "$SSH_KEY" ]; then
+    SSH_OPTS="$SSH_OPTS -i $SSH_KEY"
+fi
 
 # Ensure entrypoint is executable locally (good practice)
 chmod +x entrypoint.sh
@@ -14,23 +44,32 @@ chmod +x entrypoint.sh
 echo "========================================"
 echo "Deploying to $USER@$HOST (Port $PORT)"
 echo "Target Directory: $TARGET_DIR"
+echo "Using SSH Key: $SSH_KEY"
 echo "========================================"
 
 # 1. Sync files
 # We exclude heavy/generated directories to speed up transfer
 # Using .gitignore for exclusions requires it to be clean, preventing sync of ignored files
-echo "[1/3] Syncing files..."
-rsync -avz -e "ssh -p $PORT -i $SSH_KEY -o StrictHostKeyChecking=no" \
-    --exclude-from='.gitignore' \
-    --exclude='.git' \
-    --exclude='.env' \
-    --progress \
-    ./ \
-    $USER@$HOST:$TARGET_DIR
+echo "[1/4] Syncing files (via tar+ssh)..."
+# Use tar to stream files to remote host (avoids rsync banner issues)
+tar -c --exclude='.git' --exclude='.env' --exclude='node_modules' --exclude='.next' --exclude='__pycache__' . | \
+    $SSH_CMD $SSH_OPTS $USER@$HOST "mkdir -p $TARGET_DIR && cd $TARGET_DIR && tar -x"
 
-# 2. Remote Execution
-echo "[2/3] Setting up environment and starting services..."
-ssh -p $PORT -i $SSH_KEY -o StrictHostKeyChecking=no $USER@$HOST << EOF
+# 2. Check for critical remote dependencies
+echo "[2/4] Checking remote dependencies..."
+$SSH_CMD $SSH_OPTS $USER@$HOST << EOF
+    if ! command -v llama-server &> /dev/null && [ ! -f /usr/bin/llama-server ]; then
+        echo "WARNING: llama-server not found in path."
+        echo "If you are using the recommend image (ghcr.io/ggml-org/llama.cpp:server-cuda), it should be there."
+        echo "Proceeding, but LLM features may fail."
+    else
+        echo "llama-server found."
+    fi
+EOF
+
+# 3. Remote Execution
+echo "[3/4] Setting up environment and starting services..."
+$SSH_CMD $SSH_OPTS $USER@$HOST << EOF
     set -e
     cd $TARGET_DIR
     
@@ -97,5 +136,6 @@ ssh -p $PORT -i $SSH_KEY -o StrictHostKeyChecking=no $USER@$HOST << EOF
     echo "Wait ~30 seconds for everything to initialize."
 EOF
 
-echo "[3/3] Deployment script finished."
-echo "You can check logs with: ssh -p $PORT -i $SSH_KEY -o StrictHostKeyChecking=no $USER@$HOST 'tail -f /var/log/app_output.log'"
+echo "[4/4] Deployment script finished."
+echo "You can check logs with: ssh $SSH_OPTS $USER@$HOST 'tail -f /var/log/app_output.log'"
+echo "To tunnel ports locally: ssh $SSH_OPTS -L 3000:localhost:3000 -L 8000:localhost:8000 -L 8081:localhost:8081 -L 9001:localhost:9001 $USER@$HOST"

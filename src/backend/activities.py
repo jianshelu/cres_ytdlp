@@ -36,25 +36,44 @@ def download_video(url: str) -> str:
     ydl_opts = {
         'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
         'outtmpl': f'{download_dir}/%(title)s.%(ext)s',
+        'writethumbnail': True,
         'noplaylist': True,
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         filepath = ydl.prepare_filename(info)
+        
+        # Manually ensure thumbnail is named correctly if yt-dlp didn't use the same base
+        # (Though with outtmpl it usually does .jpg)
+        base_no_ext = os.path.splitext(filepath)[0]
+        # Check for common thumbnail extensions
+        for t_ext in ['.jpg', '.webp', '.png', '.jpeg']:
+            if os.path.exists(base_no_ext + t_ext) and t_ext != '.jpg':
+                # Convert or rename to .jpg for generate_index.py compatibility if needed
+                # but generate_index.py could also be updated.
+                # Let's just make sure we capture it in activity.
+                pass
     
-    # Upload to MinIO
+    # Upload to MinIO (Video)
     client = get_minio_client()
     bucket_name = "videos"
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
 
-    # Force strip directory
     object_name = filepath.replace('\\', '/').split('/')[-1]
-    activity.logger.info(f"Uploading {object_name} to MinIO bucket {bucket_name}")
-    
     client.fput_object(bucket_name, object_name, filepath)
-    activity.logger.info(f"Uploaded {object_name} to MinIO bucket {bucket_name}")
+
+    # Upload Thumbnail if it exists
+    for t_ext in ['.jpg', '.webp', '.png', '.jpeg']:
+        t_path = base_no_ext + t_ext
+        if os.path.exists(t_path):
+            t_object = os.path.basename(t_path)
+            if not client.bucket_exists("thumbnails"):
+                client.make_bucket("thumbnails")
+            client.fput_object("thumbnails", t_object, t_path)
+            activity.logger.info(f"Uploaded thumbnail {t_object}")
+            break
 
     # Clean up local file 
     # os.remove(filepath) # Optional: keep for cache or debug, but strictly we should clean up if scaling

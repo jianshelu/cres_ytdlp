@@ -181,43 +181,46 @@ a {
 
 /* Red */
 
-/* Transcript View - Stacked Layout */
+/* Transcript View - Stacked non-overlapping layout */
 .transcript-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  max-width: 1000px;
+  height: calc(100vh - 60px);
+  /* Adjust for header if any */
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem 4rem;
+  overflow: hidden;
 }
 
 .video-player-section {
+  flex: 0 0 auto;
   background: #000;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   width: 100%;
 }
 
 .video-player-section video {
   width: 100%;
+  max-width: 100%;
+  height: auto;
   aspect-ratio: 16 / 9;
   display: block;
 }
 
 .transcript-section {
+  flex: 1;
   background: var(--card-bg);
-  border-radius: 16px;
   padding: 2rem;
-  border: 1px solid var(--border);
-  min-height: 400px;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .transcript-list {
   flex: 1;
   overflow-y: auto;
-  padding-right: 1rem;
+  padding-right: 1.5rem;
+  padding-bottom: 2rem;
 }
 
 .transcript-list::-webkit-scrollbar {
