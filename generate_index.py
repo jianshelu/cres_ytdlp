@@ -13,7 +13,7 @@ def extract_keywords(json_path):
             data = json.load(f)
             if 'keywords' in data:
                 # Return list of objects {word, count}
-                return [{"word": k, "count": data.get('text', '').lower().count(k.lower())} for k in data['keywords']]
+                return [{"word": k.strip(), "count": data.get('text', '').lower().count(k.strip().lower())} for k in data['keywords'] if isinstance(k, str)]
     except Exception as e:
         print(f"Error extracting keywords from {json_path}: {e}")
     return []
