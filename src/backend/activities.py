@@ -29,9 +29,9 @@ def get_minio_client():
 @activity.defn
 def download_video(url: str) -> str:
     activity.logger.info(f"Downloading video from {url}")
-    download_dir = "downloads"
+    download_dir = "web/public/downloads"
     if not os.path.exists(download_dir):
-        os.makedirs(download_dir)
+        os.makedirs(download_dir, exist_ok=True)
 
     ydl_opts = {
         'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
@@ -68,9 +68,9 @@ def transcribe_video(object_name: str) -> str:
     # Download from MinIO
     client = get_minio_client()
     bucket_name = "videos"
-    download_dir = "downloads"
+    download_dir = "web/public/downloads"
     if not os.path.exists(download_dir):
-        os.makedirs(download_dir)
+        os.makedirs(download_dir, exist_ok=True)
         
     local_path = os.path.join(download_dir, object_name)
     
@@ -160,7 +160,7 @@ async def summarize_content(params: tuple) -> dict:
     # Update the local/MinIO JSON file
     client = get_minio_client()
     transcript_bucket = "transcripts"
-    download_dir = "downloads"
+    download_dir = "web/public/downloads"
     base_name = os.path.splitext(object_name)[0]
     json_filename = f"{base_name}.json"
     local_json_path = os.path.join(download_dir, json_filename)
@@ -265,3 +265,16 @@ async def search_videos(params: tuple) -> list:
             continue
             
     return valid_urls
+
+@activity.defn
+def refresh_index() -> str:
+    activity.logger.info("Refreshing video index...")
+    try:
+        import subprocess
+        # Run generate_index.py from the root directory
+        result = subprocess.run(["python3", "generate_index.py"], capture_output=True, text=True, check=True)
+        activity.logger.info(f"Index refreshed: {result.stdout}")
+        return result.stdout
+    except Exception as e:
+        activity.logger.error(f"Failed to refresh index: {e}")
+        return str(e)

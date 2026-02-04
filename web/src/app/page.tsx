@@ -1,7 +1,25 @@
 import Link from 'next/link';
-import data from '../data.json';
+import fs from 'fs';
+import path from 'path';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+// Helper to encode parts of the URI while keeping the structure
+function safelyEncodeURI(uri: string) {
+  return uri.split('/').map(part => encodeURIComponent(part)).join('/');
+}
+
+export default async function Home() {
+  // Read data at runtime
+  const dataPath = path.join(process.cwd(), 'src', 'data.json');
+  let data = [];
+  try {
+    const fileContent = fs.readFileSync(dataPath, 'utf8');
+    data = JSON.parse(fileContent);
+  } catch (e) {
+    console.error("Failed to load video data:", e);
+  }
+
   return (
     <main className="container">
       <header className="header">
@@ -44,12 +62,12 @@ export default function Home() {
       </section>
 
       <div className="grid">
-        {data.map((video, index) => (
+        {data.map((video: any, index: number) => (
           <Link key={index} href={`/video/${index}`} className="video-card">
             <div className="thumbnail-wrapper">
               {video.thumb_path ? (
                 <img
-                  src={`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`}
+                  src={safelyEncodeURI(`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`)}
                   alt={video.title}
                 />
               ) : (

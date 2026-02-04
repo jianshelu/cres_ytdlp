@@ -5,7 +5,7 @@ from temporalio.common import RetryPolicy
 # Import activities definition (only for type hinting in sandbox, 
 # typically we use string names or stub proxies)
 with workflow.unsafe.imports_passed_through():
-    from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos
+    from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos, refresh_index
 
 @workflow.defn
 class VideoProcessingWorkflow:
@@ -36,6 +36,12 @@ class VideoProcessingWorkflow:
             summarize_content,
             (transcript_text, filepath),
             start_to_close_timeout=timedelta(minutes=10)
+        )
+
+        # 4. Refresh Index
+        await workflow.execute_activity(
+            refresh_index,
+            start_to_close_timeout=timedelta(minutes=2)
         )
 
         return {
@@ -77,9 +83,9 @@ class BatchProcessingWorkflow:
                 handle = await workflow.start_child_workflow(
                     VideoProcessingWorkflow.run,
                     url,
-                    id=f"video-{url}", # Deduplication
+                    id=f"video-{url.split('=')[-1] if '=' in url else url[-12:]}", # Safer ID
                     task_queue="video-processing-queue",
-                    search_attributes=None
+                    parent_close_policy=workflow.ParentClosePolicy.ABANDON
                 )
                 results.append(handle.id)
                 workflow.logger.info(f"Started child workflow {handle.id} for {url}")

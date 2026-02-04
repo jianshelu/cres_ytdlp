@@ -41,6 +41,15 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript }: Prop
         (s) => currentTime >= s.start && currentTime <= s.end
     );
 
+    // Force play on mount/src change
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.play().catch(e => {
+                console.log("Autoplay prevented by browser, waiting for user interaction:", e);
+            });
+        }
+    }, [videoSrc]);
+
     return (
         <div className="transcript-container">
             <div className="video-player-section">
@@ -48,6 +57,7 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript }: Prop
                     ref={videoRef}
                     controls
                     autoPlay
+                    playsInline
                     src={videoSrc}
                     poster={poster}
                     onTimeUpdate={handleTimeUpdate}

@@ -44,17 +44,24 @@ until temporal operator cluster health || [ $COUNT -eq $MAX_RETRIES ]; do
 done
 
 # Start LLM Server if model is present
-if [ -f "$LLM_MODEL_PATH/*.gguf" ] || [ "$(ls -A $LLM_MODEL_PATH)" ]; then
+if [ -d "$LLM_MODEL_PATH" ] && [ "$(ls $LLM_MODEL_PATH/*.gguf 2>/dev/null)" ]; then
     echo "Starting LLM server..."
     # Find the first .gguf file
     MODEL_FILE=$(find $LLM_MODEL_PATH -name "*.gguf" | head -n 1)
     if [ -n "$MODEL_FILE" ]; then
-        /usr/bin/llama-server --model "$MODEL_FILE" --host 0.0.0.0 --port 8081 --n-gpu-layers 99 > /var/log/llama.log 2>&1 &
+        LLAMA_BIN=$(which llama-server || echo "/usr/bin/llama-server")
+        if [ ! -f "$LLAMA_BIN" ] && [ -f "/app/llama-server" ]; then
+            LLAMA_BIN="/app/llama-server"
+        fi
+        
+        export LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
+        $LLAMA_BIN --model "$MODEL_FILE" --host 0.0.0.0 --port 8081 --n-gpu-layers 99 > /var/log/llama.log 2>&1 &
         echo "LLM server starting with model: $MODEL_FILE"
     else
         echo "No .gguf model found in $LLM_MODEL_PATH, skipping LLM server start."
     fi
-    echo "LLM_MODEL_PATH is empty, skipping LLM server start."
+else
+    echo "LLM_MODEL_PATH is empty or missing, skipping LLM server start."
 fi
 
 # Start FastAPI

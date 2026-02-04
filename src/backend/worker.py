@@ -5,7 +5,7 @@ from temporalio.worker import Worker
 
 # Import our workflow and activities
 from src.backend.workflows import VideoProcessingWorkflow, BatchProcessingWorkflow
-from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos
+from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos, refresh_index
 
 import torch
 import logging
@@ -32,7 +32,7 @@ async def main():
             client,
             task_queue="video-processing-queue",
             workflows=[VideoProcessingWorkflow, BatchProcessingWorkflow],
-            activities=[download_video, transcribe_video, summarize_content, search_videos],
+            activities=[download_video, transcribe_video, summarize_content, search_videos, refresh_index],
             activity_executor=executor,
             identity=identity,
         )

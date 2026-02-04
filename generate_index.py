@@ -5,10 +5,11 @@ import re
 from collections import Counter
 
 # Configuration
-# Path to the directory containing video files (relative to project root or absolute)
-DOWNLOAD_DIR = "web/public/downloads"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the directory containing video files
+DOWNLOAD_DIR = os.path.join(SCRIPT_DIR, "web/public/downloads")
 # Path where the output JSON should be saved
-OUTPUT_JSON = "web/src/data.json"
+OUTPUT_JSON = os.path.join(SCRIPT_DIR, "web/src/data.json")
 # URL prefix for the web app (relative path from public/)
 URL_PREFIX = "downloads/"
 
@@ -67,10 +68,12 @@ def generate_index():
     for video in video_files:
         full_video_path = os.path.join(DOWNLOAD_DIR, video)
         base_name = os.path.splitext(video)[0]
+        import hashlib
+        safe_name = hashlib.md5(video.encode()).hexdigest()
         
         # Paths relative to the public/downloads directory
         json_filename = f"{base_name}.json"
-        thumb_filename = f"{base_name}.jpg"
+        thumb_filename = f"thumb_{safe_name}.jpg"
         
         full_json_path = os.path.join(DOWNLOAD_DIR, json_filename)
         full_thumb_path = os.path.join(DOWNLOAD_DIR, thumb_filename)
@@ -89,7 +92,18 @@ def generate_index():
         
         # 2. Check for JSON and extract keywords
         has_json = os.path.exists(full_json_path)
-        keywords = extract_keywords(full_json_path) if has_json else []
+        keywords = []
+        summary = "Generated automatically"
+        
+        if has_json:
+            keywords = extract_keywords(full_json_path)
+            try:
+                with open(full_json_path, 'r', encoding='utf-8') as f:
+                    json_data = json.load(f)
+                    if 'summary' in json_data:
+                        summary = json_data['summary']
+            except:
+                pass
         
         # 3. Create Entry
         entry = {
@@ -99,7 +113,7 @@ def generate_index():
             "thumb_path": f"{URL_PREFIX}{thumb_filename}" if os.path.exists(full_thumb_path) else None,
             "json_path": f"{URL_PREFIX}{json_filename}" if has_json else None,
             "keywords": keywords,
-            "summary": "Generated automatically"
+            "summary": summary
         }
         
         data.append(entry)

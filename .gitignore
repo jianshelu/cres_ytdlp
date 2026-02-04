@@ -12,14 +12,10 @@ packages/models/
 # Downloads and data
 downloads/
 test_downloads/
+archive/**/*.json
 *.mp4
 *.mkv
 *.webm
-*.json
-!package.json
-!package-lock.json
-!tsconfig.json
-!data.json
 
 # Web / Next.js
 node_modules/
