@@ -22,6 +22,7 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
 COPY batch_process.py .
 COPY generate_index.py .
 COPY scripts/ scripts/
+COPY src/ src/
 
 # Copy Frontend Build
 COPY --from=frontend-builder /workspace/.next ./.next
@@ -34,7 +35,7 @@ COPY --from=frontend-builder /workspace/package.json ./package.json
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 3000 8081 7233 9000 9001
+EXPOSE 3000 8000 8081 7233 9000 9001
 
 ENTRYPOINT ["/entrypoint.sh"]
 # Default command starts Next.js and keeps container alive (or runs a script)

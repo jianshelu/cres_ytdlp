@@ -3,3 +3,8 @@ openai-whisper
 torch --index-url https://download.pytorch.org/whl/cu121
 numpy
 requests
+temporalio
+fastapi
+uvicorn
+python-multipart
+minio

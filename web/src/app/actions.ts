@@ -7,27 +7,41 @@ const execAsync = promisify(exec);
 
 export async function processVideos(formData: FormData) {
     const search = formData.get('search') as string;
-    const limit = formData.get('limit') as string || "1";
+    const limit = parseInt((formData.get('limit') as string) || "1", 10);
 
     if (!search) {
         return { success: false, message: 'Search query required' };
     }
 
     try {
-        // Call the starter script
-        // We use nohup or just fire and forget, but exec waits for completion.
-        // Since starter.py now returns quickly (just submitting workflows), we can await it.
-        const command = `python3 src/starter.py --search "${search}" --limit ${limit}`;
-        console.log(`Executing: ${command}`);
+        console.log(`Submitting batch request: Query='${search}', Limit=${limit}`);
 
-        const { stdout, stderr } = await execAsync(command, { cwd: '/workspace' });
-        console.log("Stdout:", stdout);
+        // Call FastAPI
+        // Assuming FastAPI is on localhost:8000 (accessible from Next.js server side if on same network/host)
+        // In Docker, if they are in same container, localhost works.
+        const response = await fetch("http://localhost:8000/batch", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                query: search,
+                limit: limit
+            }),
+        });
 
-        if (stderr) console.error("Stderr:", stderr);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("FastAPI Error:", errorText);
+            return { success: false, message: `API Error: ${response.status} ${response.statusText}` };
+        }
 
-        return { success: true, message: 'Workflows submitted successfully' };
+        const data = await response.json();
+        console.log("FastAPI Response:", data);
+
+        return { success: true, message: `Batch process started! Workflow ID: ${data.workflow_id}` };
     } catch (error: any) {
-        console.error("Error executing starter script:", error);
-        return { success: false, message: `Error: ${error.message}` };
+        console.error("Error calling backend API:", error);
+        return { success: false, message: `Connection Error: ${error.message}` };
     }
 }

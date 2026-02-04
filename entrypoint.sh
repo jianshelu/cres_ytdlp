@@ -54,9 +54,17 @@ if [ -f "$LLM_MODEL_PATH/*.gguf" ] || [ "$(ls -A $LLM_MODEL_PATH)" ]; then
     else
         echo "No .gguf model found in $LLM_MODEL_PATH, skipping LLM server start."
     fi
-else
     echo "LLM_MODEL_PATH is empty, skipping LLM server start."
 fi
+
+# Start FastAPI
+echo "Starting FastAPI..."
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000 > /var/log/fastapi.log 2>&1 &
+
+# Start Temporal Worker (Background)
+echo "Starting Temporal Worker..."
+# Wait a bit for Temporal Server to be fully ready (though we waited for cluster health above)
+python3 -m src.backend.worker > /var/log/worker.log 2>&1 &
 
 echo "Services started successfully."
 
