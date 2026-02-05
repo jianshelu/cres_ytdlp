@@ -35,12 +35,31 @@ def download_video(url: str) -> str:
 
     ydl_opts = {
         'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
-        'outtmpl': f'{download_dir}/%(title)s.%(ext)s',
+        'outtmpl': f'{download_dir}/%(title)s_%(id)s.%(ext)s',
         'writethumbnail': True,
         'noplaylist': True,
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        # Check OSS first to skip download if exists
+        try:
+            info_fast = ydl.extract_info(url, download=False)
+            filename_fast = ydl.prepare_filename(info_fast)
+            object_name_fast = os.path.basename(filename_fast)
+            
+            client = get_minio_client()
+            bucket_name = "videos"
+            if client.bucket_exists(bucket_name):
+                try:
+                    client.stat_object(bucket_name, object_name_fast)
+                    activity.logger.info(f"Video {object_name_fast} already exists in OSS. Skipping download.")
+                    return object_name_fast
+                except Exception:
+                    # Object not found, proceed to download
+                    pass
+        except Exception as e:
+            activity.logger.warning(f"Failed to check OSS cache: {e}")
+            
         info = ydl.extract_info(url, download=True)
         filepath = ydl.prepare_filename(info)
         
@@ -136,10 +155,15 @@ async def summarize_content(params: tuple) -> dict:
     
     prompt = f"""
     <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-    You are a helpful assistant. Result must be valid JSON with fields: 'summary' (string) and 'keywords' (list of strings).
+    You are a professional summarizer. You MUST detect the language of the transcript and respond ONLY in that language.
+    RULE: Output Language == Input Language. 
+    Examples:
+    - Input: "Hello world" -> Output: {{"summary": "A greeting...", "keywords": ["greeting"]}}
+    - Input: "你好世界" -> Output: {{"summary": "这段视频讲述了...", "keywords": ["问候", "世界"]}}
     <|eot_id|><|start_header_id|>user<|end_header_id|>
-    Summarize the transcript and extract 5 key topics/tags.
-    
+    Detect the language of the transcript below and provide the 'summary' and 'keywords' in that SAME language.
+    DO NOT TRANSLATE TO ENGLISH.
+
     TRANSCRIPT:
     {input_text}
     <|eot_id|><|start_header_id|>assistant<|end_header_id|>
@@ -162,9 +186,11 @@ async def summarize_content(params: tuple) -> dict:
     
     # Call local llama.cpp server
     try:
+        activity.logger.info(f"LLM Prompt: {prompt[:500]}...") # Log start of prompt
         response = requests.post("http://localhost:8081/completion", json=payload, timeout=600)
         response.raise_for_status()
         result = response.json()
+        activity.logger.info(f"LLM Raw Result: {json.dumps(result, ensure_ascii=False)}")
         
         content_str = result.get('content', '')
         try:

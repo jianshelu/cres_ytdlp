@@ -70,20 +70,21 @@ class BatchProcessingWorkflow:
         # 2. Process each video (Child Workflows or Activities)
         # Using Child Workflows is better for parallelism and independent failure
         results = []
+        
+        # Sanitize query for ID usage
+        import re
+        safe_query = re.sub(r'[^a-zA-Z0-9_\-]', '_', query)
+        safe_query = re.sub(r'_+', '_', safe_query)
+
         for url in urls:
             try:
-                # Fire and forget or wait? User didn't specify. 
-                # Waiting allows us to return a report.
-                # Running sequentially or parallel? Parallel is better.
-                # But to avoid overloading GPU? Temporal manages queues.
-                # Let's run sequentially in this workflow for simplicity OR 
-                # execute_child_workflow returns a handle.
-                
                 # Let's do parallel
+                video_id = url.split('=')[-1] if '=' in url else url[-12:]
+                
                 handle = await workflow.start_child_workflow(
                     VideoProcessingWorkflow.run,
                     url,
-                    id=f"video-{url.split('=')[-1] if '=' in url else url[-12:]}", # Safer ID
+                    id=f"video-{safe_query}-{video_id}",
                     task_queue="video-processing-queue",
                     parent_close_policy=workflow.ParentClosePolicy.ABANDON
                 )

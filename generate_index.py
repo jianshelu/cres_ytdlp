@@ -11,11 +11,52 @@ def extract_keywords(json_path):
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            if 'keywords' in data:
-                # Return list of objects {word, count}
-                return [{"word": k.strip(), "count": data.get('text', '').lower().count(k.strip().lower())} for k in data['keywords'] if isinstance(k, str)]
+            
+        if 'keywords' in data:
+            keywords_list = []
+            text_lower = data.get('text', '').lower()
+            
+            # Helper to get word string whether source is string or dict (idempotency)
+            raw_keywords = data['keywords']
+            
+            for k in raw_keywords:
+                word_str = ""
+                if isinstance(k, str):
+                    word_str = k
+                elif isinstance(k, dict) and 'word' in k:
+                    word_str = k['word']
+                else:
+                    continue
+                    
+                clean_k = word_str.strip()
+                if not clean_k: 
+                    continue
+                    
+                count = text_lower.count(clean_k.lower())
+                
+                # Score Criteria:
+                # 5: >20 (Dominant)
+                # 4: >10 (Frequent)
+                # 3: >5 (Common)
+                # 2: >2 (Mentioned)
+                # 1: <=2 (Rare)
+                if count >= 20: score = 5
+                elif count >= 10: score = 4
+                elif count >= 5: score = 3
+                elif count >= 3: score = 2
+                else: score = 1
+                
+                keywords_list.append({"word": clean_k, "count": count, "score": score})
+            
+            # Update the source file with the new structured data
+            data['keywords'] = keywords_list
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+                
+            return keywords_list
+            
     except Exception as e:
-        print(f"Error extracting keywords from {json_path}: {e}")
+        print(f"Error processing keywords for {json_path}: {e}")
     return []
 
 def generate_index():

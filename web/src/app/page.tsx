@@ -85,10 +85,11 @@ export default async function Home() {
               <div className="tags">
                 {(video.keywords || []).map((kw: any, i: number) => {
                   let colorClass = 'tag-1';
-                  if (kw.count >= 5) colorClass = 'tag-5';
-                  else if (kw.count === 4) colorClass = 'tag-4';
-                  else if (kw.count === 3) colorClass = 'tag-3';
-                  else if (kw.count === 2) colorClass = 'tag-2';
+                  // Use score directly (1-5)
+                  if (kw.score >= 5) colorClass = 'tag-5';
+                  else if (kw.score === 4) colorClass = 'tag-4';
+                  else if (kw.score === 3) colorClass = 'tag-3';
+                  else if (kw.score === 2) colorClass = 'tag-2';
 
                   return (
                     <span key={i} className={`tag ${colorClass}`}>
