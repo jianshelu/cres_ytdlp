@@ -43,8 +43,13 @@ def main():
         "8000:localhost:8000", # FastAPI
         "8080:localhost:8080", # User requested port
         "8233:localhost:8233", # Temporal Web UI
+        "7233:localhost:7233", # Temporal Service
         "9001:localhost:9001", # MinIO Console
-        "8081:localhost:8081"  # Llama Server
+        "9000:localhost:9000", # MinIO API
+        "8081:localhost:8081", # Llama Server
+        "1111:localhost:1111", # ComfyUI
+        "6006:localhost:6006", # Tensorboard
+        "8384:localhost:8384"  # Syncthing
     ]
 
     print("========================================")
@@ -55,6 +60,9 @@ def main():
     print("========================================")
 
     cmd = ["ssh", "-p", port, "-o", "StrictHostKeyChecking=no"]
+    
+    # ControlMaster removed due to Windows incompatibility (getsockname failed)
+    # Reverting to standard connection for reliability.
     
     if key_path:
         cmd.extend(["-i", key_path])

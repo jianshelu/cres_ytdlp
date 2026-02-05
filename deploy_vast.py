@@ -21,7 +21,7 @@ def log(msg, color=Colors.OKBLUE):
 def show_progress(current, total, label="Progress", width=40):
     percent = (current / total) * 100
     filled = int(width * current // total)
-    bar = "█" * filled + "░" * (width - filled)
+    bar = "#" * filled + "-" * (width - filled)
     sys.stdout.write(f"\r  {label}: [{bar}] {percent:.0f}%")
     sys.stdout.flush()
     if current == total:
@@ -92,7 +92,7 @@ def run_ssh_command(ssh_cmd_base, remote_command, description, total_substeps=No
             show_progress(current_substep, total_substeps, f"{description} ({elapsed}s)")
         else:
             pulse = int((time.time() * 2) % 10)
-            bar = "░" * pulse + "█" + "░" * (9 - pulse)
+            bar = "-" * pulse + "#" + "-" * (9 - pulse)
             sys.stdout.write(f"\r  {description} running... {elapsed}s [{bar}]")
             sys.stdout.flush()
         time.sleep(0.5)
@@ -149,6 +149,9 @@ def main():
     ssh_target = f"{user}@{host}"
     
     full_ssh_base = ssh_base + [ssh_target]
+
+    # 1. Check Connection & Python
+    log(f"[1/4] Checking connection and remote dependencies...", Colors.HEADER)
 
     # 2. Check Connection & Dependencies
     log("[1/4] Checking connection and remote dependencies...")

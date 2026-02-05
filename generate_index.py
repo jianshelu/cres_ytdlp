@@ -74,6 +74,10 @@ def generate_index():
     for f in files:
         if f in ['data.json', 'package.json', 'tsconfig.json']:
             continue
+        
+        # Skip yt-dlp metadata files from being treated as primary entries
+        if f.endswith('.info.json'):
+            continue
             
         base, ext = os.path.splitext(f)
         if base not in entries_map:
@@ -111,17 +115,31 @@ def generate_index():
             except Exception as e:
                 print(f"Failed to generate thumbnail for {base_name}: {e}")
         
-        # 2. Check for JSON and extract metadata
+        # 2a. Check for METADATA (yt-dlp info.json) explicitly for Title
         keywords = []
         summary = "Generated automatically"
+        real_title = base_name # Default fallback
+        
+        metadata_path = os.path.join(DOWNLOAD_DIR, f"{base_name}.info.json")
+        if os.path.exists(metadata_path):
+             try:
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    meta = json.load(f)
+                    if isinstance(meta, dict):
+                        if 'title' in meta and meta['title']:
+                            real_title = meta['title']
+             except:
+                 pass
+
+        # 2b. Check for TRANSCRIPT (json_filename) for Summary/Keywords
         if json_filename:
             full_json_path = os.path.join(DOWNLOAD_DIR, json_filename)
             keywords = extract_keywords(full_json_path)
             try:
                 with open(full_json_path, 'r', encoding='utf-8') as f:
-                    json_data = json.load(f)
-                    if isinstance(json_data, dict) and 'summary' in json_data:
-                        summary = json_data['summary']
+                    transcript_data = json.load(f)
+                    if isinstance(transcript_data, dict) and 'summary' in transcript_data:
+                        summary = transcript_data['summary']
             except:
                 pass
         
@@ -130,7 +148,7 @@ def generate_index():
         final_video_name = video_file if video_file else f"{base_name}.webm"
         
         entry = {
-            "title": base_name,
+            "title": real_title,
             "video_path": f"{URL_PREFIX}{final_video_name}",
             "thumb_path": f"{URL_PREFIX}{thumb_filename}" if thumb_filename else None,
             "json_path": f"{URL_PREFIX}{json_filename}" if json_filename else None,

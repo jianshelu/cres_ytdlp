@@ -37,62 +37,34 @@ def download_video(url: str) -> str:
         'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
         'outtmpl': f'{download_dir}/%(title)s_%(id)s.%(ext)s',
         'writethumbnail': True,
+        'writeinfojson': True, # Save metadata for title extraction
         'noplaylist': True,
+        'restrictfilenames': True, # Force ASCII filenames
     }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        # Check OSS first to skip download if exists
-        try:
-            info_fast = ydl.extract_info(url, download=False)
-            filename_fast = ydl.prepare_filename(info_fast)
-            object_name_fast = os.path.basename(filename_fast)
+    
+    filepath = None
+    object_name = None
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            # yt-dlp returns the actual filepath after download
+            filepath = ydl.prepare_filename(info_dict)
             
+            # For MinIO, we want just the filename (e.g., "My Video_abc123.mp4")
+            object_name = os.path.basename(filepath)
+            
+            # Upload to MinIO
             client = get_minio_client()
             bucket_name = "videos"
-            if client.bucket_exists(bucket_name):
-                try:
-                    client.stat_object(bucket_name, object_name_fast)
-                    activity.logger.info(f"Video {object_name_fast} already exists in OSS. Skipping download.")
-                    return object_name_fast
-                except Exception:
-                    # Object not found, proceed to download
-                    pass
-        except Exception as e:
-            activity.logger.warning(f"Failed to check OSS cache: {e}")
+            if not client.bucket_exists(bucket_name):
+                client.make_bucket(bucket_name)
             
-        info = ydl.extract_info(url, download=True)
-        filepath = ydl.prepare_filename(info)
-        
-        # Manually ensure thumbnail is named correctly if yt-dlp didn't use the same base
-        # (Though with outtmpl it usually does .jpg)
-        base_no_ext = os.path.splitext(filepath)[0]
-        # Check for common thumbnail extensions
-        for t_ext in ['.jpg', '.webp', '.png', '.jpeg']:
-            if os.path.exists(base_no_ext + t_ext) and t_ext != '.jpg':
-                # Convert or rename to .jpg for generate_index.py compatibility if needed
-                # but generate_index.py could also be updated.
-                # Let's just make sure we capture it in activity.
-                pass
-    
-    # Upload to MinIO (Video)
-    client = get_minio_client()
-    bucket_name = "videos"
-    if not client.bucket_exists(bucket_name):
-        client.make_bucket(bucket_name)
+            client.fput_object(bucket_name, object_name, filepath)
+            activity.logger.info(f"Uploaded {object_name} to MinIO bucket '{bucket_name}'")
 
-    object_name = filepath.replace('\\', '/').split('/')[-1]
-    client.fput_object(bucket_name, object_name, filepath)
-
-    # Upload Thumbnail if it exists
-    for t_ext in ['.jpg', '.webp', '.png', '.jpeg']:
-        t_path = base_no_ext + t_ext
-        if os.path.exists(t_path):
-            t_object = os.path.basename(t_path)
-            if not client.bucket_exists("thumbnails"):
-                client.make_bucket("thumbnails")
-            client.fput_object("thumbnails", t_object, t_path)
-            activity.logger.info(f"Uploaded thumbnail {t_object}")
-            break
+    except Exception as e:
+        activity.logger.error(f"Failed to download or upload video: {e}")
+        raise
 
     # Clean up local file 
     # os.remove(filepath) # Optional: keep for cache or debug, but strictly we should clean up if scaling
@@ -144,7 +116,6 @@ def transcribe_video(object_name: str) -> str:
     return result['text']
 
 @activity.defn
-
 async def summarize_content(params: tuple) -> dict:
     text, object_name = params
     activity.logger.info(f"Summarizing content for {object_name}")
@@ -153,17 +124,18 @@ async def summarize_content(params: tuple) -> dict:
     max_chars = 12000 
     input_text = text[:max_chars]
     
+    # Simpler, robust prompt
     prompt = f"""
     <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-    You are a professional summarizer. You MUST detect the language of the transcript and respond ONLY in that language.
-    RULE: Output Language == Input Language. 
-    Examples:
-    - Input: "Hello world" -> Output: {{"summary": "A greeting...", "keywords": ["greeting"]}}
-    - Input: "你好世界" -> Output: {{"summary": "这段视频讲述了...", "keywords": ["问候", "世界"]}}
+    You are a helpful assistant. Analyzing the transcript below, provide a brief summary and a list of keywords.
+    Respond in the SAME LANGUAGE as the input text.
+    
+    JSON Format:
+    {{
+        "summary": "...",
+        "keywords": ["...", "..."]
+    }}
     <|eot_id|><|start_header_id|>user<|end_header_id|>
-    Detect the language of the transcript below and provide the 'summary' and 'keywords' in that SAME language.
-    DO NOT TRANSLATE TO ENGLISH.
-
     TRANSCRIPT:
     {input_text}
     <|eot_id|><|start_header_id|>assistant<|end_header_id|>
@@ -172,7 +144,8 @@ async def summarize_content(params: tuple) -> dict:
     payload = {
         "prompt": prompt,
         "n_predict": 512,
-        "temperature": 0.4,
+        "temperature": 0.7,
+        "repeat_penalty": 1.1, # Prevent loops
         "json_schema": {
             "type": "object",
             "properties": {
