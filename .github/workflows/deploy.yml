@@ -1,5 +1,5 @@
 name: Build and Push to GHCR
-run-name: Build image ${{ github.ref_name }} @ ${{ github.sha }} — ${{ inputs.note }}
+run-name: Build image ${{ inputs.note }} @ ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
