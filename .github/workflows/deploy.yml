@@ -96,8 +96,6 @@ jobs:
           # Build optimization
           provenance: mode=max # SBOM + attestations (security)
           sbom: true
-          # Platform support (optional: add more if needed)
-          platforms: linux/amd64,linux/arm64
 
   build-app:
     needs: [filter, build-base]
