@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
+import VideoCard from './components/VideoCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,47 +64,7 @@ export default async function Home() {
 
       <div className="grid">
         {data.map((video: any, index: number) => (
-          <Link key={index} href={`/video/${index}`} className="video-card">
-            <div className="thumbnail-wrapper">
-              {video.thumb_path ? (
-                <img
-                  src={safelyEncodeURI(`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`)}
-                  alt={video.title}
-                />
-              ) : (
-                <div style={{ padding: '20px', textAlign: 'center' }}>No Thumbnail</div>
-              )}
-              <div className="play-overlay">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-            <div className="video-card-content">
-              <h2>{video.title}</h2>
-
-              <div className="tags">
-                {(video.keywords || []).map((kw: any, i: number) => {
-                  let colorClass = 'tag-1';
-                  // Use score directly (1-5)
-                  if (kw.score >= 5) colorClass = 'tag-5';
-                  else if (kw.score === 4) colorClass = 'tag-4';
-                  else if (kw.score === 3) colorClass = 'tag-3';
-                  else if (kw.score === 2) colorClass = 'tag-2';
-
-                  return (
-                    <span key={i} className={`tag ${colorClass}`}>
-                      {kw.word} <span className="tag-count">({kw.count})</span>
-                    </span>
-                  );
-                })}
-              </div>
-
-              <div className="video-card-footer">
-                Click to view transcript
-              </div>
-            </div>
-          </Link>
+          <VideoCard key={index} video={video} index={index} />
         ))}
       </div>
     </main>

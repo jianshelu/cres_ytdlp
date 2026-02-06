@@ -21,10 +21,11 @@ async def process_video(request: ProcessRequest):
         client = await Client.connect("localhost:7233")
         
         # Start Workflow
+        video_id = request.url.split('=')[-1] if '=' in request.url else request.url[-12:]
         handle = await client.start_workflow(
             VideoProcessingWorkflow.run,
             request.url,
-            id=f"video-{request.url}", # Simple ID deduplication
+            id=f"video-{video_id}", # Standardized ID format
             task_queue="video-processing-queue",
         )
         
@@ -38,13 +39,17 @@ async def process_video(request: ProcessRequest):
 @app.post("/batch")
 async def batch_process(request: BatchRequest):
     try:
+        from pypinyin import lazy_pinyin
         client = await Client.connect("localhost:7233")
         
-        import uuid
+        # Convert Chinese to Pinyin slug (e.g., "智能体" -> "zhinengti")
+        pinyin_slug = "".join(lazy_pinyin(request.query))
+        workflow_id = f"batch-{pinyin_slug}" if pinyin_slug else f"batch-{uuid.uuid4()}"
+        
         handle = await client.start_workflow(
             BatchProcessingWorkflow.run,
             (request.query, request.limit),
-            id=f"batch-{uuid.uuid4()}",
+            id=workflow_id,
             task_queue="video-processing-queue",
         )
         return {"status": "started", "workflow_id": handle.id, "run_id": handle.run_id}

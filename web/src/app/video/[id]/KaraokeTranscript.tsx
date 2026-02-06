@@ -14,9 +14,10 @@ interface Props {
     transcript: {
         segments: Segment[];
     };
+    initialTime?: number;
 }
 
-export default function KaraokeTranscript({ videoSrc, poster, transcript }: Props) {
+export default function KaraokeTranscript({ videoSrc, poster, transcript, initialTime }: Props) {
     const [currentTime, setCurrentTime] = useState(0);
     const videoRef = useRef<HTMLVideoElement>(null);
     const transcriptListRef = useRef<HTMLDivElement>(null);
@@ -49,14 +50,17 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript }: Prop
         (s) => currentTime >= s.start && currentTime <= s.end
     );
 
-    // Force play on mount/src change
+    // Initial Seek and Play
     useEffect(() => {
         if (videoRef.current) {
+            if (initialTime && initialTime > 0) {
+                videoRef.current.currentTime = initialTime;
+            }
             videoRef.current.play().catch(e => {
                 console.log("Autoplay prevented by browser, waiting for user interaction:", e);
             });
         }
-    }, [videoSrc]);
+    }, [videoSrc, initialTime]);
 
     return (
         <div className="transcript-container">

@@ -34,18 +34,26 @@ def download_video(url: str) -> str:
         os.makedirs(download_dir, exist_ok=True)
 
     ydl_opts = {
-        'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
+        # Prioritize Chinese audio (language matches 'zh' start), then fallback to best audio
+        'format': 'bestvideo[height<=360]+bestaudio[language^=zh]/bestvideo[height<=360]+bestaudio/best[height<=360]',
         'outtmpl': f'{download_dir}/%(title)s_%(id)s.%(ext)s',
         'writethumbnail': True,
         'writeinfojson': True, # Save metadata for title extraction
         'noplaylist': True,
         'restrictfilenames': True, # Force ASCII filenames
+        'merge_output_format': 'mp4', # Force MP4 for browser compatibility
     }
     
     filepath = None
     object_name = None
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # Pre-check info to avoid downloading live streams
+            info = ydl.extract_info(url, download=False)
+            if info.get('is_live'):
+                activity.logger.warning(f"Video is a live stream, skipping: {url}")
+                raise Exception("Live streams are not supported")
+                
             info_dict = ydl.extract_info(url, download=True)
             # yt-dlp returns the actual filepath after download
             filepath = ydl.prepare_filename(info_dict)
@@ -53,23 +61,52 @@ def download_video(url: str) -> str:
             # For MinIO, we want just the filename (e.g., "My Video_abc123.mp4")
             object_name = os.path.basename(filepath)
             
-            # Upload to MinIO
+            # Upload video to MinIO
             client = get_minio_client()
-            bucket_name = "videos"
+            bucket_name = "cres"
             if not client.bucket_exists(bucket_name):
                 client.make_bucket(bucket_name)
             
-            client.fput_object(bucket_name, object_name, filepath)
-            activity.logger.info(f"Uploaded {object_name} to MinIO bucket '{bucket_name}'")
+            # Upload Main Video
+            # object_name is just the filename here initially
+            video_key = f"videos/{object_name}" 
+            client.fput_object(bucket_name, video_key, filepath)
+            activity.logger.info(f"Uploaded {video_key} to MinIO bucket '{bucket_name}'")
+
+            # Upload Sidecar Files (Thumbnail, InfoJson)
+            base_name = os.path.splitext(filepath)[0] # e.g. web/public/downloads/Title_ID
+            # List all files in download dir
+            for f in os.listdir(download_dir):
+                full_f = os.path.join(download_dir, f)
+                
+                # Check if it starts with the base filename
+                if f.startswith(os.path.basename(base_name)) and f != object_name:
+                    # Upload it
+                    # Determine prefix based on extension
+                    if f.endswith(('.jpg', '.webp', '.png')):
+                        sidecar_key = f"thumbnails/{f}"
+                    else:
+                        # Assume metadata or other goes to videos
+                        sidecar_key = f"videos/{f}"
+
+                    client.fput_object(bucket_name, sidecar_key, full_f)
+                    activity.logger.info(f"Uploaded sidecar {sidecar_key} to MinIO")
+                    # Delete sidecar
+                    os.remove(full_f)
 
     except Exception as e:
         activity.logger.error(f"Failed to download or upload video: {e}")
+        # Clean up local file on failure as well
+        if filepath and os.path.exists(filepath):
+             os.remove(filepath)
         raise
 
     # Clean up local file 
-    # os.remove(filepath) # Optional: keep for cache or debug, but strictly we should clean up if scaling
+    if filepath and os.path.exists(filepath):
+        os.remove(filepath)
+        activity.logger.info(f"Deleted local file: {filepath}")
     
-    return object_name
+    return video_key
 
 @activity.defn
 def transcribe_video(object_name: str) -> str:
@@ -77,13 +114,15 @@ def transcribe_video(object_name: str) -> str:
     
     # Download from MinIO
     client = get_minio_client()
-    bucket_name = "videos"
+    bucket_name = "cres"
     download_dir = "web/public/downloads"
-    if not os.path.exists(download_dir):
-        os.makedirs(download_dir, exist_ok=True)
-        
+    
+    # object_name is now "videos/filename.mp4"
     local_path = os.path.join(download_dir, object_name)
     
+    # Ensure local directory structure exists
+    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        
     # Check if we need to download (idempotency or cache check could go here)
     if not os.path.exists(local_path):
         client.fget_object(bucket_name, object_name, local_path)
@@ -100,18 +139,33 @@ def transcribe_video(object_name: str) -> str:
     result = model.transcribe(local_path)
     
     # Save transcript locally (temp)
-    base_name = os.path.splitext(object_name)[0]
-    json_path = os.path.join(download_dir, f"{base_name}.json")
+    # object_name = "videos/filename.mp4"
+    # base = "filename.mp4"
+    base_filename = os.path.basename(object_name)
+    base_name_no_ext = os.path.splitext(base_filename)[0]
+    
+    # Save to a flat downloads dir or structured? 
+    # Let's save flat to avoid deep nesting issues for temp files, or mirror
+    # simpler: save flat in downloads dir
+    json_path = os.path.join(download_dir, f"{base_name_no_ext}.json")
     
     with open(json_path, "w", encoding='utf-8') as f:
         json.dump(result, f, indent=4, ensure_ascii=False)
     
     # Upload transcript to MinIO
-    transcript_bucket = "transcripts"
-    if not client.bucket_exists(transcript_bucket):
-        client.make_bucket(transcript_bucket)
+    transcript_key = f"transcripts/{base_name_no_ext}.json"
         
-    client.fput_object(transcript_bucket, f"{base_name}.json", json_path)
+    client.fput_object(bucket_name, transcript_key, json_path)
+    
+    # Cleanup local video copy
+    if os.path.exists(local_path):
+        os.remove(local_path)
+        activity.logger.info(f"Deleted local video copy: {local_path}")
+
+    # Cleanup local JSON transcript
+    if os.path.exists(json_path):
+        os.remove(json_path)
+        activity.logger.info(f"Deleted local transcript: {json_path}")
         
     return result['text']
 
@@ -130,7 +184,7 @@ async def summarize_content(params: tuple) -> dict:
     You are a helpful assistant. Analyzing the transcript below, provide a brief summary and a list of keywords.
     Respond in the SAME LANGUAGE as the input text.
     
-    JSON Format:
+    JSON Format (strictly maximum 5 keywords):
     {{
         "summary": "...",
         "keywords": ["...", "..."]
@@ -177,16 +231,24 @@ async def summarize_content(params: tuple) -> dict:
 
     # Update the local/MinIO JSON file
     client = get_minio_client()
-    transcript_bucket = "transcripts"
+    bucket_name = "cres"
     download_dir = "web/public/downloads"
-    base_name = os.path.splitext(object_name)[0]
-    json_filename = f"{base_name}.json"
+    
+    # object_name comes from transcribe_video result? No, params usually "videos/abc.mp4"
+    # Actually summarize takes (text, object_name) from previous steps?
+    # Usually workflow passes the key.
+    
+    base_filename = os.path.basename(object_name)
+    base_name_no_ext = os.path.splitext(base_filename)[0]
+    json_filename = f"{base_name_no_ext}.json"
+    transcript_key = f"transcripts/{json_filename}"
+    
     local_json_path = os.path.join(download_dir, json_filename)
     
     # Check if we need to fetch it (if worker is on different node/pod)
     if not os.path.exists(local_json_path):
         try:
-             client.fget_object(transcript_bucket, json_filename, local_json_path)
+             client.fget_object(bucket_name, transcript_key, local_json_path)
         except Exception as e:
              activity.logger.error(f"Could not fetch existing transcript to update: {e}")
              return summary_data # Return partial
@@ -202,7 +264,13 @@ async def summarize_content(params: tuple) -> dict:
             json.dump(existing_data, f, indent=4, ensure_ascii=False)
             
         # Re-upload
-        client.fput_object(transcript_bucket, json_filename, local_json_path)
+        client.fput_object(bucket_name, transcript_key, local_json_path)
+        
+        # Cleanup
+        if os.path.exists(local_json_path):
+            os.remove(local_json_path)
+            activity.logger.info(f"Deleted local transcript: {local_json_path}")
+            
     except Exception as e:
         activity.logger.error(f"Failed to update JSON artifact: {e}")
 
@@ -241,7 +309,7 @@ async def search_videos(params: tuple) -> list:
 
     # Filter (Basic duration filter matching batch_process.py)
     MIN_DURATION = 180
-    MAX_DURATION = 1200 # Updated to 20 mins
+    MAX_DURATION = 1800 # Updated to 30 mins
     # LICENSE_FILTER = "creative commons" # Loosened as per request
     
     valid_urls = []
@@ -270,12 +338,9 @@ async def search_videos(params: tuple) -> list:
              if dur and not (MIN_DURATION <= dur <= MAX_DURATION):
                  continue
                  
-             # License check usually requires full extraction.
-             # If we skip license check for speed, we might violate constraints?
-             # Let's skip license check in this iteration for speed unless critical.
-             # Re-implementing FULL logic from batch_process.py:
-             # SKIPPING strict license check for now as requested ("loosened")
-             
+             if cand.get('is_live'):
+                 continue
+                 
              url = cand.get('url')
              valid_urls.append(url)
              

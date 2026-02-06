@@ -26,8 +26,9 @@ echo "MinIO is ready."
 
 # Configure mc
 echo "Configuring MinIO client..."
-mc alias set local http://localhost:9000 minioadmin minioadmin
-mc mb local/videos --ignore-existing
+mc alias set cres http://localhost:9000 minioadmin minioadmin
+mc mb cres/cres --ignore-existing
+mc anonymous set download cres/cres
 
 # Start Temporal Dev Server if requested or as default
 # Note: In a production environment on vast.ai, you might want a persistent Temporal cluster,

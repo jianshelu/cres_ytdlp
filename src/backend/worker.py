@@ -27,8 +27,8 @@ async def main():
     print(f"Worker Identity: {identity}")
 
     # Run the worker
-    # LIMIT CONCURRENCY to 1 to protect GPU from OOM
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+    # LIMIT CONCURRENCY to 2 to prevent single-activity blocking while protecting GPU
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         worker = Worker(
             client,
             task_queue="video-processing-queue",

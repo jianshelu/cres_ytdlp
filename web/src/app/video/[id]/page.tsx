@@ -5,6 +5,7 @@ import KaraokeTranscript from './KaraokeTranscript';
 
 interface Props {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // Helper to encode parts of the URI while keeping the structure
@@ -12,9 +13,12 @@ function safelyEncodeURI(uri: string) {
     return uri.split('/').map(part => encodeURIComponent(part)).join('/');
 }
 
-export default async function VideoPage({ params }: Props) {
+export default async function VideoPage({ params, searchParams }: Props) {
     const resolvedParams = await params;
+    const resolvedSearchParams = await searchParams;
     const index = parseInt(resolvedParams.id);
+
+    const initialTime = resolvedSearchParams?.t ? parseInt(resolvedSearchParams.t as string) : 0;
 
     // Read data at runtime
     const dataPath = path.join(process.cwd(), 'src', 'data.json');
@@ -34,20 +38,43 @@ export default async function VideoPage({ params }: Props) {
     let transcript = null;
     if (videoData.json_path) {
         try {
-            const relativePath = videoData.json_path.replace('test_downloads/', 'downloads/');
-            const fullPath = path.join(process.cwd(), 'public', relativePath);
-            const jsonContent = fs.readFileSync(fullPath, 'utf8');
-            transcript = JSON.parse(jsonContent);
+            if (videoData.json_path.startsWith('http')) {
+                // Fetch from MinIO (or remote URL)
+                const res = await fetch(videoData.json_path, { cache: 'no-store' });
+                if (res.ok) {
+                    transcript = await res.json();
+                } else {
+                    console.error(`Failed to fetch transcript: ${res.status}`);
+                }
+            } else {
+                // Legacy Local File
+                const relativePath = videoData.json_path.replace('test_downloads/', 'downloads/');
+                const fullPath = path.join(process.cwd(), 'public', relativePath);
+                const jsonContent = fs.readFileSync(fullPath, 'utf8');
+                transcript = JSON.parse(jsonContent);
+            }
         } catch (e) {
             console.error("Failed to read transcript:", e);
         }
     }
 
-    const videoPath = videoData.video_path.replace('test_downloads/', 'downloads/');
-    const videoSrc = safelyEncodeURI(`/${videoPath}`);
+    let videoSrc = '';
+    if (videoData.video_path.startsWith('http')) {
+        videoSrc = videoData.video_path;
+    } else {
+        const videoPath = videoData.video_path.replace('test_downloads/', 'downloads/');
+        videoSrc = safelyEncodeURI(`/${videoPath}`);
+    }
 
-    const thumbPath = videoData.thumb_path ? videoData.thumb_path.replace('test_downloads/', 'downloads/') : null;
-    const posterSrc = thumbPath ? safelyEncodeURI(`/${thumbPath}`) : undefined;
+    let posterSrc = undefined;
+    if (videoData.thumb_path) {
+        if (videoData.thumb_path.startsWith('http')) {
+            posterSrc = videoData.thumb_path;
+        } else {
+            const thumbPath = videoData.thumb_path.replace('test_downloads/', 'downloads/');
+            posterSrc = safelyEncodeURI(`/${thumbPath}`);
+        }
+    }
 
     return (
         <main className="container">
@@ -63,7 +90,12 @@ export default async function VideoPage({ params }: Props) {
             <h1 style={{ marginBottom: '2rem' }}>{videoData.title}</h1>
 
             {transcript ? (
-                <KaraokeTranscript videoSrc={videoSrc} poster={posterSrc} transcript={transcript} />
+                <KaraokeTranscript
+                    videoSrc={videoSrc}
+                    poster={posterSrc}
+                    transcript={transcript}
+                    initialTime={initialTime}
+                />
             ) : (
                 <div className="container">No transcription available.</div>
             )}

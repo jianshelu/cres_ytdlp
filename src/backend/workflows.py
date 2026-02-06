@@ -6,6 +6,7 @@ from temporalio.common import RetryPolicy
 # typically we use string names or stub proxies)
 with workflow.unsafe.imports_passed_through():
     from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos, refresh_index
+    from pypinyin import lazy_pinyin
 
 @workflow.defn
 class VideoProcessingWorkflow:
@@ -71,10 +72,9 @@ class BatchProcessingWorkflow:
         # Using Child Workflows is better for parallelism and independent failure
         results = []
         
-        # Sanitize query for ID usage
-        import re
-        safe_query = re.sub(r'[^a-zA-Z0-9_\-]', '_', query)
-        safe_query = re.sub(r'_+', '_', safe_query)
+        # Sanitize query for ID usage using Pinyin
+        pinyin_slug = "".join(lazy_pinyin(query))
+        safe_query = pinyin_slug if pinyin_slug else "batch"
 
         for url in urls:
             try:
