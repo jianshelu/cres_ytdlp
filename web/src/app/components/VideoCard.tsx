@@ -67,7 +67,7 @@ export default function VideoCard({ video, index }: Props) {
                         else if (kw.score === 2) colorClass = 'tag-2';
 
                         const startTime = kw.start_time || 0;
-                        const seekTime = Math.max(0, Math.floor(startTime) - 3);
+                        const seekTime = Math.max(0, Math.floor(startTime) - 1);
 
                         return (
                             <Link

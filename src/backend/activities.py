@@ -309,7 +309,7 @@ async def search_videos(params: tuple) -> list:
 
     # Filter (Basic duration filter matching batch_process.py)
     MIN_DURATION = 180
-    MAX_DURATION = 1800 # Updated to 30 mins
+    MAX_DURATION = 1200 # Updated to 20 mins
     # LICENSE_FILTER = "creative commons" # Loosened as per request
     
     valid_urls = []
