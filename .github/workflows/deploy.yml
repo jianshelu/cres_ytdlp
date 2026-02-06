@@ -1,7 +1,21 @@
 name: Build and Push to GHCR
+run-name: Build image ${{ github.ref_name }} @ ${{ github.sha }}
 
 on:
   workflow_dispatch:
+  # Optional: Add push/pull_request triggers for automation
+  push:
+    branches: [main, master]
+    paths:
+      - 'Dockerfile'
+      - 'Dockerfile.base'
+      - '.github/workflows/deploy.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'Dockerfile'
+      - 'Dockerfile.base'
+      - '.github/workflows/deploy.yml'
 
 env:
   REGISTRY: ghcr.io
@@ -95,6 +109,8 @@ jobs:
           # Build optimization
           provenance: mode=max # SBOM + attestations (security)
           sbom: true
+          # Platform support (optional: add more if needed)
+          platforms: linux/amd64,linux/arm64
 
   build-app:
     needs: [filter, build-base]
@@ -152,11 +168,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           # Isolate cache per image type
-          cache-from: |
-            type=gha,scope=app
-            type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache
-          cache-to: |
-            type=gha,scope=app,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache,mode=max
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,scope=app,mode=max
           provenance: mode=max
           sbom: true
+          platforms: linux/amd64,linux/arm64
+          # Optional: Add build cache for faster builds
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache,mode=max
