@@ -3,19 +3,6 @@ run-name: Build image ${{ github.ref_name }} @ ${{ github.sha }}
 
 on:
   workflow_dispatch:
-  # Optional: Add push/pull_request triggers for automation
-  push:
-    branches: [main, master]
-    paths:
-      - 'Dockerfile'
-      - 'Dockerfile.base'
-      - '.github/workflows/deploy.yml'
-  pull_request:
-    branches: [main, master]
-    paths:
-      - 'Dockerfile'
-      - 'Dockerfile.base'
-      - '.github/workflows/deploy.yml'
 
 env:
   REGISTRY: ghcr.io
