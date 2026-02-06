@@ -1,9 +1,14 @@
 name: Build and Push to GHCR
-run-name: Build image ${{ github.ref_name }} @ ${{ github.sha }}
+run-name: Build image ${{ github.ref_name }} @ ${{ github.sha }} — ${{ inputs.note }}
 
 on:
   workflow_dispatch:
-
+    inputs:
+      note:
+        description: "Optional label (e.g., fix qemu / test build)"
+        required: false
+        default: ""
+        
 env:
   REGISTRY: ghcr.io
   # Centralize image name for consistency
