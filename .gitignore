@@ -36,3 +36,7 @@ build/
 .cache/
 id_vast_key
 *.key
+
+
+# Agent rules - untrack instance-specific configuration
+.agent/rules/workwithvastai.md
