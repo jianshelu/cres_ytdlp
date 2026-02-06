@@ -233,16 +233,20 @@ def main():
 
     # 5. Start Services
     log("[4/4] Starting Services...")
-    # Using the robust startup command we derived
     start_cmd = f"""
     cd {target_dir}
-    chmod +x start_remote.sh
+    chmod +x start_remote.sh onstart.sh entrypoint.sh
     mkdir -p logs
     ./start_remote.sh
     """
     
     if run_ssh_command(full_ssh_base, start_cmd, "Start Services"):
         log("Deployment Finished Successfully!", Colors.OKGREEN)
+        log("========================================", Colors.HEADER)
+        log("AUTO-STARTUP CONFIGURATION REQUIRED:", Colors.WARNING)
+        log("1. Go to Vast.ai Console -> Edit Instance", Colors.WARNING)
+        log("2. Set 'On-start script' to: bash /workspace/onstart.sh", Colors.WARNING)
+        log("========================================", Colors.HEADER)
         log(f"Access tunnel via: python connect_vast.py", Colors.OKGREEN)
 
 if __name__ == "__main__":
