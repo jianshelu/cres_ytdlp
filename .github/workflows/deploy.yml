@@ -2,19 +2,6 @@ name: Build and Push to GHCR
 
 on:
   workflow_dispatch:
-  # Optional: Add push/pull_request triggers for automation
-  push:
-    branches: [main, master]
-    paths:
-      - 'Dockerfile'
-      - 'Dockerfile.base'
-      - '.github/workflows/deploy.yml'
-  pull_request:
-    branches: [main, master]
-    paths:
-      - 'Dockerfile'
-      - 'Dockerfile.base'
-      - '.github/workflows/deploy.yml'
 
 env:
   REGISTRY: ghcr.io
@@ -108,8 +95,6 @@ jobs:
           # Build optimization
           provenance: mode=max # SBOM + attestations (security)
           sbom: true
-          # Platform support (optional: add more if needed)
-          platforms: linux/amd64,linux/arm64
 
   build-app:
     needs: [filter, build-base]
@@ -175,4 +160,3 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache,mode=max
           provenance: mode=max
           sbom: true
-          platforms: linux/amd64,linux/arm64
