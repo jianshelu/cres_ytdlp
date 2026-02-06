@@ -170,9 +170,3 @@ jobs:
           # Isolate cache per image type
           cache-from: type=gha,scope=app
           cache-to: type=gha,scope=app,mode=max
-          provenance: mode=max
-          sbom: true
-          platforms: linux/amd64,linux/arm64
-          # Optional: Add build cache for faster builds
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}:buildcache,mode=max
