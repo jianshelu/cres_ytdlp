@@ -1,5 +1,5 @@
 yt-dlp
-openai-whisper
+faster-whisper
 torch --index-url https://download.pytorch.org/whl/cu121
 numpy
 requests

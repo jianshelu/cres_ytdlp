@@ -1,7 +1,6 @@
 from temporalio import activity
 import asyncio
 import yt_dlp
-import whisper
 import os
 import json
 import requests
@@ -127,16 +126,35 @@ def transcribe_video(object_name: str) -> str:
     if not os.path.exists(local_path):
         client.fget_object(bucket_name, object_name, local_path)
 
-    # Attempting to use GPU as requested
+    # Attempting to use GPU as requested with faster-whisper
     try:
-        model = whisper.load_model("base", device="cuda")
-        activity.logger.info("Whisper model loaded on device: CUDA (GPU)")
+        from faster_whisper import WhisperModel
+        model = WhisperModel("base", device="cuda", compute_type="float16")
+        activity.logger.info("Faster-Whisper model loaded on device: CUDA (GPU)")
     except Exception as e:
         activity.logger.error(f"Failed to load on CUDA, falling back to CPU: {e}")
-        model = whisper.load_model("base", device="cpu")
-        activity.logger.info("Whisper model loaded on device: CPU")
+        from faster_whisper import WhisperModel
+        model = WhisperModel("base", device="cpu", compute_type="int8")
+        activity.logger.info("Faster-Whisper model loaded on device: CPU")
         
-    result = model.transcribe(local_path)
+    segments, info = model.transcribe(local_path, beam_size=5)
+    
+    # Reconstruct result dict for compatibility with existing flow
+    segments_list = []
+    full_text = ""
+    for segment in segments:
+        segments_list.append({
+            "start": segment.start,
+            "end": segment.end,
+            "text": segment.text
+        })
+        full_text += segment.text
+    
+    result = {
+        "text": full_text,
+        "segments": segments_list,
+        "language": info.language
+    }
     
     # Save transcript locally (temp)
     # object_name = "videos/filename.mp4"
