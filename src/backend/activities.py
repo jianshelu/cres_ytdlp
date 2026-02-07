@@ -196,19 +196,27 @@ async def summarize_content(params: tuple) -> dict:
     max_chars = 12000 
     input_text = text[:max_chars]
     
-    # Simpler, robust prompt
+    # Detect language and enforce it in prompt
+    # Simple heuristic: if >30% Chinese characters, it's Chinese
+    chinese_chars = sum(1 for c in input_text[:500] if '\u4e00' <= c <= '\u9fff')
+    is_chinese = chinese_chars > 150  # >30% of 500 chars
+    
+    language_instruction = "中文" if is_chinese else "the same language as the input"
+    
+    # Stronger prompt with explicit language enforcement
     prompt = f"""
     <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-    You are a helpful assistant. Analyzing the transcript below, provide a brief summary and a list of keywords.
-    Respond in the SAME LANGUAGE as the input text.
+    You are a helpful assistant. Analyzing the transcript below, provide a brief summary and keywords.
     
-    JSON Format (strictly maximum 5 keywords):
+    CRITICAL: You MUST respond in {language_instruction}. If the transcript is in Chinese, the summary and keywords MUST be in Chinese.
+    
+    JSON Format (strictly 3-5 keywords):
     {{
         "summary": "...",
-        "keywords": ["...", "..."]
+        "keywords": ["...", "...", "..."]
     }}
     <|eot_id|><|start_header_id|>user<|end_header_id|>
-    TRANSCRIPT:
+    TRANSCRIPT ({language_instruction}):
     {input_text}
     <|eot_id|><|start_header_id|>assistant<|end_header_id|>
     """
@@ -216,7 +224,7 @@ async def summarize_content(params: tuple) -> dict:
     payload = {
         "prompt": prompt,
         "n_predict": 512,
-        "temperature": 0.7,
+        "temperature": 0.3,  # Lower temperature for more consistent language matching
         "repeat_penalty": 1.1, # Prevent loops
         "json_schema": {
             "type": "object",
