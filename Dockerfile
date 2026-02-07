@@ -7,7 +7,11 @@ WORKDIR /workspace
 # Install Python deps
 COPY requirements.txt .
 RUN pip3 install --upgrade pip \
- && pip3 install --no-cache-dir -r requirements.txt
+ && pip3 install --no-cache-dir -r requirements.txt \
+ && rm -rf /root/.cache/pip \
+ && find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
+ && find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete \
+ && find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete
 
 # Frontend build stage
 FROM node:20-slim AS frontend-builder
