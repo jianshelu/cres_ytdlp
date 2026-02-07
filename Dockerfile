@@ -21,10 +21,8 @@ RUN npm run build
 FROM ${BASE_IMAGE}
 WORKDIR /workspace
 
-# Backend code
-COPY src ./src
-COPY batch_process.py generate_index.py ./
-COPY scripts ./scripts
+# Project code and root scripts
+COPY . ./
 
 # Frontend runtime assets
 RUN mkdir -p /workspace/web
