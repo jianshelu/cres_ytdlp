@@ -1,42 +1,37 @@
-# ARG for base image (passed from CI)
-ARG BASE_IMAGE=ghcr.io/ggml-org/llama.cpp:server-cuda
-FROM node:20-slim AS frontend-builder
+# Dockerfile (supervisord PID1; starts all services)
+ARG BASE_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:latest
+FROM ${BASE_IMAGE} AS base
+
 WORKDIR /workspace
-# Copy web specific files
+
+# Install Python deps
+COPY requirements.txt .
+RUN pip3 install --upgrade pip \
+ && pip3 install --no-cache-dir -r requirements.txt
+
+# Frontend build stage
+FROM node:20-slim AS frontend-builder
+WORKDIR /web
 COPY web/package*.json ./
 RUN npm install
 COPY web/ .
 RUN npm run build
 
-# Final Stage
+# Final stage
 FROM ${BASE_IMAGE}
-
 WORKDIR /workspace
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir -r requirements.txt
+# Backend code
+COPY src ./src
+COPY batch_process.py generate_index.py ./
+COPY scripts ./scripts
 
-# Copy Backend Scripts
-COPY batch_process.py .
-COPY generate_index.py .
-COPY scripts/ scripts/
-COPY src/ src/
+# Frontend runtime assets
+RUN mkdir -p /workspace/web
+COPY --from=frontend-builder /web/.next /workspace/web/.next
+COPY --from=frontend-builder /web/public /workspace/web/public
+COPY --from=frontend-builder /web/package*.json /workspace/web/
+COPY --from=frontend-builder /web/node_modules /workspace/web/node_modules
 
-# Copy Frontend Build into /workspace/web
-COPY --from=frontend-builder /workspace/.next ./web/.next
-COPY --from=frontend-builder /workspace/public ./web/public
-COPY --from=frontend-builder /workspace/node_modules ./web/node_modules
-# Copy web package.json for start script
-COPY --from=frontend-builder /workspace/package.json ./web/package.json
-
-# Copy entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-EXPOSE 3000 8000 8081 7233 9000 9001
-
-ENTRYPOINT ["/entrypoint.sh"]
-# Default command starts Next.js and keeps container alive
-CMD ["npm", "start", "--prefix", "web"]
+# Start all services via supervisord (single-container, self-healing)
+ENTRYPOINT ["/usr/bin/supervisord","-n","-c","/etc/supervisor/supervisord.conf"]
