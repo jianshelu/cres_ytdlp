@@ -17,8 +17,8 @@ RUN npm install
 COPY web/ .
 RUN npm run build
 
-# Final stage
-FROM ${BASE_IMAGE}
+# Final stage (inherits Python packages from base stage)
+FROM base
 WORKDIR /workspace
 
 # Project code and root scripts
