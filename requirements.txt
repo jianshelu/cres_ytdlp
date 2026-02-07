@@ -6,6 +6,7 @@ requests
 temporalio
 fastapi
 uvicorn
+httpx
 python-multipart
 minio
 pypinyin

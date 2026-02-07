@@ -60,4 +60,48 @@ async def batch_process(request: BatchRequest):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    """
+    Comprehensive health check that verifies all critical dependencies.
+    Returns 200 if all services are healthy, 503 if any are down.
+    """
+    import httpx
+    from fastapi import status
+    from fastapi.responses import JSONResponse
+    
+    checks = {
+        "api": "ok",
+        "llama": "unknown",
+        "temporal": "unknown",
+        "minio": "unknown"
+    }
+    
+    # Check llama-server (port 8081)
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            resp = await client.get("http://localhost:8081/health")
+            checks["llama"] = "ok" if resp.status_code == 200 else "down"
+    except Exception:
+        checks["llama"] = "down"
+    
+    # Check Temporal (port 8233 UI API)
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            resp = await client.get("http://localhost:8233/api/v1/namespaces")
+            checks["temporal"] = "ok" if resp.status_code == 200 else "down"
+    except Exception:
+        checks["temporal"] = "down"
+    
+    # Check MinIO (port 9000 health endpoint)
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            resp = await client.get("http://localhost:9000/minio/health/live")
+            checks["minio"] = "ok" if resp.status_code == 200 else "down"
+    except Exception:
+        checks["minio"] = "down"
+    
+    all_healthy = all(v == "ok" for v in checks.values())
+    return JSONResponse(
+        content=checks,
+        status_code=status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+    )
+
