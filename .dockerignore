@@ -19,7 +19,10 @@ id_vast_key
 downloads
 test_downloads
 archive
-web
+web/.next
+web/node_modules
+web/out
+web/build
 node_modules
 dist
 build
