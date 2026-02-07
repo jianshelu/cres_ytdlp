@@ -181,87 +181,72 @@ a {
 
 /* Red */
 
-/* Transcript View - Stacked non-overlapping layout */
+/* Transcript View - Sticky Video with scrolling content below */
 .transcript-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 60px);
-  /* Adjust for header if any */
-  max-width: 1200px;
+  min-height: 100vh;
+  max-width: 1000px;
   margin: 0 auto;
-  overflow: hidden;
 }
 
 .video-player-section {
-  flex: 0 0 auto;
-  background: #000;
-  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--background);
   width: 100%;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .video-player-section video {
   width: 100%;
-  max-width: 100%;
-  height: auto;
   aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: block;
 }
 
 .transcript-section {
-  flex: 1;
-  background: var(--card-bg);
-  padding: 2rem;
-  overflow-y: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.transcript-list {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 1.5rem;
-  padding-bottom: 2rem;
-}
-
-.transcript-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.transcript-list::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 10px;
+  padding: 2rem 0;
 }
 
 .transcript-section h3 {
   margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.transcript-item {
+.transcript-paragraph {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: var(--muted);
+  text-align: justify;
+}
+
+.transcript-word {
   cursor: pointer;
-  margin-bottom: 0.75rem;
-}
-
-.transcript-text {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #888;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
+  padding: 0 2px;
+  border-radius: 4px;
   transition: all 0.2s ease;
+  display: inline-block;
 }
 
-.transcript-item:hover .transcript-text {
+.transcript-word:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.transcript-item.active .transcript-text {
-  color: #fff;
+.transcript-word.active {
+  color: var(--accent-foreground);
   background: var(--accent);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.timestamp {
+  display: none;
 }
 
 .timestamp {

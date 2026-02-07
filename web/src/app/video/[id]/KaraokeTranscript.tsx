@@ -20,8 +20,6 @@ interface Props {
 export default function KaraokeTranscript({ videoSrc, poster, transcript, initialTime }: Props) {
     const [currentTime, setCurrentTime] = useState(0);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const transcriptListRef = useRef<HTMLDivElement>(null);
-    const activeRef = useRef<HTMLDivElement>(null);
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
@@ -29,26 +27,8 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript, initia
         }
     };
 
-    // Scroll active segment into view within the list
-    useEffect(() => {
-        if (activeRef.current && transcriptListRef.current) {
-            const container = transcriptListRef.current;
-            const element = activeRef.current;
-
-            // Calculate relative offset
-            const containerCenter = container.offsetHeight / 2;
-            const elementOffset = element.offsetTop - container.offsetTop;
-
-            container.scrollTo({
-                top: elementOffset - containerCenter + (element.offsetHeight / 2),
-                behavior: 'smooth'
-            });
-        }
-    }, [currentTime]);
-
-    const activeIndex = transcript.segments.findIndex(
-        (s) => currentTime >= s.start && currentTime <= s.end
-    );
+    // Auto-scroll logic removed as it's less standard for paragraph views, 
+    // but the user can scroll naturally since the video is sticky.
 
     // Initial Seek and Play
     useEffect(() => {
@@ -94,23 +74,37 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript, initia
 
             <div className="transcript-section">
                 <h3>Transcription</h3>
-                <div className="transcript-list" ref={transcriptListRef}>
+                <div className="transcript-paragraph">
                     {transcript.segments.map((segment, sIdx) => {
-                        const isActive = sIdx === activeIndex;
+                        const words = segment.text.trim().split(/\s+/);
+                        const duration = segment.end - segment.start;
+
                         return (
-                            <div
-                                key={sIdx}
-                                ref={isActive ? activeRef : null}
-                                className={`transcript-item ${isActive ? 'active' : ''}`}
-                                onClick={() => {
-                                    if (videoRef.current) {
-                                        videoRef.current.currentTime = segment.start;
-                                        videoRef.current.play();
-                                    }
-                                }}
-                            >
-                                <div className="transcript-text">{segment.text}</div>
-                            </div>
+                            <span key={sIdx} className="segment-group">
+                                {words.map((word, wIdx) => {
+                                    // Interpolate word start time
+                                    const wordStartTime = segment.start + (wIdx * (duration / words.length));
+                                    const isActive = currentTime >= wordStartTime &&
+                                        (wIdx === words.length - 1
+                                            ? currentTime <= segment.end
+                                            : currentTime < (segment.start + ((wIdx + 1) * (duration / words.length))));
+
+                                    return (
+                                        <span
+                                            key={`${sIdx}-${wIdx}`}
+                                            className={`transcript-word ${isActive ? 'active' : ''}`}
+                                            onClick={() => {
+                                                if (videoRef.current) {
+                                                    videoRef.current.currentTime = wordStartTime;
+                                                    videoRef.current.play();
+                                                }
+                                            }}
+                                        >
+                                            {word}{' '}
+                                        </span>
+                                    );
+                                })}
+                            </span>
                         );
                     })}
                 </div>
