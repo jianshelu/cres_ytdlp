@@ -2,6 +2,7 @@ import json
 import os
 import io
 import urllib.parse
+import re
 from minio import Minio
 
 # Config
@@ -89,7 +90,10 @@ def process_transcript(client, object_key):
                 # Calculate start_time from segments
                 start_time = 0
                 for seg in segments:
-                    if clean_k.lower() in seg.get('text', '').lower():
+                    # Use regex for precise match with word boundaries
+                    # This avoids partial matches like "anti" in "antigravity" if the keyword is just "anti"
+                    pattern = re.compile(rf'\b{re.escape(clean_k)}\b', re.IGNORECASE)
+                    if pattern.search(seg.get('text', '')):
                         start_time = seg.get('start', 0)
                         break
                 

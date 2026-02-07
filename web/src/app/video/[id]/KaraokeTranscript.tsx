@@ -74,37 +74,23 @@ export default function KaraokeTranscript({ videoSrc, poster, transcript, initia
 
             <div className="transcript-section">
                 <h3>Transcription</h3>
-                <div className="transcript-paragraph">
-                    {transcript.segments.map((segment, sIdx) => {
-                        const words = segment.text.trim().split(/\s+/);
-                        const duration = segment.end - segment.start;
+                <div className="transcript-list">
+                    {transcript.segments.map((segment, idx) => {
+                        const isActive = currentTime >= segment.start && currentTime <= segment.end;
 
                         return (
-                            <span key={sIdx} className="segment-group">
-                                {words.map((word, wIdx) => {
-                                    // Interpolate word start time
-                                    const wordStartTime = segment.start + (wIdx * (duration / words.length));
-                                    const isActive = currentTime >= wordStartTime &&
-                                        (wIdx === words.length - 1
-                                            ? currentTime <= segment.end
-                                            : currentTime < (segment.start + ((wIdx + 1) * (duration / words.length))));
-
-                                    return (
-                                        <span
-                                            key={`${sIdx}-${wIdx}`}
-                                            className={`transcript-word ${isActive ? 'active' : ''}`}
-                                            onClick={() => {
-                                                if (videoRef.current) {
-                                                    videoRef.current.currentTime = wordStartTime;
-                                                    videoRef.current.play();
-                                                }
-                                            }}
-                                        >
-                                            {word}{' '}
-                                        </span>
-                                    );
-                                })}
-                            </span>
+                            <div
+                                key={idx}
+                                className={`transcript-segment ${isActive ? 'active-segment' : ''}`}
+                                onClick={() => {
+                                    if (videoRef.current) {
+                                        videoRef.current.currentTime = segment.start;
+                                        videoRef.current.play();
+                                    }
+                                }}
+                            >
+                                {segment.text}
+                            </div>
                         );
                     })}
                 </div>
