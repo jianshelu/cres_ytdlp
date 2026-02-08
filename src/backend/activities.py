@@ -34,14 +34,18 @@ def download_video(url: str) -> str:
 
     ydl_opts = {
         # Prioritize Chinese audio (language matches 'zh' start), then fallback to best audio
-        'format': 'bestvideo[height<=360]+bestaudio[language^=zh]/bestvideo[height<=360]+bestaudio/best[height<=360]',
+        'format': 'bestvideo[height<=480]+bestaudio/bestvideo[height<=720]+bestaudio/bestvideo[height<=1080]+bestaudio/best[height<=480]/best[height<=720]/best[height<=1080]/best',
         'outtmpl': f'{download_dir}/%(title)s_%(id)s.%(ext)s',
         'writethumbnail': True,
         'writeinfojson': True, # Save metadata for title extraction
         'noplaylist': True,
         'restrictfilenames': True, # Force ASCII filenames
         'merge_output_format': 'mp4', # Force MP4 for browser compatibility
+        'extractor_args': {'youtube': {'player_client': ['ios', 'tv', 'web']}},
+        'quiet': False, # Enable more logging to debug format issues
+        'geo_bypass_country': 'US', # Use USA region for YouTube content
     }
+
 
     # Add cookies if available (to bypass bot detection)
     cookie_path = "/workspace/cookies.txt"
@@ -199,8 +203,14 @@ def transcribe_video(object_name: str) -> str:
 
 @activity.defn
 async def summarize_content(params: tuple) -> dict:
-    text, object_name = params
-    activity.logger.info(f"Summarizing content for {object_name}")
+    # Support 2 or 3 element tuple for backwards compatibility
+    if len(params) == 3:
+        text, object_name, search_query = params
+    else:
+        text, object_name = params
+        search_query = None
+        
+    activity.logger.info(f"Summarizing content for {object_name} (search_query: {search_query})")
     
     # Truncate text if too long for prompt context
     max_chars = 12000 
@@ -265,6 +275,10 @@ async def summarize_content(params: tuple) -> dict:
         activity.logger.error(f"Summarization failed: {e}")
         summary_data = {"summary": f"Summarization failed: {e}", "keywords": []}
 
+    # Add search_query to summary_data for storage
+    if search_query:
+        summary_data["search_query"] = search_query
+
     # Update the local/MinIO JSON file
     client = get_minio_client()
     bucket_name = "cres"
@@ -312,6 +326,7 @@ async def summarize_content(params: tuple) -> dict:
 
     return summary_data
 
+
 @activity.defn
 async def search_videos(params: tuple) -> list:
     query, limit = params
@@ -320,8 +335,10 @@ async def search_videos(params: tuple) -> list:
     ydl_opts = {
         'quiet': True, 
         'extract_flat': True, 
-        'dump_single_json': True
+        'dump_single_json': True,
+        'geo_bypass_country': 'US', # Use USA region for YouTube search
     }
+
     
     # Add cookies if available
     cookie_path = "/workspace/cookies.txt"

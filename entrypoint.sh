@@ -3,6 +3,17 @@ set -e
 
 echo "Starting services..."
 
+# Install Deno if not present (required for yt-dlp to solve YouTube n-challenge)
+if [ ! -f /root/.deno/bin/deno ]; then
+    echo "Installing Deno for yt-dlp..."
+    apt-get install -y unzip > /dev/null 2>&1 || true
+    curl -fsSL https://deno.land/install.sh | sh > /dev/null 2>&1
+fi
+export PATH="/root/.deno/bin:$PATH"
+
+# Install yt-dlp-ejs if not present
+python3 -c "import yt_dlp_ejs" 2>/dev/null || pip3 install yt-dlp-ejs > /dev/null 2>&1
+
 # Start MinIO in the background
 mkdir -p ./data/minio
 echo "Starting MinIO..."

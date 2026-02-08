@@ -18,6 +18,7 @@ interface VideoData {
   thumb_path: string | null;
   keywords: Keyword[];
   summary: string;
+  search_query?: string;
 }
 
 export default async function Home() {
@@ -31,23 +32,16 @@ export default async function Home() {
     console.error("Failed to load video data:", e);
   }
 
-  // Aggregate unique keywords with total counts
-  const keywordMap = new Map<string, { count: number; score: number }>();
+  // Extract unique search queries with video counts
+  const searchQueryMap = new Map<string, number>();
   data.forEach(video => {
-    (video.keywords || []).forEach(kw => {
-      const existing = keywordMap.get(kw.word);
-      if (existing) {
-        existing.count += kw.count;
-        existing.score = Math.max(existing.score, kw.score);
-      } else {
-        keywordMap.set(kw.word, { count: kw.count, score: kw.score });
-      }
-    });
+    const query = video.search_query || 'Uncategorized';
+    searchQueryMap.set(query, (searchQueryMap.get(query) || 0) + 1);
   });
 
-  // Sort by total count descending
-  const allKeywords = Array.from(keywordMap.entries())
-    .map(([word, { count, score }]) => ({ word, count, score }))
+  // Sort by count descending
+  const searchQueries = Array.from(searchQueryMap.entries())
+    .map(([query, count]) => ({ query, count }))
     .sort((a, b) => b.count - a.count);
 
   return (
@@ -89,37 +83,38 @@ export default async function Home() {
       </section>
 
       <div className="main-layout">
-        {/* Video Grid - Left Side */}
+        {/* Video Grid - Left Side (3 columns) */}
         <div className="grid">
           {data.map((video: VideoData, index: number) => (
             <VideoCard key={index} video={video} index={index} />
           ))}
         </div>
 
-        {/* Keyword Sidebar - Right Side */}
+        {/* Search Words Sidebar - Right Side */}
         <aside className="keyword-sidebar">
-          <h3>🔍 Keywords</h3>
-          <p className="sidebar-subtitle">Click to view all videos with this keyword</p>
+          <h3>🔍 Search Words</h3>
+          <p className="sidebar-subtitle">Click to view transcriptions for this search</p>
           <div className="keyword-list">
-            {allKeywords.map((kw, i) => {
+            {searchQueries.map((sq, i) => {
+              // Color based on count
               let colorClass = 'tag-1';
-              if (kw.score >= 5) colorClass = 'tag-5';
-              else if (kw.score === 4) colorClass = 'tag-4';
-              else if (kw.score === 3) colorClass = 'tag-3';
-              else if (kw.score === 2) colorClass = 'tag-2';
+              if (sq.count >= 20) colorClass = 'tag-5';
+              else if (sq.count >= 10) colorClass = 'tag-4';
+              else if (sq.count >= 5) colorClass = 'tag-3';
+              else if (sq.count >= 2) colorClass = 'tag-2';
 
               return (
                 <Link
                   key={i}
-                  href={`/transcriptions?keyword=${encodeURIComponent(kw.word)}`}
+                  href={`/transcriptions?query=${encodeURIComponent(sq.query)}`}
                   className={`sidebar-tag ${colorClass}`}
                 >
-                  {kw.word} <span className="tag-count">({kw.count})</span>
+                  {sq.query} <span className="tag-count">({sq.count})</span>
                 </Link>
               );
             })}
-            {allKeywords.length === 0 && (
-              <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>No keywords extracted yet.</p>
+            {searchQueries.length === 0 && (
+              <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>No search queries yet. Start a batch process above.</p>
             )}
           </div>
         </aside>

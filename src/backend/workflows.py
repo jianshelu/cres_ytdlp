@@ -11,8 +11,15 @@ with workflow.unsafe.imports_passed_through():
 @workflow.defn
 class VideoProcessingWorkflow:
     @workflow.run
-    async def run(self, url: str) -> dict:
-        workflow.logger.info(f"Video processing workflow started for {url}")
+    async def run(self, params) -> dict:
+        # Support both tuple (url, search_query) and string url for backwards compatibility
+        if isinstance(params, tuple):
+            url, search_query = params
+        else:
+            url = params
+            search_query = None
+            
+        workflow.logger.info(f"Video processing workflow started for {url} (query: {search_query})")
 
         # 1. Download Activity
         # Retry logic: Retrying downloads is generally safe.
@@ -32,10 +39,10 @@ class VideoProcessingWorkflow:
         )
 
         # 3. Summarize Activity
-        # OpenAI/Llama based
+        # OpenAI/Llama based - pass search_query to be stored in metadata
         summary = await workflow.execute_activity(
             summarize_content,
-            (transcript_text, filepath),
+            (transcript_text, filepath, search_query),
             start_to_close_timeout=timedelta(minutes=10)
         )
 
@@ -49,7 +56,8 @@ class VideoProcessingWorkflow:
             "status": "completed",
             "url": url,
             "filepath": filepath,
-            "summary": summary
+            "summary": summary,
+            "search_query": search_query
         }
 
 @workflow.defn
@@ -83,7 +91,7 @@ class BatchProcessingWorkflow:
                 
                 handle = await workflow.start_child_workflow(
                     VideoProcessingWorkflow.run,
-                    url,
+                    (url, query),  # Pass tuple with url and search query
                     id=f"video-{safe_query}-{video_id}",
                     task_queue="video-processing-queue",
                     parent_close_policy=workflow.ParentClosePolicy.ABANDON
@@ -106,7 +114,7 @@ class ReprocessVideoWorkflow:
         # summary_data contains {summary, keywords}
         summary_data = await workflow.execute_activity(
             summarize_content,
-            (text, object_name),
+            (text, object_name, None),  # No search query for reprocessing
             start_to_close_timeout=timedelta(minutes=10)
         )
         

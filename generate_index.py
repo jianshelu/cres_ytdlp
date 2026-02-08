@@ -44,10 +44,11 @@ def get_metadata_title(client, object_key):
 
 def process_transcript(client, object_key):
     """
-    Reads transcript, scores keywords, updates if needed, returns (summary, keywords).
+    Reads transcript, scores keywords, updates if needed, returns (summary, keywords, search_query).
     """
     summary = "Generated automatically"
     keywords = []
+    search_query = None
     
     try:
         response = client.get_object(BUCKET_CRES, object_key)
@@ -57,6 +58,9 @@ def process_transcript(client, object_key):
         
         if 'summary' in data:
             summary = data['summary']
+
+        if 'search_query' in data:
+            search_query = data['search_query']
 
         if 'keywords' in data:
             # check structure / scoring
@@ -120,7 +124,8 @@ def process_transcript(client, object_key):
     except Exception as e:
         print(f"Error processing transcript {object_key}: {e}")
 
-    return summary, keywords
+    return summary, keywords, search_query
+
 
 def generate_index():
     client = get_minio_client()
@@ -191,10 +196,12 @@ def generate_index():
         # 2. Transcript Info
         keywords = []
         summary = "Generated automatically"
+        search_query = None
         if transcript_key:
-            s, k = process_transcript(client, transcript_key)
+            s, k, sq = process_transcript(client, transcript_key)
             summary = s
             keywords = k
+            search_query = sq
             
         # Encode keys for URLs
         enc_video = urllib.parse.quote(video_key) if video_key else None
@@ -207,9 +214,11 @@ def generate_index():
             "thumb_path": f"{URL_BASE}/{BUCKET_CRES}/{enc_thumb}" if enc_thumb else None,
             "json_path": f"{URL_BASE}/{BUCKET_CRES}/{enc_trans}" if enc_trans else None,
             "keywords": keywords,
-            "summary": summary
+            "summary": summary,
+            "search_query": search_query
         }
         data.append(entry)
+
 
     data.sort(key=lambda x: x['title'])
     

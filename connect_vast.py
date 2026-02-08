@@ -23,11 +23,10 @@ def main():
     
     user = env.get("VAST_USER", "root")
     host = env.get("VAST_HOST", "ssh3.vast.ai")
-    port = env.get("VAST_PORT", "36535")
+    port = env.get("VAST_PORT", "32069")
     key_path = env.get("VAST_SSH_KEY", "")
 
     # Fix WSL paths for Windows execution
-    # e.g. /mnt/c/Users/... -> c:/Users/...
     if sys.platform == "win32" and key_path.startswith("/mnt/"):
         parts = key_path.split("/")
         if len(parts) > 2 and len(parts[2]) == 1:
@@ -36,20 +35,19 @@ def main():
             key_path = f"{drive}:/{rest}"
             print(f"Converted WSL path to Windows: {key_path}")
 
-    # Ports to tunnel
-    # Local:Remote
+    # Ports to tunnel (Local:Remote)
+    # Using 127.0.0.1 to avoid IPv6/localhost resolution issues
     tunnels = [
-        "3000:localhost:3000", # Next.js App
-        "8000:localhost:8000", # FastAPI
-        "8080:localhost:8080", # User requested port
-        "8233:localhost:8233", # Temporal Web UI
-        "7233:localhost:7233", # Temporal Service
-        "9001:localhost:9001", # MinIO Console
-        "9000:localhost:9000", # MinIO API
-        "8081:localhost:8081", # Llama Server
-        "1111:localhost:1111", # ComfyUI
-        "6006:localhost:6006", # Tensorboard
-        "8384:localhost:8384"  # Syncthing
+        "3000:127.0.0.1:3000", # Next.js App
+        "8000:127.0.0.1:8000", # FastAPI
+        "8080:127.0.0.1:8081", # Llama Server
+        "8233:127.0.0.1:8233", # Temporal Web UI
+        "7233:127.0.0.1:7233", # Temporal Service
+        "9001:127.0.0.1:9001", # MinIO Console
+        "9000:127.0.0.1:9000", # MinIO API
+        "1111:127.0.0.1:1111", # ComfyUI
+        "6006:127.0.0.1:6006", # Tensorboard
+        "8384:127.0.0.1:8384"  # Syncthing
     ]
 
     print("========================================")
@@ -60,9 +58,6 @@ def main():
     print("========================================")
 
     cmd = ["ssh", "-p", port, "-o", "StrictHostKeyChecking=no"]
-    
-    # ControlMaster removed due to Windows incompatibility (getsockname failed)
-    # Reverting to standard connection for reliability.
     
     if key_path:
         cmd.extend(["-i", key_path])
