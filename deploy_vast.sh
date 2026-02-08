@@ -9,8 +9,8 @@ if [ -f .env ]; then
 fi
 
 # Vast.ai connection details (Defaults or from .env)
-HOST="${VAST_HOST:-ssh1.vast.ai}"
-PORT="${VAST_PORT:-12843}"
+HOST="${VAST_HOST:-ssh3.vast.ai}"
+PORT="${VAST_PORT:-36535}"
 USER="${VAST_USER:-root}"
 SSH_KEY="${VAST_SSH_KEY}" # Optional, if empty will use default ssh agent/key
 TARGET_DIR="/workspace"

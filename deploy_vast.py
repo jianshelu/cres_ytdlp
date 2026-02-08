@@ -123,8 +123,8 @@ def main():
     env = read_env()
     
     user = env.get("VAST_USER", "root")
-    host = env.get("VAST_HOST", "ssh1.vast.ai")
-    port = env.get("VAST_PORT", "12843")
+    host = env.get("VAST_HOST", "ssh3.vast.ai")
+    port = env.get("VAST_PORT", "36535")
     key_path = env.get("VAST_SSH_KEY", "")
     target_dir = "/workspace"
 

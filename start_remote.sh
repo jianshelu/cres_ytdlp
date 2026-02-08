@@ -13,13 +13,13 @@ sleep 2
 # 2. Environment Setup
 export LLM_MODEL_PATH="${LLM_MODEL_PATH:-/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
 export WHISPER_MODEL_PATH="${WHISPER_MODEL_PATH:-/workspace/packages/models/whisper}"
-export PATH="/usr/local/bin:/usr/bin:/bin:/workspace:${PATH}"
+export PATH="/root/.local/bin:/usr/local/bin:/usr/bin:/bin:/workspace:${PATH}"
 
 mkdir -p /workspace/logs
 
 # 3. Start Services via entrypoint
 # We use nohup and backgrounding to ensure persistence
 echo "Starting services via entrypoint..."
-nohup ./entrypoint.sh bash -c "cd web && npm start" > /workspace/logs/app.log 2>&1 &
+nohup /workspace/entrypoint.sh bash -c "cd /workspace/web && npm start" > /workspace/logs/app.log 2>&1 &
 
 echo "Started. Monitor status with: ps aux | grep -E 'node|uvicorn|temporal|minio'"

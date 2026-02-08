@@ -47,11 +47,15 @@ def download_video(url: str) -> str:
     object_name = None
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Pre-check info to avoid downloading live streams
+            # Pre-check info to avoid downloading active live streams
             info = ydl.extract_info(url, download=False)
-            if info.get('is_live'):
-                activity.logger.warning(f"Video is a live stream, skipping: {url}")
-                raise Exception("Live streams are not supported")
+            live_status = info.get('live_status')
+            is_live = info.get('is_live')
+            
+            # If it's currently live or upcoming, we skip it
+            if is_live and live_status != 'was_live':
+                activity.logger.warning(f"Video is an active/upcoming live stream (status: {live_status}), skipping: {url}")
+                raise Exception(f"Live streams (active/upcoming) are not supported. Status: {live_status}")
                 
             info_dict = ydl.extract_info(url, download=True)
             # yt-dlp returns the actual filepath after download

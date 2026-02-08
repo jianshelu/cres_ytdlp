@@ -73,7 +73,7 @@ fi
 
 # Start FastAPI
 echo "Starting FastAPI..."
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 > /var/log/fastapi.log 2>&1 &
+python3 -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 > /var/log/fastapi.log 2>&1 &
 
 # Start Temporal Worker (Background)
 echo "Starting Temporal Worker..."

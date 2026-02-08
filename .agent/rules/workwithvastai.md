@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: Guidelines for working with Vast.ai deployment
 ---
 
@@ -37,6 +38,7 @@ description: Guidelines for working with Vast.ai deployment
     /workspace/packages/models/llm, 
     /workspace/packages/models/whisper, 
     /workspace/packages/models/whisperx.
-6. Whenever workflows or activities which are boren on GPU should run through Temporal.
-7. Append new content to the artifacts instead of overwrite the old one.
-8. input, output and related workflow and process should named with suffix of orginal video id. like: https://www.youtube.com/watch?v=u1BAG9bGp74, workflow named as video-u1BAG9bGp74，thumbnails named as thumbnails-u1BAG9bGp74. batch workflow suffix is query keyword, for example, query keyword "Genimi", batch workflow named as batch-Genimi.
+6. Workflows and activities should run through Temporal. 
+7. RAM Optimization: Balance RAM for tasks on GPU, Llama, GPU Worker to ensure system stability under the 11GB constraint. 
+8. Append new content to the artifacts instead of overwrite the old one.
+9. Input, output and related workflow and process should named with suffix of orginal video id. like: https://www.youtube.com/watch?v=u1BAG9bGp74, workflow named as video-u1BAG9bGp74，thumbnails named as thumbnails-u1BAG9bGp74. batch workflow suffix is query keyword, for example, query keyword "Genimi", batch workflow named as batch-Genimi.

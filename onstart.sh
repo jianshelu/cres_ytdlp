@@ -8,6 +8,9 @@ echo "[$(date)] Instance starting..." >> $LOGFILE
 # Ensure we are in workspace
 cd /workspace
 
+# Explicitly set PATH for background services
+export PATH=/root/.local/bin:/usr/local/bin:/usr/bin:/bin:/workspace:$PATH
+
 # Call the refined remote startup script
 if [ -f "./start_remote.sh" ]; then
     echo "[$(date)] Calling start_remote.sh..." >> $LOGFILE

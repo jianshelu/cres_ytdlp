@@ -9,7 +9,7 @@ LLAMA_HOST="${LLAMA_HOST:-0.0.0.0}"
 LLAMA_PORT="${LLAMA_PORT:-8081}"
 
 # RTX 3060 12GB + 10 vCPU tuned defaults
-LLAMA_THREADS="${LLAMA_THREADS:-10}"
+LLAMA_THREADS="${LLAMA_THREADS:-8}"
 LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-4096}"
 LLAMA_PARALLEL="${LLAMA_PARALLEL:-1}"
 LLAMA_NGL="${LLAMA_NGL:-999}"
@@ -26,13 +26,13 @@ deadline=$(( $(date +%s) + LLAMA_WAIT_SECONDS ))
 
 while [ ! -f "${MODEL_FULL_PATH}" ]; do
   if [ "$(date +%s)" -ge "$deadline" ]; then
-    echo "[llama] Timeout after ${LLAMA_WAIT_SECONDS}s. Exiting so supervisor restarts and retries."
+    echo "[llama] Timeout after ${LLAMA_WAIT_SECONDS}s. Exiting."
     exit 1
   fi
   sleep "${LLAMA_POLL_SECONDS}"
 done
 
-# Wait until file size is stable (sync finished)
+# Wait until file size is stable
 prev=-1; stable=0
 while [ $stable -lt 3 ]; do
   size=$(stat -c%s "${MODEL_FULL_PATH}" 2>/dev/null || echo 0)
@@ -59,7 +59,7 @@ fi
 # Ensure /app libraries are available
 export LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH:-}"
 
-echo "[llama] Starting llama-server on ${LLAMA_HOST}:${LLAMA_PORT} using ${LLAMA_BIN}"
+echo "[llama] Starting llama-server on ${LLAMA_HOST}:${LLAMA_PORT}"
 exec "$LLAMA_BIN" \
   --model "${MODEL_FULL_PATH}" \
   --host "${LLAMA_HOST}" \
@@ -68,6 +68,5 @@ exec "$LLAMA_BIN" \
   --ctx-size "${LLAMA_CTX_SIZE}" \
   --threads "${LLAMA_THREADS}" \
   --parallel "${LLAMA_PARALLEL}" \
-  --n-batch 512 \
-  --memory-f32 false \
+  -b 512 \
   ${LLAMA_ARGS:-}
