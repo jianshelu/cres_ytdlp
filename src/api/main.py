@@ -2,9 +2,13 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from temporalio.client import Client
 from src.backend.workflows import VideoProcessingWorkflow, BatchProcessingWorkflow
+from src.api.routers import transcriptions
 import os
 
 app = FastAPI()
+
+# Include routers
+app.include_router(transcriptions.router)
 
 class ProcessRequest(BaseModel):
     url: str
