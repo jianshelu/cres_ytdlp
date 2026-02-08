@@ -33,12 +33,13 @@ description: Guidelines for working with Vast.ai deployment
         1.208.108.242:57204 -> 8384/tcp
         1.208.108.242:57289 -> 9000/tcp
         1.208.108.242:57218 -> 9001/tcp 
-4. During code developping, Using SSH  ControlMaster + ControlPersist to build long connection and using rsync to sync code and debugging with instance's logs. 
-5.Sync LLM, whisper,whisperx models with google drive on vast.ai instace management page. models path: 
+4. Update Instance's specification in raw_vast.json file to help analysis and optimize data processing.
+5. During code developping, Using SSH  ControlMaster + ControlPersist to build long connection and using rsync to sync code and debugging with instance's logs. 
+6.Sync LLM, whisper,whisperx models with google drive on vast.ai instace management page. models path: 
     /workspace/packages/models/llm, 
     /workspace/packages/models/whisper, 
     /workspace/packages/models/whisperx.
-6. Workflows and activities should run through Temporal. 
+. Workflows and activities should run through Temporal. 
 7. RAM Optimization: Balance RAM for tasks on GPU, Llama, GPU Worker to ensure system stability under the 11GB constraint. 
 8. Append new content to the artifacts instead of overwrite the old one.
 9. Input, output and related workflow and process should named with suffix of orginal video id. like: https://www.youtube.com/watch?v=u1BAG9bGp74, workflow named as video-u1BAG9bGp74，thumbnails named as thumbnails-u1BAG9bGp74. batch workflow suffix is query keyword, for example, query keyword "Genimi", batch workflow named as batch-Genimi.
