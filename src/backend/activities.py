@@ -42,6 +42,12 @@ def download_video(url: str) -> str:
         'restrictfilenames': True, # Force ASCII filenames
         'merge_output_format': 'mp4', # Force MP4 for browser compatibility
     }
+
+    # Add cookies if available (to bypass bot detection)
+    cookie_path = "/workspace/cookies.txt"
+    if os.path.exists(cookie_path):
+        ydl_opts['cookiefile'] = cookie_path
+        activity.logger.info(f"Using cookies from {cookie_path}")
     
     filepath = None
     object_name = None
@@ -316,6 +322,11 @@ async def search_videos(params: tuple) -> list:
         'extract_flat': True, 
         'dump_single_json': True
     }
+    
+    # Add cookies if available
+    cookie_path = "/workspace/cookies.txt"
+    if os.path.exists(cookie_path):
+        ydl_opts['cookiefile'] = cookie_path
     
     candidates = []
     # Search slightly more than limit to account for filtering if we were filtering,
