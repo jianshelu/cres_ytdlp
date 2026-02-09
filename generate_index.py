@@ -137,57 +137,104 @@ def generate_index():
     objects = client.list_objects(BUCKET_CRES, recursive=True)
     
     entries_map = {}
+    query_slug_latest_ts = {}
+    query_slug_to_query_text = {}
     # entry structure: { 'video': key, 'thumb': key, 'meta': key, 'transcript': key }
     
     video_extensions = ('.mp4', '.webm', '.mkv', '.avi', '.mov')
     image_extensions = ('.jpg', '.webp', '.png', '.jpeg')
 
     for obj in objects:
-        key = obj.object_name # e.g. "videos/Title_ID.mp4"
-        
+        key = obj.object_name  # e.g. queries/oracle/videos/Title_ID.mp4 or videos/Title_ID.mp4
         parts = key.split('/')
         if len(parts) < 2:
             continue
-            
+
+        query_slug = None
         folder = parts[0]
-        filename = parts[1]
-        
+        filename = parts[-1]
+        if len(parts) >= 4 and parts[0] == "queries":
+            query_slug = parts[1]
+            folder = parts[2]
+            lm = getattr(obj, "last_modified", None)
+            if lm is not None:
+                prev = query_slug_latest_ts.get(query_slug)
+                if prev is None or lm > prev:
+                    query_slug_latest_ts[query_slug] = lm
+
+        if folder not in {"videos", "thumbnails", "transcripts"}:
+            if len(parts) >= 3 and parts[0] == "queries" and parts[2] == "manifest.json":
+                try:
+                    obj_manifest = client.get_object(BUCKET_CRES, key)
+                    try:
+                        manifest = json.loads(obj_manifest.read().decode("utf-8"))
+                    finally:
+                        obj_manifest.close()
+                        obj_manifest.release_conn()
+                    q = (manifest.get("query") or "").strip()
+                    q_slug = parts[1]
+                    if q and q_slug:
+                        query_slug_to_query_text[q_slug] = q
+                except Exception:
+                    pass
+            continue
+
         # Base name extraction
-        # Special case: metadata is .info.json
         if filename.endswith('.info.json'):
             base = filename[:-10]
         else:
             base = os.path.splitext(filename)[0]
-            
-        if base not in entries_map:
-            entries_map[base] = {'video': None, 'thumb': None, 'meta': None, 'transcript': None}
-            
+
+        entry_id = f"{query_slug or '_legacy'}::{base}"
+        if entry_id not in entries_map:
+            entries_map[entry_id] = {
+                'video': None,
+                'thumb': None,
+                'meta': None,
+                'transcript': None,
+                'query_slug': query_slug,
+            }
+
         if folder == 'videos':
             if filename.endswith('.info.json'):
-                entries_map[base]['meta'] = key
+                entries_map[entry_id]['meta'] = key
             elif filename.lower().endswith(video_extensions):
-                entries_map[base]['video'] = key
-                
+                entries_map[entry_id]['video'] = key
         elif folder == 'thumbnails':
-             if filename.lower().endswith(image_extensions):
-                 entries_map[base]['thumb'] = key
-                 
+            if filename.lower().endswith(image_extensions):
+                entries_map[entry_id]['thumb'] = key
         elif folder == 'transcripts':
-             if filename.endswith('.json'):
-                 entries_map[base]['transcript'] = key
+            if filename.endswith('.json'):
+                entries_map[entry_id]['transcript'] = key
 
     data = []
-    
-    for base_name, assets in entries_map.items():
-        video_key = assets['video']
-        if not video_key:
+    # Prefer query-scoped records over legacy records for the same base video.
+    query_scoped_bases = set()
+    for _, assets in entries_map.items():
+        if not assets.get("query_slug"):
             continue
-            
+        vk = assets.get("video")
+        if not vk:
+            continue
+        query_scoped_bases.add(os.path.splitext(os.path.basename(vk))[0])
+
+    for _, assets in entries_map.items():
+        video_key = assets['video']
+        transcript_key = assets['transcript']
+        # Keep only "live" cards: a playable video with transcript data.
+        if not video_key or not transcript_key:
+            continue
+        if not assets.get("query_slug"):
+            base_legacy = os.path.splitext(os.path.basename(video_key))[0]
+            if base_legacy in query_scoped_bases:
+                continue
+
         thumb_key = assets['thumb']
         meta_key = assets['meta']
-        transcript_key = assets['transcript']
         
         # 1. Title
+        base_filename = os.path.basename(video_key)
+        base_name = os.path.splitext(base_filename)[0]
         real_title = base_name
         if meta_key:
              t = get_metadata_title(client, meta_key)
@@ -202,7 +249,16 @@ def generate_index():
             summary = s
             keywords = k
             search_query = sq
+        if not search_query and assets.get('query_slug'):
+            q_slug = assets.get('query_slug')
+            search_query = query_slug_to_query_text.get(q_slug, q_slug)
             
+        query_updated_at = None
+        if assets.get('query_slug'):
+            q_ts = query_slug_latest_ts.get(assets.get('query_slug'))
+            if q_ts is not None:
+                query_updated_at = q_ts.isoformat()
+
         # Encode keys for URLs
         enc_video = urllib.parse.quote(video_key) if video_key else None
         enc_thumb = urllib.parse.quote(thumb_key) if thumb_key else None
@@ -215,7 +271,8 @@ def generate_index():
             "json_path": f"{URL_BASE}/{BUCKET_CRES}/{enc_trans}" if enc_trans else None,
             "keywords": keywords,
             "summary": summary,
-            "search_query": search_query
+            "search_query": search_query,
+            "query_updated_at": query_updated_at,
         }
         data.append(entry)
 

@@ -8,6 +8,7 @@ running Meta-Llama-3.1-8B-Instruct via OpenAI-compatible API.
 import httpx
 import json
 import logging
+import re
 from typing import Dict, List, Optional
 from pydantic import BaseModel
 
@@ -34,7 +35,7 @@ class LlamaCppClient:
             base_url: Base URL of llama-server (default: http://localhost:8080)
         """
         self.base_url = base_url.rstrip('/')
-        self.timeout = 60.0  # 60s timeout for LLM requests
+        self.timeout = 5.0  # keep requests short so API can degrade gracefully
         
     def _build_extraction_prompt(self, query: str, text: str, k: int = 50) -> str:
         """
@@ -48,6 +49,13 @@ class LlamaCppClient:
         Returns:
             Formatted prompt string
         """
+        query_is_cjk = bool(re.search(r"[\u4e00-\u9fff]", query or ""))
+        language_rule = (
+            "- Output keyword terms in Chinese only. Do not output English keywords.\n"
+            if query_is_cjk
+            else "- Output keyword terms in the same language as the query.\n"
+        )
+
         return f"""You are an information extraction system.
 
 Task: Extract candidate keywords/phrases that are highly relevant to the search query.
@@ -55,7 +63,9 @@ Task: Extract candidate keywords/phrases that are highly relevant to the search 
 Rules:
 - Output MUST be valid JSON only. No markdown, no extra text.
 - Provide exactly {k} candidate keywords/phrases.
-- Each keyword is 1-5 words, lowercase, no punctuation.
+- Each keyword is 1-5 words/terms, concise, no punctuation.
+- Preserve original language script for non-Latin text.
+- {language_rule.strip()}
 - Prefer specific entities/concepts; avoid generic words (video, today, people, thing).
 - Score is semantic relevance to the query on [0,1]. Higher is more relevant.
 - Do NOT include counts.
@@ -82,7 +92,7 @@ Return JSON:
         text: str,
         k: int = 50,
         temperature: float = 0.1,
-        max_retries: int = 1
+        max_retries: int = 0
     ) -> Optional[LLMKeywordResponse]:
         """
         Extract keywords from text using LLM.

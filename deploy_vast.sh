@@ -109,13 +109,14 @@ $SSH_CMD $SSH_OPTS $USER@$HOST << EOF
         chmod +x /usr/local/bin/mc
     fi
 
-    # Killing existing services if any
-    echo "Cleaning up existing processes..."
-    pkill -9 -f "uvicorn|temporal|minio|node|next|python3 -m src.backend.worker|llama-server" || true
-    # Try to free ports if fuser is available
-    if command -v fuser &> /dev/null; then
-        fuser -k 3000/tcp 8000/tcp 8233/tcp 9000/tcp 9001/tcp || true
-    fi
+    # Killing only project-managed services (avoid touching unrelated host services)
+    echo "Cleaning up existing project processes..."
+    pkill -9 -f "/workspace/entrypoint.sh bash -c cd /workspace/web && npm start" || true
+    pkill -9 -f "uvicorn src.api.main:app --host 0.0.0.0 --port 8000" || true
+    pkill -9 -f "python3 -m src.backend.worker" || true
+    pkill -9 -f "temporal server start-dev --ip 0.0.0.0" || true
+    pkill -9 -f "minio server ./data/minio --address :9000 --console-address :9001" || true
+    pkill -9 -f "llama-server --model" || true
     sleep 2
 
     echo "Starting services via entrypoint..."

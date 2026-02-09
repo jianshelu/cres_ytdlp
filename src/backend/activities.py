@@ -1,12 +1,19 @@
-from temporalio import activity
+﻿from temporalio import activity
 import asyncio
 import yt_dlp
 import os
 import json
 import requests
+import re
 from dataclasses import dataclass
 from minio import Minio
+from io import BytesIO
 from datetime import timedelta
+from yt_dlp.utils import DownloadError
+try:
+    from pypinyin import lazy_pinyin
+except Exception:  # pragma: no cover - optional fallback
+    lazy_pinyin = None
 
 @dataclass
 class VideoInfo:
@@ -23,89 +30,341 @@ def get_minio_client():
         secure=False
     )
 
+
+def _query_slug(query: str) -> str:
+    raw = (query or "").strip()
+    if not raw:
+        return "batch"
+
+    candidate = raw
+    if lazy_pinyin is not None:
+        try:
+            pinyin = "".join(lazy_pinyin(raw))
+            if pinyin.strip():
+                candidate = pinyin
+        except Exception:
+            pass
+
+    candidate = candidate.lower()
+    candidate = re.sub(r"\s+", "-", candidate)
+    candidate = re.sub(r"[^a-z0-9\-_]", "_", candidate)
+    candidate = re.sub(r"_+", "_", candidate).strip("_-")
+    return candidate or "batch"
+
+
+def _extract_query_slug_from_object_key(object_key: str) -> str | None:
+    m = re.match(r"^queries/([^/]+)/", (object_key or ""))
+    return m.group(1) if m else None
+
+
+def _query_prefix(query: str) -> str:
+    return f"queries/{_query_slug(query)}"
+
+
+def _key_for_query(query: str, category: str, filename: str) -> str:
+    return f"{_query_prefix(query)}/{category}/{filename}"
+
+
+def _legacy_transcript_key_from_video_key(video_key: str) -> str:
+    base_filename = os.path.basename(video_key or "")
+    base_name_no_ext = os.path.splitext(base_filename)[0]
+    return f"transcripts/{base_name_no_ext}.json"
+
+
+def _transcript_key_from_video_key(video_key: str) -> str:
+    slug = _extract_query_slug_from_object_key(video_key or "")
+    base_filename = os.path.basename(video_key or "")
+    base_name_no_ext = os.path.splitext(base_filename)[0]
+    if slug:
+        return f"queries/{slug}/transcripts/{base_name_no_ext}.json"
+    return _legacy_transcript_key_from_video_key(video_key)
+
+
+def _combined_output_key(query: str) -> str:
+    return f"{_query_prefix(query)}/combined/combined-output.json"
+
+
+def _manifest_key(query: str) -> str:
+    return f"{_query_prefix(query)}/manifest.json"
+
+
+def _upsert_query_manifest(client: Minio, bucket_name: str, query: str, update: dict) -> None:
+    """Upsert manifest at queries/<slug>/manifest.json."""
+    key = _manifest_key(query)
+    payload = {
+        "query": query,
+        "slug": _query_slug(query),
+        "videos": [],
+        "combined": {},
+    }
+    try:
+        obj = client.get_object(bucket_name, key)
+        try:
+            existing = json.loads(obj.read().decode("utf-8"))
+            if isinstance(existing, dict):
+                payload.update(existing)
+        finally:
+            obj.close()
+            obj.release_conn()
+    except Exception:
+        pass
+
+    # Merge update shallowly + merge videos by object_key.
+    if isinstance(update, dict):
+        if "videos" in update and isinstance(update["videos"], list):
+            existing_videos = payload.get("videos", [])
+            if not isinstance(existing_videos, list):
+                existing_videos = []
+            by_key = {}
+            for item in existing_videos:
+                if isinstance(item, dict):
+                    by_key[item.get("object_key")] = item
+            for item in update["videos"]:
+                if not isinstance(item, dict):
+                    continue
+                k = item.get("object_key")
+                if not k:
+                    continue
+                merged = dict(by_key.get(k, {}))
+                merged.update(item)
+                by_key[k] = merged
+            payload["videos"] = list(by_key.values())
+        if "combined" in update and isinstance(update["combined"], dict):
+            combined = payload.get("combined", {})
+            if not isinstance(combined, dict):
+                combined = {}
+            combined.update(update["combined"])
+            payload["combined"] = combined
+        for k, v in update.items():
+            if k in {"videos", "combined"}:
+                continue
+            payload[k] = v
+
+    raw = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+    client.put_object(
+        bucket_name,
+        key,
+        BytesIO(raw),
+        length=len(raw),
+        content_type="application/json",
+    )
+
+
+def _is_chinese_text(text: str) -> bool:
+    sample = (text or "")[:800]
+    if not sample:
+        return False
+    cjk = sum(1 for c in sample if "\u4e00" <= c <= "\u9fff")
+    return cjk / max(len(sample), 1) > 0.25
+
+
+def _split_sentences_simple(text: str) -> list[str]:
+    parts = re.split(r"[.!?ã€‚ï¼ï¼Ÿ]+\s*", text or "")
+    return [p.strip() for p in parts if p and p.strip()]
+
+
+def _fallback_keywords_from_text(text: str, is_chinese: bool, k: int = 5) -> list[str]:
+    if not text:
+        return []
+
+    if is_chinese:
+        tokens = re.findall(r"[\u4e00-\u9fff]{2,6}", text)
+        stop = {"æˆ‘ä»¬", "ä½ ä»¬", "ä»–ä»¬", "è¿™ä¸ª", "é‚£ä¸ª", "ä»¥åŠ", "å› ä¸º", "æ‰€ä»¥", "å¯ä»¥", "ä¸€ä¸ª", "æ²¡æœ‰"}
+    else:
+        tokens = re.findall(r"[A-Za-z][A-Za-z0-9'-]{2,}", text.lower())
+        stop = {
+            "the", "and", "for", "that", "this", "with", "you", "your", "are", "was",
+            "have", "has", "had", "from", "they", "their", "about", "there", "what",
+            "when", "where", "which", "will", "would", "could", "should", "into",
+            "just", "like", "more", "than", "then", "over", "very", "some", "such",
+            "been", "being", "also", "but", "not", "its", "our", "out", "all", "can",
+            "get", "got", "one", "two", "three", "how", "why", "who", "whom", "whose",
+            "video", "today", "people", "thing", "things", "make", "made", "using",
+        }
+
+    counts = {}
+    for t in tokens:
+        if t in stop:
+            continue
+        counts[t] = counts.get(t, 0) + 1
+
+    ranked = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+    return [term for term, _ in ranked[:k]]
+
+
+def _fallback_summary_data(text: str, is_chinese: bool) -> dict:
+    sentences = _split_sentences_simple(text)
+    if sentences:
+        summary = " ".join(sentences[:2]).strip()
+    else:
+        summary = (text or "").strip()
+
+    if not summary:
+        summary = "Summary unavailable."
+    summary = summary[:480]
+
+    keywords = _fallback_keywords_from_text(text, is_chinese, k=5)
+    if len(keywords) < 3:
+        if is_chinese:
+            keywords = (keywords + ["å†…å®¹", "ä¸»é¢˜", "æ¦‚è¿°"])[:3]
+        else:
+            keywords = (keywords + ["general", "overview", "topic"])[:3]
+
+    return {"summary": summary, "keywords": keywords[:5]}
+
+
+def _sanitize_summary_data(raw: dict, text: str, is_chinese: bool) -> dict:
+    summary = str(raw.get("summary", "")).strip() if isinstance(raw, dict) else ""
+    keywords_raw = raw.get("keywords", []) if isinstance(raw, dict) else []
+    keywords = [str(k).strip() for k in keywords_raw if str(k).strip()] if isinstance(keywords_raw, list) else []
+    keywords = keywords[:5]
+
+    if not summary or len(summary) < 10:
+        return _fallback_summary_data(text, is_chinese)
+
+    summary_cjk_ratio = sum(1 for c in summary if "\u4e00" <= c <= "\u9fff") / max(len(summary), 1)
+    if not is_chinese and summary_cjk_ratio > 0.20:
+        return _fallback_summary_data(text, is_chinese)
+
+    if len(keywords) < 3:
+        keywords = _fallback_summary_data(text, is_chinese)["keywords"]
+
+    return {"summary": summary[:1000], "keywords": keywords}
+
 # Re-using logic from original main.py but adapted for Activities
 
 @activity.defn
-def download_video(url: str) -> str:
-    activity.logger.info(f"Downloading video from {url}")
+def download_video(params) -> str:
+    # Backward-compatible input: url string OR (url, search_query)
+    if isinstance(params, (tuple, list)):
+        url, search_query = params
+    else:
+        url = params
+        search_query = None
+    if not isinstance(url, str):
+        raise TypeError(f"download_video expected URL string, got {type(url).__name__}: {url!r}")
+    activity.logger.info(f"Downloading video from {url} (query: {search_query})")
     download_dir = "web/public/downloads"
     if not os.path.exists(download_dir):
         os.makedirs(download_dir, exist_ok=True)
 
-    ydl_opts = {
-        # Prioritize Chinese audio (language matches 'zh' start), then fallback to best audio
-        'format': 'bestvideo[height<=480]+bestaudio/bestvideo[height<=720]+bestaudio/bestvideo[height<=1080]+bestaudio/best[height<=480]/best[height<=720]/best[height<=1080]/best',
+    base_opts = {
         'outtmpl': f'{download_dir}/%(title)s_%(id)s.%(ext)s',
         'writethumbnail': True,
-        'writeinfojson': True, # Save metadata for title extraction
+        'writeinfojson': True,  # Save metadata for title extraction
         'noplaylist': True,
-        'restrictfilenames': True, # Force ASCII filenames
-        'merge_output_format': 'mp4', # Force MP4 for browser compatibility
-        'extractor_args': {'youtube': {'player_client': ['ios', 'tv', 'web']}},
-        'quiet': False, # Enable more logging to debug format issues
-        'geo_bypass_country': 'US', # Use USA region for YouTube content
+        'restrictfilenames': True,  # Force ASCII filenames
+        'merge_output_format': 'mp4',  # Force MP4 for browser compatibility
+        'quiet': False,  # Enable more logging to debug format issues
+        'geo_bypass_country': 'US',  # Use USA region for YouTube content
     }
+
+    # Ordered fallback profiles to avoid "Requested format is not available" failures.
+    ydl_profiles = [
+        {
+            # Preferred constrained profile
+            'format': 'bestvideo[height<=480]+bestaudio/bestvideo[height<=720]+bestaudio/bestvideo[height<=1080]+bestaudio/best[height<=480]/best[height<=720]/best[height<=1080]/best',
+            'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        },
+        {
+            # Relaxed adaptive profile
+            'format': 'bestvideo*+bestaudio/best',
+            'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        },
+        {
+            # Last-resort progressive profile
+            'format': 'best',
+            'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        },
+    ]
 
 
     # Add cookies if available (to bypass bot detection)
     cookie_path = "/workspace/cookies.txt"
-    if os.path.exists(cookie_path):
-        ydl_opts['cookiefile'] = cookie_path
+    cookie_enabled = os.path.exists(cookie_path)
+    if cookie_enabled:
         activity.logger.info(f"Using cookies from {cookie_path}")
     
     filepath = None
     object_name = None
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Pre-check info to avoid downloading active live streams
-            info = ydl.extract_info(url, download=False)
-            live_status = info.get('live_status')
-            is_live = info.get('is_live')
-            
-            # If it's currently live or upcoming, we skip it
-            if is_live and live_status != 'was_live':
-                activity.logger.warning(f"Video is an active/upcoming live stream (status: {live_status}), skipping: {url}")
-                raise Exception(f"Live streams (active/upcoming) are not supported. Status: {live_status}")
-                
-            info_dict = ydl.extract_info(url, download=True)
-            # yt-dlp returns the actual filepath after download
-            filepath = ydl.prepare_filename(info_dict)
-            
-            # For MinIO, we want just the filename (e.g., "My Video_abc123.mp4")
-            object_name = os.path.basename(filepath)
-            
-            # Upload video to MinIO
-            client = get_minio_client()
-            bucket_name = "cres"
-            if not client.bucket_exists(bucket_name):
-                client.make_bucket(bucket_name)
-            
-            # Upload Main Video
-            # object_name is just the filename here initially
-            video_key = f"videos/{object_name}" 
-            client.fput_object(bucket_name, video_key, filepath)
-            activity.logger.info(f"Uploaded {video_key} to MinIO bucket '{bucket_name}'")
+        info_dict = None
+        last_error = None
 
-            # Upload Sidecar Files (Thumbnail, InfoJson)
-            base_name = os.path.splitext(filepath)[0] # e.g. web/public/downloads/Title_ID
-            # List all files in download dir
-            for f in os.listdir(download_dir):
-                full_f = os.path.join(download_dir, f)
-                
-                # Check if it starts with the base filename
-                if f.startswith(os.path.basename(base_name)) and f != object_name:
-                    # Upload it
-                    # Determine prefix based on extension
-                    if f.endswith(('.jpg', '.webp', '.png')):
-                        sidecar_key = f"thumbnails/{f}"
+        for idx, profile in enumerate(ydl_profiles, start=1):
+            ydl_opts = dict(base_opts)
+            ydl_opts.update(profile)
+            if cookie_enabled:
+                ydl_opts['cookiefile'] = cookie_path
+
+            activity.logger.info(f"yt-dlp attempt {idx} with format='{ydl_opts.get('format')}'")
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    # Pre-check info to avoid downloading active live streams
+                    info = ydl.extract_info(url, download=False)
+                    live_status = info.get('live_status')
+                    is_live = info.get('is_live')
+
+                    # If it's currently live or upcoming, we skip it
+                    if is_live and live_status != 'was_live':
+                        activity.logger.warning(f"Video is an active/upcoming live stream (status: {live_status}), skipping: {url}")
+                        raise Exception(f"Live streams (active/upcoming) are not supported. Status: {live_status}")
+
+                    info_dict = ydl.extract_info(url, download=True)
+                    filepath = ydl.prepare_filename(info_dict)
+                    break
+            except DownloadError as e:
+                last_error = e
+                activity.logger.warning(f"yt-dlp attempt {idx} failed: {e}")
+                continue
+
+        if not info_dict or not filepath:
+            raise last_error or Exception("yt-dlp failed with all format fallback profiles")
+
+        # For MinIO, we want just the filename (e.g., "My Video_abc123.mp4")
+        object_name = os.path.basename(filepath)
+
+        # Upload video to MinIO
+        client = get_minio_client()
+        bucket_name = "cres"
+        if not client.bucket_exists(bucket_name):
+            client.make_bucket(bucket_name)
+
+        # Upload Main Video
+        # object_name is just the filename here initially
+        if search_query:
+            video_key = _key_for_query(search_query, "videos", object_name)
+        else:
+            video_key = f"videos/{object_name}"
+        client.fput_object(bucket_name, video_key, filepath)
+        activity.logger.info(f"Uploaded {video_key} to MinIO bucket '{bucket_name}'")
+
+        # Upload Sidecar Files (Thumbnail, InfoJson)
+        base_name = os.path.splitext(filepath)[0]  # e.g. web/public/downloads/Title_ID
+        # List all files in download dir
+        for f in os.listdir(download_dir):
+            full_f = os.path.join(download_dir, f)
+
+            # Check if it starts with the base filename
+            if f.startswith(os.path.basename(base_name)) and f != object_name:
+                # Upload it
+                # Determine prefix based on extension
+                if f.endswith(('.jpg', '.webp', '.png')):
+                    if search_query:
+                        sidecar_key = _key_for_query(search_query, "thumbnails", f)
                     else:
-                        # Assume metadata or other goes to videos
+                        sidecar_key = f"thumbnails/{f}"
+                else:
+                    # Assume metadata or other goes to videos
+                    if search_query:
+                        sidecar_key = _key_for_query(search_query, "videos", f)
+                    else:
                         sidecar_key = f"videos/{f}"
 
-                    client.fput_object(bucket_name, sidecar_key, full_f)
-                    activity.logger.info(f"Uploaded sidecar {sidecar_key} to MinIO")
-                    # Delete sidecar
-                    os.remove(full_f)
+                client.fput_object(bucket_name, sidecar_key, full_f)
+                activity.logger.info(f"Uploaded sidecar {sidecar_key} to MinIO")
+                # Delete sidecar
+                os.remove(full_f)
 
     except Exception as e:
         activity.logger.error(f"Failed to download or upload video: {e}")
@@ -118,7 +377,21 @@ def download_video(url: str) -> str:
     if filepath and os.path.exists(filepath):
         os.remove(filepath)
         activity.logger.info(f"Deleted local file: {filepath}")
-    
+
+    if search_query:
+        _upsert_query_manifest(
+            client,
+            bucket_name,
+            search_query,
+            {
+                "videos": [{
+                    "object_key": video_key,
+                    "url": url,
+                    "status": "downloaded",
+                }]
+            }
+        )
+
     return video_key
 
 @activity.defn
@@ -184,8 +457,8 @@ def transcribe_video(object_name: str) -> str:
     with open(json_path, "w", encoding='utf-8') as f:
         json.dump(result, f, indent=4, ensure_ascii=False)
     
-    # Upload transcript to MinIO
-    transcript_key = f"transcripts/{base_name_no_ext}.json"
+    # Upload transcript to MinIO (query-scoped path if available)
+    transcript_key = _transcript_key_from_video_key(object_name)
         
     client.fput_object(bucket_name, transcript_key, json_path)
     
@@ -198,54 +471,65 @@ def transcribe_video(object_name: str) -> str:
     if os.path.exists(json_path):
         os.remove(json_path)
         activity.logger.info(f"Deleted local transcript: {json_path}")
+
+    slug = _extract_query_slug_from_object_key(object_name)
+    if slug:
+        _upsert_query_manifest(
+            client,
+            bucket_name,
+            slug,
+            {
+                "videos": [{
+                    "object_key": object_name,
+                    "transcript_key": transcript_key,
+                    "status": "transcribed",
+                }]
+            }
+        )
         
     return result['text']
 
 @activity.defn
 async def summarize_content(params: tuple) -> dict:
-    # Support 2 or 3 element tuple for backwards compatibility
     if len(params) == 3:
         text, object_name, search_query = params
     else:
         text, object_name = params
         search_query = None
-        
     activity.logger.info(f"Summarizing content for {object_name} (search_query: {search_query})")
-    
-    # Truncate text if too long for prompt context
-    max_chars = 12000 
+
+    # Truncate text for prompt context
+    max_chars = 12000
     input_text = text[:max_chars]
-    
-    # Detect language and enforce it in prompt
-    # Simple heuristic: if >30% Chinese characters, it's Chinese
-    chinese_chars = sum(1 for c in input_text[:500] if '\u4e00' <= c <= '\u9fff')
-    is_chinese = chinese_chars > 150  # >30% of 500 chars
-    
-    language_instruction = "中文" if is_chinese else "the same language as the input"
-    
-    # Stronger prompt with explicit language enforcement
+    is_chinese = _is_chinese_text(input_text)
+    language_instruction = "Chinese" if is_chinese else "English"
+
     prompt = f"""
     <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-    You are a helpful assistant. Analyzing the transcript below, provide a brief summary and keywords.
-    
-    CRITICAL: You MUST respond in {language_instruction}. If the transcript is in Chinese, the summary and keywords MUST be in Chinese.
-    
-    JSON Format (strictly 3-5 keywords):
+    You are a helpful assistant. Analyze the transcript and return concise JSON.
+
+    CRITICAL:
+    - Respond in {language_instruction} only. Do not switch language.
+    - Return valid JSON only.
+    - Provide 3-5 keyword terms.
+    - Keywords must be terms from the transcript.
+
+    JSON Format:
     {{
         "summary": "...",
         "keywords": ["...", "...", "..."]
     }}
     <|eot_id|><|start_header_id|>user<|end_header_id|>
-    TRANSCRIPT ({language_instruction}):
+    TRANSCRIPT:
     {input_text}
     <|eot_id|><|start_header_id|>assistant<|end_header_id|>
     """
-    
+
     payload = {
         "prompt": prompt,
         "n_predict": 512,
-        "temperature": 0.3,  # Lower temperature for more consistent language matching
-        "repeat_penalty": 1.1, # Prevent loops
+        "temperature": 0.2,
+        "repeat_penalty": 1.1,
         "json_schema": {
             "type": "object",
             "properties": {
@@ -254,26 +538,26 @@ async def summarize_content(params: tuple) -> dict:
             }
         }
     }
-    
+
     summary_data = {"summary": "Failed", "keywords": []}
-    
-    # Call local llama.cpp server
+
     try:
-        activity.logger.info(f"LLM Prompt: {prompt[:500]}...") # Log start of prompt
-        response = requests.post("http://localhost:8081/completion", json=payload, timeout=600)
+        activity.logger.info(f"LLM Prompt: {prompt[:500]}...")
+        response = requests.post("http://localhost:8081/completion", json=payload, timeout=300)
         response.raise_for_status()
         result = response.json()
         activity.logger.info(f"LLM Raw Result: {json.dumps(result, ensure_ascii=False)}")
-        
-        content_str = result.get('content', '')
+
+        content_str = result.get("content", "")
         try:
-            summary_data = json.loads(content_str)
+            parsed = json.loads(content_str)
         except json.JSONDecodeError:
-            summary_data = {"summary": content_str, "keywords": []}
-            
+            parsed = {"summary": content_str, "keywords": []}
+        summary_data = _sanitize_summary_data(parsed, input_text, is_chinese)
+
     except Exception as e:
         activity.logger.error(f"Summarization failed: {e}")
-        summary_data = {"summary": f"Summarization failed: {e}", "keywords": []}
+        summary_data = _fallback_summary_data(input_text, is_chinese)
 
     # Add search_query to summary_data for storage
     if search_query:
@@ -283,54 +567,73 @@ async def summarize_content(params: tuple) -> dict:
     client = get_minio_client()
     bucket_name = "cres"
     download_dir = "web/public/downloads"
-    
-    # object_name comes from transcribe_video result? No, params usually "videos/abc.mp4"
-    # Actually summarize takes (text, object_name) from previous steps?
-    # Usually workflow passes the key.
-    
+
     base_filename = os.path.basename(object_name)
     base_name_no_ext = os.path.splitext(base_filename)[0]
-    json_filename = f"{base_name_no_ext}.json"
-    transcript_key = f"transcripts/{json_filename}"
-    
-    local_json_path = os.path.join(download_dir, json_filename)
-    
-    # Check if we need to fetch it (if worker is on different node/pod)
+    transcript_key = _transcript_key_from_video_key(object_name)
+    local_json_path = os.path.join(download_dir, transcript_key)
+    os.makedirs(os.path.dirname(local_json_path), exist_ok=True)
+
     if not os.path.exists(local_json_path):
         try:
-             client.fget_object(bucket_name, transcript_key, local_json_path)
+            client.fget_object(bucket_name, transcript_key, local_json_path)
         except Exception as e:
-             activity.logger.error(f"Could not fetch existing transcript to update: {e}")
-             return summary_data # Return partial
+            # Backward-compat: try legacy transcripts/<filename>.json when query-scoped key isn't present.
+            legacy_key = _legacy_transcript_key_from_video_key(object_name)
+            try:
+                client.fget_object(bucket_name, legacy_key, local_json_path)
+                transcript_key = legacy_key
+            except Exception:
+                activity.logger.error(f"Could not fetch existing transcript to update: {e}")
+                return summary_data
 
-    # Update file
     try:
         with open(local_json_path, 'r', encoding='utf-8') as f:
             existing_data = json.load(f)
-        
+
         existing_data.update(summary_data)
-        
+
         with open(local_json_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, indent=4, ensure_ascii=False)
-            
-        # Re-upload
+
         client.fput_object(bucket_name, transcript_key, local_json_path)
-        
-        # Cleanup
+
         if os.path.exists(local_json_path):
             os.remove(local_json_path)
             activity.logger.info(f"Deleted local transcript: {local_json_path}")
-            
+
     except Exception as e:
         activity.logger.error(f"Failed to update JSON artifact: {e}")
 
-    return summary_data
+    if search_query:
+        _upsert_query_manifest(
+            client,
+            bucket_name,
+            search_query,
+            {
+                "videos": [{
+                    "object_key": object_name,
+                    "transcript_key": transcript_key,
+                    "status": "summarized",
+                    "search_query": search_query,
+                    "summary_updated": True,
+                }]
+            }
+        )
 
+    return summary_data
 
 @activity.defn
 async def search_videos(params: tuple) -> list:
-    query, limit = params
-    activity.logger.info(f"Searching for videos with query: {query}, limit: {limit}")
+    if isinstance(params, (tuple, list)) and len(params) >= 3:
+        query, limit, max_duration_minutes = params[0], params[1], params[2]
+    else:
+        query, limit = params
+        max_duration_minutes = 10
+    max_duration_seconds = max(60, int(max_duration_minutes) * 60)
+    activity.logger.info(
+        f"Searching for videos with query: {query}, limit: {limit}, max_duration_minutes: {max_duration_minutes}"
+    )
     
     ydl_opts = {
         'quiet': True, 
@@ -346,11 +649,10 @@ async def search_videos(params: tuple) -> list:
         ydl_opts['cookiefile'] = cookie_path
     
     candidates = []
-    # Search slightly more than limit to account for filtering if we were filtering,
-    # but for now we just return raw URLs and let workflow decide or loop filters.
-    # Actually, let's filter here to match original logic if possible, or just return top N.
-    # For simplicity/robustness, we fetch 2*limit candidates.
-    search_query = f"ytsearch{limit*2}:{query}"
+    # Over-fetch candidates because duration/live/url-type filters can drop many entries.
+    # Cap at 50 to keep search fast enough.
+    candidate_count = min(max(limit * 10, limit + 5), 50)
+    search_query = f"ytsearch{candidate_count}:{query}"
     
     def _search():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -365,12 +667,12 @@ async def search_videos(params: tuple) -> list:
         loop = asyncio.get_running_loop()
         candidates = await loop.run_in_executor(executor, _search)
 
-    # Filter (Basic duration filter matching batch_process.py)
-    MIN_DURATION = 180
-    MAX_DURATION = 1200 # Updated to 20 mins
+    # Filter by maximum duration only (configured from request).
+    MAX_DURATION = max_duration_seconds
     # LICENSE_FILTER = "creative commons" # Loosened as per request
     
     valid_urls = []
+    seen_urls = set()
     for cand in candidates:
         if len(valid_urls) >= limit:
             break
@@ -390,21 +692,43 @@ async def search_videos(params: tuple) -> list:
         # Let's try to do the filtering here.
         
         try:
-             # Just basic check from flat info if available?
-             # Often flat info has duration.
-             dur = cand.get('duration')
-             if dur and not (MIN_DURATION <= dur <= MAX_DURATION):
-                 continue
-                 
-             if cand.get('is_live'):
-                 continue
-                 
-             url = cand.get('url')
-             valid_urls.append(url)
-             
+            # Just basic check from flat info if available?
+            # Often flat info has duration.
+            dur = cand.get('duration')
+            if dur and dur > MAX_DURATION:
+                continue
+
+            if cand.get('is_live'):
+                continue
+
+            # extract_flat may return id/url/webpage_url with varying formats.
+            # Keep only concrete YouTube watch URLs to avoid channel/playlist downloads.
+            video_id = (cand.get("id") or "").strip()
+            webpage_url = (cand.get("webpage_url") or "").strip()
+            raw_url = (cand.get("url") or "").strip()
+
+            url = ""
+            if webpage_url and "watch?v=" in webpage_url:
+                url = webpage_url
+            elif raw_url and "watch?v=" in raw_url:
+                url = raw_url
+            elif video_id and re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+                url = f"https://www.youtube.com/watch?v={video_id}"
+            elif raw_url and re.fullmatch(r"[A-Za-z0-9_-]{11}", raw_url):
+                url = f"https://www.youtube.com/watch?v={raw_url}"
+
+            if not url:
+                continue
+
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            valid_urls.append(url)
+
         except Exception:
             continue
             
+    activity.logger.info(f"Returning {len(valid_urls)} valid URLs for query='{query}' (requested={limit})")
     return valid_urls
 
 @activity.defn
@@ -419,3 +743,275 @@ def refresh_index() -> str:
     except Exception as e:
         activity.logger.error(f"Failed to refresh index: {e}")
         return str(e)
+
+
+@activity.defn
+async def build_batch_combined_output(params: tuple) -> dict:
+    """
+    Build combined batch artifacts after child workflows complete and save to MinIO.
+    Outputs include:
+    - combined transcription
+    - combined keyword tags
+    - combined sentence
+    """
+    query, child_results = params
+    activity.logger.info(f"Building batch combined output for query='{query}', child_count={len(child_results)}")
+
+    from src.backend.services.llm_llamacpp import LlamaCppClient
+    from src.backend.services.keyword_service import KeywordExtractionService, Keyword
+    from src.backend.services.sentence_service import SentenceService
+
+    client = get_minio_client()
+    bucket_name = "cres"
+
+    transcript_items = []
+    transcripts = []
+
+    # Gather transcript texts from MinIO based on child workflow outputs.
+    for item in child_results:
+        object_name = item.get("filepath") if isinstance(item, dict) else None  # e.g. videos/abc.mp4
+        if not object_name:
+            continue
+
+        base_filename = os.path.basename(object_name)
+        base_name_no_ext = os.path.splitext(base_filename)[0]
+        transcript_key = _transcript_key_from_video_key(object_name)
+
+        try:
+            obj = client.get_object(bucket_name, transcript_key)
+            try:
+                payload = obj.read()
+            finally:
+                obj.close()
+                obj.release_conn()
+            data = json.loads(payload.decode("utf-8"))
+            text = (data.get("text") or "").strip()
+            if not text:
+                continue
+            transcripts.append(text)
+            transcript_items.append({
+                "video_object": object_name,
+                "transcript_key": transcript_key,
+                "text_len": len(text),
+            })
+        except Exception as e:
+            legacy_key = _legacy_transcript_key_from_video_key(object_name)
+            try:
+                obj = client.get_object(bucket_name, legacy_key)
+                try:
+                    payload = obj.read()
+                finally:
+                    obj.close()
+                    obj.release_conn()
+                data = json.loads(payload.decode("utf-8"))
+                text = (data.get("text") or "").strip()
+                if not text:
+                    continue
+                transcripts.append(text)
+                transcript_items.append({
+                    "video_object": object_name,
+                    "transcript_key": legacy_key,
+                    "text_len": len(text),
+                })
+            except Exception:
+                activity.logger.warning(f"Failed to load transcript '{transcript_key}': {e}")
+
+    slug = _query_slug(query)
+    object_key = _combined_output_key(query)
+    combined_transcription_key = f"{_query_prefix(query)}/combined/combined-transcription.txt"
+    combined_keywords_key = f"{_query_prefix(query)}/combined/combined-keywords.json"
+    combined_sentence_key = f"{_query_prefix(query)}/combined/combined-sentence.txt"
+
+    if not transcripts:
+        payload = {
+            "query": query,
+            "count": 0,
+            "replaceCount": 0,
+            "transcripts": [],
+            "combined_transcription": "",
+            "combined_keywords": [],
+            "combined_sentence": "",
+            "key_sentences": [],
+            "status": "no-transcripts",
+        }
+        raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        client.put_object(
+            bucket_name,
+            object_key,
+            BytesIO(raw),
+            length=len(raw),
+            content_type="application/json",
+        )
+        activity.logger.info(f"Saved empty batch combined output to MinIO: {object_key}")
+        _upsert_query_manifest(
+            client,
+            bucket_name,
+            query,
+            {
+                "combined": {
+                    "status": "no-transcripts",
+                    "combined_output_key": object_key,
+                }
+            }
+        )
+        return {
+            "status": "no-transcripts",
+            "query": query,
+            "count": 0,
+            "object_key": object_key,
+            "replaceCount": 0,
+            "combined_keyword_count": 0,
+            "combined_sentence_len": 0,
+        }
+
+    combined_text = "\n\n---\n\n".join(transcripts)
+
+    # Build combined keywords/sentence using the same services used by /api/transcriptions.
+    llm_client = LlamaCppClient(base_url=os.getenv("LLAMA_URL", "http://localhost:8081"))
+    keyword_service = KeywordExtractionService(llm_client)
+    sentence_service = SentenceService()
+
+    try:
+        combined_keywords = await asyncio.wait_for(
+            keyword_service.extract_combined_keywords(query=query, transcripts=transcripts, k=50),
+            timeout=10.0,
+        )
+    except asyncio.TimeoutError:
+        combined_keywords = []
+
+    async def _extract_single(transcript: str):
+        try:
+            return await asyncio.wait_for(
+                keyword_service.extract_single_keywords(query=query, transcript=transcript, k=30),
+                timeout=8.0,
+            )
+        except asyncio.TimeoutError:
+            return []
+
+    per_video_keywords = await asyncio.gather(*(_extract_single(t) for t in transcripts))
+    final_combined, replace_count = await keyword_service.apply_coverage_compensation(
+        combined_keywords=combined_keywords,
+        transcripts=transcripts,
+        per_transcript_keywords=per_video_keywords,
+    )
+    final_combined = keyword_service.filter_keywords_by_query_language(final_combined, query)
+    final_combined = keyword_service.filter_low_quality_keywords(final_combined)
+    if not final_combined:
+        # Rebuild deterministic combined list from per-video keywords when filtered result becomes empty.
+        agg = {}
+        for kws in per_video_keywords:
+            for kw in kws:
+                if keyword_service.is_low_quality_term(kw.term):
+                    continue
+                if kw.term not in agg:
+                    agg[kw.term] = {"score": kw.score, "count": kw.count}
+                else:
+                    agg[kw.term]["score"] = max(agg[kw.term]["score"], kw.score)
+                    agg[kw.term]["count"] += kw.count
+        fallback = sorted(
+            (Keyword(term=t, score=v["score"], count=v["count"]) for t, v in agg.items()),
+            key=lambda k: (-k.score, -k.count, k.term),
+        )
+        fallback = keyword_service.filter_keywords_by_query_language(fallback, query)
+        final_combined = keyword_service.filter_low_quality_keywords(fallback)
+
+    top_keywords = final_combined[:5]
+    key_sentence_items = sentence_service.extract_key_sentence_items_from_transcripts(
+        transcripts=transcripts,
+        keywords=[kw.term for kw in top_keywords],
+        max_sentences=5,
+    )
+    combined_sentence = sentence_service.extract_combined_sentence_from_transcripts(
+        transcripts=transcripts,
+        keywords=[kw.term for kw in top_keywords],
+    )
+
+    structured_key_sentences = []
+    for item in key_sentence_items:
+        src_idx = int(item.get("source_index", -1))
+        src_video_object = ""
+        if 0 <= src_idx < len(transcript_items):
+            src_video_object = transcript_items[src_idx].get("video_object", "")
+        structured_key_sentences.append(
+            {
+                "sentence": item.get("sentence", ""),
+                "keyword": item.get("keyword", ""),
+                "source_index": src_idx,
+                "source_video_object": src_video_object,
+            }
+        )
+
+    payload = {
+        "query": query,
+        "count": len(transcripts),
+        "replaceCount": replace_count,
+        "transcripts": transcript_items,
+        "combined_transcription": combined_text,
+        "combined_keywords": [kw.model_dump() for kw in top_keywords],
+        "combined_sentence": combined_sentence,
+        "key_sentences": structured_key_sentences,
+    }
+
+    # Save to MinIO process path.
+    raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    client.put_object(
+        bucket_name,
+        object_key,
+        BytesIO(raw),
+        length=len(raw),
+        content_type="application/json",
+    )
+
+    trans_raw = combined_text.encode("utf-8")
+    client.put_object(
+        bucket_name,
+        combined_transcription_key,
+        BytesIO(trans_raw),
+        length=len(trans_raw),
+        content_type="text/plain; charset=utf-8",
+    )
+
+    keywords_raw = json.dumps([kw.model_dump() for kw in top_keywords], ensure_ascii=False, indent=2).encode("utf-8")
+    client.put_object(
+        bucket_name,
+        combined_keywords_key,
+        BytesIO(keywords_raw),
+        length=len(keywords_raw),
+        content_type="application/json",
+    )
+
+    sentence_raw = (combined_sentence or "").encode("utf-8")
+    client.put_object(
+        bucket_name,
+        combined_sentence_key,
+        BytesIO(sentence_raw),
+        length=len(sentence_raw),
+        content_type="text/plain; charset=utf-8",
+    )
+
+    _upsert_query_manifest(
+        client,
+        bucket_name,
+        query,
+        {
+            "combined": {
+                "status": "ok",
+                "combined_output_key": object_key,
+                "combined_transcription_key": combined_transcription_key,
+                "combined_keywords_key": combined_keywords_key,
+                "combined_sentence_key": combined_sentence_key,
+                "count": len(transcripts),
+            }
+        }
+    )
+    activity.logger.info(f"Saved batch combined output to MinIO: {object_key}")
+
+    return {
+        "status": "ok",
+        "query": query,
+        "count": len(transcripts),
+        "object_key": object_key,
+        "replaceCount": replace_count,
+        "combined_keyword_count": len(top_keywords),
+        "combined_sentence_len": len(combined_sentence),
+    }

@@ -4,8 +4,21 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 # Import our workflow and activities
-from src.backend.workflows import VideoProcessingWorkflow, BatchProcessingWorkflow, ReprocessVideoWorkflow
-from src.backend.activities import download_video, transcribe_video, summarize_content, search_videos, refresh_index
+from src.backend.workflows import (
+    VideoProcessingWorkflow,
+    BatchProcessingWorkflow,
+    ReprocessVideoWorkflow,
+    QueryDispatcherWorkflow,
+    QueryOrchestratorWorkflow,
+)
+from src.backend.activities import (
+    download_video,
+    transcribe_video,
+    summarize_content,
+    search_videos,
+    refresh_index,
+    build_batch_combined_output,
+)
 
 import torch
 import logging
@@ -32,8 +45,21 @@ async def main():
         worker = Worker(
             client,
             task_queue="video-processing-queue",
-            workflows=[VideoProcessingWorkflow, BatchProcessingWorkflow, ReprocessVideoWorkflow],
-            activities=[download_video, transcribe_video, summarize_content, search_videos, refresh_index],
+            workflows=[
+                VideoProcessingWorkflow,
+                BatchProcessingWorkflow,
+                ReprocessVideoWorkflow,
+                QueryDispatcherWorkflow,
+                QueryOrchestratorWorkflow,
+            ],
+            activities=[
+                download_video,
+                transcribe_video,
+                summarize_content,
+                search_videos,
+                refresh_index,
+                build_batch_combined_output,
+            ],
             activity_executor=executor,
             identity=identity,
         )

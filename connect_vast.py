@@ -57,7 +57,18 @@ def main():
         print(f"  - {t}")
     print("========================================")
 
-    cmd = ["ssh", "-p", port, "-o", "StrictHostKeyChecking=no"]
+    cmd = [
+        "ssh",
+        "-p",
+        port,
+        "-o",
+        "StrictHostKeyChecking=no",
+        "-o",
+        "ExitOnForwardFailure=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-N",
+    ]
     
     if key_path:
         cmd.extend(["-i", key_path])
@@ -67,7 +78,6 @@ def main():
         cmd.extend(["-L", t])
     
     cmd.append(f"{user}@{host}")
-    cmd.append("-N") # Do not execute a remote command, just forward ports
 
     print("\nStarting Tunnel... (Press Ctrl+C to stop)")
     print("Once connected, access your services at:")

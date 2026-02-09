@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+PID_DIR="/workspace/run"
+mkdir -p "$PID_DIR"
 
 echo "Starting services..."
 
@@ -18,6 +20,7 @@ python3 -c "import yt_dlp_ejs" 2>/dev/null || pip3 install yt-dlp-ejs > /dev/nul
 mkdir -p ./data/minio
 echo "Starting MinIO..."
 minio server ./data/minio --address ":9000" --console-address ":9001" > /var/log/minio.log 2>&1 &
+echo $! > "$PID_DIR/cres_minio.pid"
 
 # Wait for MinIO to be ready
 echo "Waiting for MinIO to start..."
@@ -46,6 +49,7 @@ mc anonymous set download cres/cres
 # but for standalone Docker, start-dev is useful.
 echo "Starting Temporal dev server..."
 temporal server start-dev --ip 0.0.0.0 > /var/log/temporal.log 2>&1 &
+echo $! > "$PID_DIR/cres_temporal.pid"
 
 # Wait for Temporal
 echo "Waiting for Temporal..."
@@ -74,6 +78,7 @@ if [ -n "$LLM_MODEL_PATH" ]; then
         
         export LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
         $LLAMA_BIN --model "$MODEL_FILE" --host 0.0.0.0 --port 8081 --n-gpu-layers 99 > /var/log/llama.log 2>&1 &
+        echo $! > "$PID_DIR/cres_llama.pid"
         echo "LLM server starting with model: $MODEL_FILE"
     else
         echo "No .gguf model found at $LLM_MODEL_PATH, skipping LLM server start."
@@ -85,11 +90,13 @@ fi
 # Start FastAPI
 echo "Starting FastAPI..."
 python3 -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 > /var/log/fastapi.log 2>&1 &
+echo $! > "$PID_DIR/cres_fastapi.pid"
 
 # Start Temporal Worker (Background)
 echo "Starting Temporal Worker..."
 # Wait a bit for Temporal Server to be fully ready (though we waited for cluster health above)
 python3 -m src.backend.worker > /var/log/worker.log 2>&1 &
+echo $! > "$PID_DIR/cres_worker.pid"
 
 echo "Services started successfully."
 

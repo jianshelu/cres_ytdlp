@@ -1,0 +1,55 @@
+{
+  "started_at_utc": "2026-02-08T23:58:54+00:00",
+  "seed_query": "中国 人工智能 大模型 科技 新闻",
+  "news_count": 30,
+  "keyword_count": 2,
+  "per_keyword_limit": 1,
+  "max_duration_minutes": 10,
+  "api_base": "http://localhost:8000",
+  "dry_run": false,
+  "news_items": [
+    {
+      "title": "Minds at War: China’s Pursuit of Military Advantage through Cognitive Science and Biotechnology",
+      "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPblhQdWNBR2gzd25LeWk1T0pmSzBXX2VqbFQ2ckcwQVhUQ0w5YXFKcTEwSWdUd2VsZFBrMDdsR1Nta0VQVFJHTHkyZGxhQV9iS3lBVnlnRkU5WWNrSHBXRXk4S2l6cldzdTQyLVJmOGJLMC15VUV6RDNDdUszTnRMSEpfaXg1YVdYR2drQW9UQUZyVmpXbDJ3aVZCb1hkcVA1WG44VU1sWjRSOU41bVJVemNDYTR6VUgwcExtZnlFQWQ3OGlVVmcxUEZiaHo1aXhFeTlKeGk2aWdDa0YwUDROTUktTFc?oc=5",
+      "published": "Thu, 09 Jan 2020 08:00:00 GMT"
+    },
+    {
+      "title": "Artificial Intelligence-Generated Content (AIGC) White Paper [Excerpt]",
+      "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNSGQzVVVBbGoxbVlxbzI3UFV2VllVX2x0dnQ4bld5NGp6al9DblduNFdrRTl1QUZMVzQ3blQ0NUcwY3VnMkZsSVJ4dHg1WGZJTTJPalZGa1F1bXFuMDNaQXY5M3BOZTE2UlhBdV83M09ZWXhGQU16NEZVTUZ3QzBkQTVPYTRjYjZITDhGdDU5ekEzbl9DQ1dzMURJR25JZGRmZlR3YzNIdmY4Zms?oc=5",
+      "published": "Tue, 20 Feb 2024 22:05:28 GMT"
+    }
+  ],
+  "keywords": [
+    "人工智能",
+    "大模型"
+  ],
+  "dispatches": [
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-dispatcher",
+        "request_id": "57df3bb1-9107-49a8-bc3a-e67b73ccf61c",
+        "parallelism": 1,
+        "max_duration_minutes": 10
+      },
+      "query": "人工智能"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-dispatcher",
+        "request_id": "2c911c59-3ae8-4b2c-b586-b3511c50b40a",
+        "parallelism": 1,
+        "max_duration_minutes": 10
+      },
+      "query": "大模型"
+    }
+  ],
+  "accepted_count": 2,
+  "failed_count": 0,
+  "finished_at_utc": "2026-02-08T23:58:55+00:00"
+}

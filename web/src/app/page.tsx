@@ -1,7 +1,7 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
-import VideoCard from './components/VideoCard';
+import SearchForm from './components/SearchForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,30 +19,49 @@ interface VideoData {
   keywords: Keyword[];
   summary: string;
   search_query?: string;
+  query_updated_at?: string | null;
+}
+
+function safelyEncodeURI(uri: string) {
+  return uri.split('/').map((part) => encodeURIComponent(part)).join('/');
 }
 
 export default async function Home() {
-  // Read data at runtime
-  const dataPath = path.join(process.cwd(), 'src', 'data.json');
+  const candidateDataPaths = [
+    path.join(process.cwd(), 'src', 'data.json'),
+    path.join(process.cwd(), 'web', 'src', 'data.json'),
+  ];
+
   let data: VideoData[] = [];
   try {
+    const dataPath = candidateDataPaths.find((p) => fs.existsSync(p));
+    if (!dataPath) {
+      throw new Error(`data.json not found in: ${candidateDataPaths.join(', ')}`);
+    }
     const fileContent = fs.readFileSync(dataPath, 'utf8');
     data = JSON.parse(fileContent);
   } catch (e) {
-    console.error("Failed to load video data:", e);
+    console.error('Failed to load video data:', e);
   }
 
-  // Extract unique search queries with video counts
-  const searchQueryMap = new Map<string, number>();
-  data.forEach(video => {
-    const query = video.search_query || 'Uncategorized';
-    searchQueryMap.set(query, (searchQueryMap.get(query) || 0) + 1);
+  const grouped = new Map<string, VideoData[]>();
+  data.forEach((video) => {
+    const query = (video.search_query || 'Uncategorized').trim() || 'Uncategorized';
+    if (!grouped.has(query)) grouped.set(query, []);
+    grouped.get(query)!.push(video);
   });
 
-  // Sort by count descending
-  const searchQueries = Array.from(searchQueryMap.entries())
-    .map(([query, count]) => ({ query, count }))
-    .sort((a, b) => b.count - a.count);
+  const queryRows = Array.from(grouped.entries())
+    .map(([query, videos]) => {
+      const latestTs = videos.reduce<number>((maxTs, v) => {
+        const raw = v.query_updated_at || '';
+        const ts = raw ? Date.parse(raw) : NaN;
+        if (!Number.isNaN(ts)) return Math.max(maxTs, ts);
+        return maxTs;
+      }, 0);
+      return { query, videos, count: videos.length, latestTs };
+    })
+    .sort((a, b) => b.latestTs - a.latestTs || b.count - a.count || a.query.localeCompare(b.query));
 
   return (
     <main className="container">
@@ -51,74 +70,80 @@ export default async function Home() {
         <p>Browse and review your downloaded videos and transcriptions.</p>
       </header>
 
-      <section className="search-section" style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #333', borderRadius: '8px' }}>
-        <form action={async (formData) => {
-          'use server';
-          const { processVideos } = await import('./actions');
-          await processVideos(formData);
-        }} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            name="search"
-            placeholder="Search keywords..."
-            required
-            style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #444', background: '#222', color: '#fff' }}
-          />
-          <input
-            type="number"
-            name="limit"
-            placeholder="Limit"
-            defaultValue="5"
-            min="1"
-            max="50"
-            style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #444', background: '#222', color: '#fff' }}
-          />
-          <button
-            type="submit"
-            style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#0070f3', color: '#fff', cursor: 'pointer' }}
-          >
-            Start Processing
-          </button>
-        </form>
+      <section
+        className="search-section"
+        style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #333', borderRadius: '8px' }}
+      >
+        <SearchForm />
       </section>
 
-      <div className="main-layout">
-        {/* Video Grid - Left Side (3 columns) */}
-        <div className="grid">
-          {data.map((video: VideoData, index: number) => (
-            <VideoCard key={index} video={video} index={index} />
-          ))}
-        </div>
+      <section className="waterfall-marquee">
+        {queryRows.length === 0 && (
+          <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
+            No search queries yet. Start a batch process above.
+          </p>
+        )}
 
-        {/* Search Words Sidebar - Right Side */}
-        <aside className="keyword-sidebar">
-          <h3>🔍 Search Words</h3>
-          <p className="sidebar-subtitle">Click to view transcriptions for this search</p>
-          <div className="keyword-list">
-            {searchQueries.map((sq, i) => {
-              // Color based on count
-              let colorClass = 'tag-1';
-              if (sq.count >= 20) colorClass = 'tag-5';
-              else if (sq.count >= 10) colorClass = 'tag-4';
-              else if (sq.count >= 5) colorClass = 'tag-3';
-              else if (sq.count >= 2) colorClass = 'tag-2';
+        {queryRows.map((row, rowIndex) => {
+          const repeated = row.videos.length > 1 ? [...row.videos, ...row.videos] : row.videos;
+          const visibleCards = repeated.slice(0, 24);
+          const hiddenCount = Math.max(0, repeated.length - visibleCards.length);
+          const directionClass = rowIndex % 2 === 0 ? 'left' : 'right';
+          // Idle: much slower when not hovered.
+          // 8s per result, minimum 120s per full loop.
+          const idleDurationSeconds = Math.max(120, row.videos.length * 8);
+          // Hover: unified quick speed for all rows.
+          const hoverDurationSeconds = 14;
 
-              return (
-                <Link
-                  key={i}
-                  href={`/transcriptions?query=${encodeURIComponent(sq.query)}`}
-                  className={`sidebar-tag ${colorClass}`}
-                >
-                  {sq.query} <span className="tag-count">({sq.count})</span>
+          return (
+            <article key={row.query} className="waterfall-row">
+              <div className="waterfall-row-header">
+                <Link href={`/transcriptions?query=${encodeURIComponent(row.query)}`} className="waterfall-query-chip">
+                  {row.query} ({row.count})
                 </Link>
-              );
-            })}
-            {searchQueries.length === 0 && (
-              <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>No search queries yet. Start a batch process above.</p>
-            )}
-          </div>
-        </aside>
-      </div>
+                {rowIndex === 0 && <span className="latest-chip">Latest</span>}
+                <span className="speed-chip">Idle {idleDurationSeconds}s • Hover {hoverDurationSeconds}s</span>
+                {hiddenCount > 0 && <span className="speed-chip">+{hiddenCount} more</span>}
+              </div>
+
+              <div className="marquee-shell">
+                <div
+                  className={`marquee-track ${directionClass}`}
+                  style={{
+                    ['--marquee-idle-duration' as string]: `${idleDurationSeconds}s`,
+                    ['--marquee-hover-duration' as string]: `${hoverDurationSeconds}s`,
+                  }}
+                >
+                  {visibleCards.map((video, idx) => {
+                    const thumbSrc = video.thumb_path
+                      ? video.thumb_path.startsWith('http')
+                        ? video.thumb_path
+                        : safelyEncodeURI(`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`)
+                      : null;
+                    return (
+                      <Link
+                        key={`${row.query}-${idx}-${video.title}`}
+                        href={`/transcriptions?query=${encodeURIComponent(row.query)}`}
+                        className="marquee-card"
+                        title={video.title}
+                      >
+                        <div className="marquee-thumb">
+                          {thumbSrc ? (
+                            <img src={thumbSrc} alt={video.title} loading="lazy" />
+                          ) : (
+                            <div className="marquee-thumb-fallback">No Thumbnail</div>
+                          )}
+                        </div>
+                        <div className="marquee-title">{video.title}</div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </section>
     </main>
   );
 }

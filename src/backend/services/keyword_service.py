@@ -41,6 +41,121 @@ class KeywordExtractionService:
             llm_client: LlamaCppClient instance for LLM calls
         """
         self.llm = llm_client
+
+    @staticmethod
+    def _contains_cjk(text: str) -> bool:
+        return bool(re.search(r"[\u4e00-\u9fff]", text or ""))
+
+    @staticmethod
+    def _is_cjk_query(query: str) -> bool:
+        return KeywordExtractionService._contains_cjk(query or "")
+
+    @staticmethod
+    def _is_term_compatible_with_query_language(term: str, query_is_cjk: bool) -> bool:
+        if not term:
+            return False
+        term_has_cjk = KeywordExtractionService._contains_cjk(term)
+        if query_is_cjk:
+            # Chinese query should return Chinese terms.
+            return term_has_cjk
+        # Non-Chinese query can keep both latin/entity words and mixed tokens.
+        return True
+
+    @staticmethod
+    def is_low_quality_term(term: str) -> bool:
+        t = (term or "").strip().lower().replace("’", "'").replace("`", "'")
+        if not t:
+            return True
+        t_no_apo = t.replace("'", "")
+
+        generic_en = {
+            "because", "users", "user", "people", "person", "thing", "things", "today",
+            "now", "then", "also", "just", "really", "very", "some", "many", "much",
+            "more", "most", "less", "least", "good", "bad", "better", "best", "worse",
+            "new", "old", "big", "small", "high", "low", "use", "used", "using", "make",
+            "made", "get", "got", "take", "taken", "look", "looks", "looking", "say",
+            "said", "go", "goes", "went", "come", "came", "know", "known", "need", "needs",
+            "want", "wants", "think", "thinks", "its", "it's", "this", "that", "these",
+            "those", "there", "here", "their", "them", "they", "we", "our", "you", "your",
+            "theyre", "were", "youre", "im", "ive", "dont", "cant", "wont", "thats", "theres",
+        }
+        generic_cn = {
+            "这个", "那个", "这些", "那些", "我们", "你们", "他们", "然后", "就是", "可以", "没有",
+            "因为", "所以", "现在", "已经", "还是", "但是", "一个", "一些", "很多", "比较", "非常",
+            "东西", "内容", "问题", "情况", "时候", "地方", "方面",
+        }
+
+        if t in generic_en or t_no_apo in generic_en or t in generic_cn:
+            return True
+
+        has_cjk = KeywordExtractionService._contains_cjk(t)
+        if has_cjk:
+            return len(t) < 2
+
+        # For latin terms, keep only meaningful words/phrases.
+        short_allow = {"ai", "llm", "gpu", "cpu", "api", "sdk"}
+        if t in short_allow:
+            return False
+        if len(t) < 3:
+            return True
+        if re.fullmatch(r"\d+([.-]\d+)?", t):
+            return True
+        if not re.search(r"[a-z]", t):
+            return True
+        return False
+
+    @staticmethod
+    def _fallback_keywords_from_text(text: str, k: int = 30) -> List[Keyword]:
+        """
+        Deterministic fallback when LLM output is unavailable or unusable.
+        Uses simple token frequency with lightweight stop-word filtering.
+        """
+        if KeywordExtractionService._contains_cjk(text):
+            stop_cn = {
+                "我们", "你们", "他们", "这个", "那个", "以及", "因为", "所以", "可以", "一个",
+                "没有", "如果", "就是", "然后", "什么", "怎么", "现在", "已经", "还是", "但是",
+            }
+            tokens_cn = re.findall(r"[\u4e00-\u9fff]{2,8}", text)
+            counts_cn: Dict[str, int] = defaultdict(int)
+            for t in tokens_cn:
+                if t in stop_cn:
+                    continue
+                counts_cn[t] += 1
+            if counts_cn:
+                ranked_cn = sorted(counts_cn.items(), key=lambda x: (-x[1], x[0]))[:k]
+                max_count_cn = ranked_cn[0][1] if ranked_cn else 1
+                return [
+                    Keyword(term=term, count=count, score=min(1.0, count / max_count_cn))
+                    for term, count in ranked_cn
+                ]
+
+        stop_words = {
+            "the", "and", "for", "that", "this", "with", "you", "your", "are", "was",
+            "have", "has", "had", "from", "they", "their", "about", "there", "what",
+            "when", "where", "which", "will", "would", "could", "should", "into",
+            "just", "like", "more", "than", "then", "over", "very", "some", "such",
+            "been", "being", "also", "but", "not", "its", "our", "out", "all", "can",
+            "get", "got", "one", "two", "three", "how", "why", "who", "whom", "whose",
+            "video", "today", "people", "thing", "things", "make", "made", "using",
+        }
+
+        tokens = re.findall(r"[A-Za-z][A-Za-z0-9'-]{2,}", text.lower())
+        counts: Dict[str, int] = defaultdict(int)
+        for t in tokens:
+            if t in stop_words:
+                continue
+            counts[t] += 1
+
+        if not counts:
+            return []
+
+        ranked = sorted(counts.items(), key=lambda x: (-x[1], x[0]))[:k]
+        max_count = ranked[0][1] if ranked else 1
+
+        return [
+            Keyword(term=term, count=count, score=min(1.0, count / max_count))
+            for term, count in ranked
+        ]
         
     @staticmethod
     def normalize_term(term: str) -> str:
@@ -54,7 +169,8 @@ class KeywordExtractionService:
             Normalized term
         """
         # Lowercase and remove punctuation
-        term = term.lower().strip()
+        term = term.lower().strip().replace("’", "'").replace("`", "'")
+        term = re.sub(r"\b([a-z0-9]+)'s\b", r"\1", term)
         term = re.sub(r'[^\w\s-]', '', term)
         term = re.sub(r'\s+', ' ', term)
         return term
@@ -71,8 +187,39 @@ class KeywordExtractionService:
         Returns:
             Occurrence count
         """
-        pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
+        if KeywordExtractionService._contains_cjk(term):
+            # CJK text does not use whitespace boundaries like latin words.
+            pattern = re.compile(re.escape(term), re.IGNORECASE)
+        else:
+            pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
         return len(pattern.findall(text))
+
+    @staticmethod
+    def filter_keywords_by_query_language(keywords: List[Keyword], query: str) -> List[Keyword]:
+        """Keep keywords consistent with query language (Chinese query => Chinese keywords)."""
+        query_is_cjk = KeywordExtractionService._is_cjk_query(query)
+        out = []
+        for kw in keywords:
+            if KeywordExtractionService._is_term_compatible_with_query_language(kw.term, query_is_cjk):
+                out.append(kw)
+        return out
+
+    @staticmethod
+    def filter_low_quality_keywords(keywords: List[Keyword]) -> List[Keyword]:
+        out = []
+        seen = set()
+        for kw in keywords:
+            term = (kw.term or "").strip()
+            if not term:
+                continue
+            if KeywordExtractionService.is_low_quality_term(term):
+                continue
+            norm = term.lower()
+            if norm in seen:
+                continue
+            seen.add(norm)
+            out.append(kw)
+        return out
     
     @staticmethod
     def merge_keywords(llm_response: LLMKeywordResponse, text: str) -> List[Keyword]:
@@ -91,6 +238,8 @@ class KeywordExtractionService:
         for candidate in llm_response.keywords:
             normalized = KeywordExtractionService.normalize_term(candidate.term)
             if not normalized:
+                continue
+            if KeywordExtractionService.is_low_quality_term(normalized):
                 continue
                 
             count = KeywordExtractionService.count_occurrences(normalized, text)
@@ -135,12 +284,24 @@ class KeywordExtractionService:
             List of Keywords sorted by score/count
         """
         llm_response = await self.llm.extract_keywords(query, transcript, k=k)
-        
+
+        query_is_cjk = self._is_cjk_query(query)
+
         if not llm_response:
-            logger.warning(f"LLM failed for single transcript, query: {query}")
-            return []
-        
-        return self.merge_keywords(llm_response, transcript)
+            logger.warning(f"LLM failed for single transcript, using fallback; query: {query}")
+            fallback = self._fallback_keywords_from_text(transcript, k=k)
+            return self.filter_keywords_by_query_language(fallback, query)
+
+        merged = self.merge_keywords(llm_response, transcript)
+        merged = self.filter_low_quality_keywords(merged)
+        merged = [kw for kw in merged if self._is_term_compatible_with_query_language(kw.term, query_is_cjk)]
+        if merged:
+            return merged
+
+        logger.warning(f"LLM returned unusable keywords for single transcript, using fallback; query: {query}")
+        fallback = self._fallback_keywords_from_text(transcript, k=k)
+        fallback = self.filter_low_quality_keywords(fallback)
+        return self.filter_keywords_by_query_language(fallback, query)
     
     async def extract_combined_keywords(
         self,
@@ -162,12 +323,24 @@ class KeywordExtractionService:
         combined_text = "\n\n---\n\n".join(transcripts)
         
         llm_response = await self.llm.extract_keywords(query, combined_text, k=k)
-        
+
+        query_is_cjk = self._is_cjk_query(query)
+
         if not llm_response:
-            logger.warning(f"LLM failed for combined transcript, query: {query}")
-            return []
-        
-        return self.merge_keywords(llm_response, combined_text)
+            logger.warning(f"LLM failed for combined transcript, using fallback; query: {query}")
+            fallback = self._fallback_keywords_from_text(combined_text, k=k)
+            return self.filter_keywords_by_query_language(fallback, query)
+
+        merged = self.merge_keywords(llm_response, combined_text)
+        merged = self.filter_low_quality_keywords(merged)
+        merged = [kw for kw in merged if self._is_term_compatible_with_query_language(kw.term, query_is_cjk)]
+        if merged:
+            return merged
+
+        logger.warning(f"LLM returned unusable keywords for combined transcript, using fallback; query: {query}")
+        fallback = self._fallback_keywords_from_text(combined_text, k=k)
+        fallback = self.filter_low_quality_keywords(fallback)
+        return self.filter_keywords_by_query_language(fallback, query)
     
     @staticmethod
     def compute_coverage(keywords: List[Keyword], transcripts: List[str]) -> List[Set[int]]:

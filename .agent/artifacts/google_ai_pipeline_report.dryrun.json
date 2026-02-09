@@ -1,0 +1,36 @@
+{
+  "started_at_utc": "2026-02-08T23:58:31+00:00",
+  "seed_query": "中国 人工智能 大模型 科技 新闻",
+  "news_count": 20,
+  "keyword_count": 10,
+  "per_keyword_limit": 3,
+  "max_duration_minutes": 10,
+  "api_base": "http://localhost:8000",
+  "dry_run": true,
+  "news_items": [
+    {
+      "title": "Minds at War: China’s Pursuit of Military Advantage through Cognitive Science and Biotechnology",
+      "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPblhQdWNBR2gzd25LeWk1T0pmSzBXX2VqbFQ2ckcwQVhUQ0w5YXFKcTEwSWdUd2VsZFBrMDdsR1Nta0VQVFJHTHkyZGxhQV9iS3lBVnlnRkU5WWNrSHBXRXk4S2l6cldzdTQyLVJmOGJLMC15VUV6RDNDdUszTnRMSEpfaXg1YVdYR2drQW9UQUZyVmpXbDJ3aVZCb1hkcVA1WG44VU1sWjRSOU41bVJVemNDYTR6VUgwcExtZnlFQWQ3OGlVVmcxUEZiaHo1aXhFeTlKeGk2aWdDa0YwUDROTUktTFc?oc=5",
+      "published": "Thu, 09 Jan 2020 08:00:00 GMT"
+    },
+    {
+      "title": "Artificial Intelligence-Generated Content (AIGC) White Paper [Excerpt]",
+      "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNSGQzVVVBbGoxbVlxbzI3UFV2VllVX2x0dnQ4bld5NGp6al9DblduNFdrRTl1QUZMVzQ3blQ0NUcwY3VnMkZsSVJ4dHg1WGZJTTJPalZGa1F1bXFuMDNaQXY5M3BOZTE2UlhBdV83M09ZWXhGQU16NEZVTUZ3QzBkQTVPYTRjYjZITDhGdDU5ekEzbl9DQ1dzMURJR25JZGRmZlR3YzNIdmY4Zms?oc=5",
+      "published": "Tue, 20 Feb 2024 22:05:28 GMT"
+    }
+  ],
+  "keywords": [
+    "人工智能",
+    "大模型",
+    "智能体",
+    "算力",
+    "芯片",
+    "机器学习",
+    "深度学习",
+    "生成式AI",
+    "多模态",
+    "科技新闻"
+  ],
+  "dispatches": [],
+  "finished_at_utc": "2026-02-08T23:58:32+00:00"
+}
