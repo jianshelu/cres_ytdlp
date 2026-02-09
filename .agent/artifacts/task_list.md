@@ -1,4 +1,6 @@
-# 📋 Task List - cres_ytdlp Project
+# Task List - cres_ytdlp Project
+
+Time Zone Standard: `America/Toronto` (EST/EDT).
 
 **Maintained by:** Antigravity  
 **Project:** YouTube Video Processing & Transcription with LLM Analysis  
@@ -8,7 +10,7 @@
 
 ## Date: 2026-02-08
 
-### ✅ Completed Tasks
+### Completed Tasks
 
 - [x] **1.** Fix Temporal workflow argument passing mechanism (tuple parameter standardization) `[DONE 10:31:21]`
 - [x] **2.** Deploy workflow fixes to Vast.ai instance and verify execution `[DONE 10:31:21]`
@@ -25,9 +27,9 @@
 - [x] **13.** Create environment configuration for frontend API URL `[DONE 10:54:14]`
 - [x] **14.** Deploy specification-compliant implementation to instance `[DONE 10:54:14]`
 
-### 📝 Pending/In-Progress Tasks
+### Pending/In-Progress Tasks
 
-- [ ] **15.** Test end-to-end workflow: Search → LLM Keyword Extraction → UI Display
+- [ ] **15.** Test end-to-end workflow: Search â†’ LLM Keyword Extraction â†’ UI Display
 - [ ] **16.** Verify LLM server (llama.cpp) is responding correctly to keyword extraction requests
 - [ ] **17.** Monitor coverage compensation algorithm performance with real data
 - [ ] **18.** Test download functionality in browser environment
@@ -58,30 +60,30 @@
 
 ---
 
-**Last Updated:** 2026-02-08 10:57:11
+**Last Updated:** 2026-02-08 10:57:11 (America/Toronto)
 
 ---
 
 ## Date: 2026-02-08 // OBLONG State Consolidation
 
-### ✅ Completed Tasks
+### Completed Tasks
 
 - [x] **22.** Ingest and apply project rules from [.agent/rules/workwithvastai.md](../rules/workwithvastai.md) and [GEMINI.md](C:/Users/ruipe/.gemini/GEMINI.md) `[DONE 11:19:16]`
 - [x] **23.** Execute OBLONG deep state consolidation across artifact set `[DONE 11:19:16]`
 
-### 📝 Pending/In-Progress Tasks
+### Pending/In-Progress Tasks
 
 - [ ] **24.** Resume and finalize requirement-by-requirement verification report for [Combined Keywords Feature.md](../../Combined Keywords Feature.md)
 
 ---
 
-**Last Updated:** 2026-02-08 11:19:16
+**Last Updated:** 2026-02-08 11:19:16 (America/Toronto)
 
 ---
 
 ## Date: 2026-02-09
 
-### ✅ Completed Tasks
+### Completed Tasks
 
 - [x] **25.** Implement single-workflow inline orchestration mode (`QueryOrchestratorWorkflow`) with queue signal processing `[DONE 00:12:10]`
 - [x] **26.** Preserve rollback compatibility via legacy dispatcher/batch mode switch in API (`BATCH_ORCHESTRATOR_MODE`) `[DONE 00:12:10]`
@@ -97,7 +99,7 @@
 - [x] **36.** Fix transcriptions combined-video progress reset during scroll (clip load idempotency guard) `[DONE 00:41:30]`
 - [x] **37.** Expand artifacts detail level using `docs/Implementation Plan.md`, `docs/Perimeter.md`, `docs/Task.md`, `docs/Walkthrough.md` as reference `[DONE 00:58:40]`
 
-### 📝 Pending/In-Progress Tasks
+### Pending/In-Progress Tasks
 
 - [ ] **38.** Add automated artifact lint/check script (section presence + sequential task numbering validation)
 - [ ] **39.** Add dashboard summary script for query-by-query output completeness (`combined-output.json`, sentence, keywords, manifest)
@@ -105,4 +107,28 @@
 
 ---
 
-**Last Updated:** 2026-02-09 00:58:40
+**Last Updated:** 2026-02-09 00:58:40 (America/Toronto)
+
+---
+
+## Date: 2026-02-09 // Incremental Closeout
+
+### Completed Tasks
+
+- [x] **41.** Enforce remote-first validation rule: deploy/build/restart on vast.ai instance for UI acceptance `[DONE 22:47:00]`
+- [x] **42.** Tune homepage marquee readability policy (idle slower, hover faster fixed target) and redeploy `[DONE 22:50:00]`
+- [x] **43.** Monitor multi-workflow running status and continue stable per-query workflow baseline verification `[DONE 22:53:00]`
+- [x] **44.** Commit and push stabilized baseline to `origin/main` (`9ed118b`) `[DONE 22:56:00]`
+- [x] **45.** Record manual remote instance shutdown and perform artifact incremental consolidation `[DONE 23:01:00]`
+
+### Pending/In-Progress Tasks
+
+- [ ] **46.** On next instance boot, run post-start verification checklist (`3000/8000` health, one query smoke, sentence page render)
+- [ ] **47.** Add small UI marker on homepage indicating latest query batch timestamp for easier freshness judgment
+
+---
+
+**Last Updated:** 2026-02-09 23:01:00 (America/Toronto)
+
+
+

@@ -2,12 +2,17 @@
 # Unified Service Startup Script
 set -e
 
-cd /workspace
-PID_DIR="/workspace/run"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-/workspace}"
+if [ ! -w "$WORKSPACE_ROOT" ]; then
+    WORKSPACE_ROOT="$(pwd)"
+fi
+
+cd "$WORKSPACE_ROOT"
+PID_DIR="$WORKSPACE_ROOT/run"
 mkdir -p "$PID_DIR"
 
 # Normalize line endings to avoid Windows CRLF startup issues.
-sed -i 's/\r$//' /workspace/start_remote.sh /workspace/entrypoint.sh /workspace/deploy_vast.sh /workspace/onstart.sh 2>/dev/null || true
+sed -i 's/\r$//' "$WORKSPACE_ROOT/start_remote.sh" "$WORKSPACE_ROOT/entrypoint.sh" "$WORKSPACE_ROOT/deploy_vast.sh" "$WORKSPACE_ROOT/onstart.sh" 2>/dev/null || true
 
 pid_status_line() {
     local name="$1"
@@ -43,6 +48,20 @@ check_http() {
 
 check_temporal_grpc() {
     local target="$1"
+    if ! python3 -c "import temporalio" >/dev/null 2>&1; then
+        local host="${target%:*}"
+        local port="${target##*:}"
+        if command -v nc >/dev/null 2>&1; then
+            if nc -z -w 3 "$host" "$port" >/dev/null 2>&1; then
+                echo "[OK]      Temporal TCP ${target} (temporalio missing locally)"
+            else
+                echo "[FAIL]    Temporal TCP ${target} (temporalio missing locally)"
+            fi
+        else
+            echo "[WARN]    temporalio and nc both unavailable; skip Temporal check for ${target}"
+        fi
+        return
+    fi
     python3 - "$target" <<'PY'
 import asyncio
 import sys
@@ -85,8 +104,8 @@ show_status() {
     check_temporal_grpc "${temporal_addr}"
     echo
     echo "== Recent Logs =="
-    echo "-- /workspace/logs/app.log --"
-    tail -n 20 /workspace/logs/app.log 2>/dev/null || true
+    echo "-- $WORKSPACE_ROOT/logs/app.log --"
+    tail -n 20 "$WORKSPACE_ROOT/logs/app.log" 2>/dev/null || true
     echo "-- /var/log/fastapi.log --"
     tail -n 20 /var/log/fastapi.log 2>/dev/null || true
     echo "-- /var/log/worker.log --"
@@ -121,7 +140,7 @@ terminate_workspace_next() {
     for pid in $pids; do
         local cwd
         cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
-        if [ "$cwd" = "/workspace/web" ]; then
+        if [ "$cwd" = "$WORKSPACE_ROOT/web" ]; then
             kill "$pid" 2>/dev/null || true
             sleep 1
             kill -9 "$pid" 2>/dev/null || true
@@ -138,7 +157,7 @@ has_workspace_next_server() {
     for pid in $pids; do
         local cwd
         cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
-        if [ "$cwd" = "/workspace/web" ]; then
+        if [ "$cwd" = "$WORKSPACE_ROOT/web" ]; then
             return 0
         fi
     done
@@ -154,7 +173,7 @@ terminate_workspace_next_server() {
     for pid in $pids; do
         local cwd
         cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
-        if [ "$cwd" = "/workspace/web" ]; then
+        if [ "$cwd" = "$WORKSPACE_ROOT/web" ]; then
             kill "$pid" 2>/dev/null || true
             sleep 1
             kill -9 "$pid" 2>/dev/null || true
@@ -175,34 +194,34 @@ restart_services() {
     terminate_workspace_next_server
 
     # Conservative fallback for stale processes from old scripts.
-    pkill -9 -f "/workspace/entrypoint.sh bash -c cd /workspace/web && npm start" || true
+    pkill -9 -f "$WORKSPACE_ROOT/entrypoint.sh bash -c cd $WORKSPACE_ROOT/web && npm start" || true
     pkill -9 -f "uvicorn src.api.main:app --host 0.0.0.0 --port 8000" || true
     pkill -9 -f "python3 -m src.backend.worker" || true
     sleep 2
 
     # Environment setup.
-    export LLM_MODEL_PATH="${LLM_MODEL_PATH:-/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
-    export WHISPER_MODEL_PATH="${WHISPER_MODEL_PATH:-/workspace/packages/models/whisper}"
+    export LLM_MODEL_PATH="${LLM_MODEL_PATH:-$WORKSPACE_ROOT/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
+    export WHISPER_MODEL_PATH="${WHISPER_MODEL_PATH:-$WORKSPACE_ROOT/packages/models/whisper}"
     export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.121.250.72:7233}"
     export MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.121.250.72:9000}"
     export MINIO_SECURE="${MINIO_SECURE:-false}"
     export CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
-    export PATH="/root/.local/bin:/usr/local/bin:/usr/bin:/bin:/workspace:${PATH}"
-    mkdir -p /workspace/logs
+    export PATH="/root/.local/bin:/usr/local/bin:/usr/bin:/bin:$WORKSPACE_ROOT:${PATH}"
+    mkdir -p "$WORKSPACE_ROOT/logs"
 
-    if [ -f /workspace/scripts/setup_tailscale.sh ]; then
-        chmod +x /workspace/scripts/setup_tailscale.sh
-        /workspace/scripts/setup_tailscale.sh || true
+    if [ -f "$WORKSPACE_ROOT/scripts/setup_tailscale.sh" ]; then
+        chmod +x "$WORKSPACE_ROOT/scripts/setup_tailscale.sh"
+        "$WORKSPACE_ROOT/scripts/setup_tailscale.sh" || true
     fi
 
     echo "Starting services via entrypoint..."
     rm -f "$PID_DIR/cres_next_wrapper.pid"
     if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:3000 || true)" = "200" ]; then
         echo "Detected healthy service on :3000, skipping Next.js relaunch command."
-        nohup /workspace/entrypoint.sh bash -lc "while true; do sleep 3600; done" > /workspace/logs/app.log 2>&1 &
+        nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -lc "while true; do sleep 3600; done" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
         echo $! > "$PID_DIR/cres_next_wrapper.pid"
     else
-        nohup /workspace/entrypoint.sh bash -c "cd /workspace/web && npm start" > /workspace/logs/app.log 2>&1 &
+        nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -c "cd $WORKSPACE_ROOT/web && npm start" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
         echo $! > "$PID_DIR/cres_next_wrapper.pid"
     fi
     echo "Started. Monitor status with: ./start_remote.sh --status"

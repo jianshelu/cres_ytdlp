@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
-PID_DIR="/workspace/run"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-/workspace}"
+if [ ! -w "$WORKSPACE_ROOT" ]; then
+    WORKSPACE_ROOT="$(pwd)"
+fi
+PID_DIR="$WORKSPACE_ROOT/run"
 mkdir -p "$PID_DIR"
 CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
 TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.121.250.72:7233}"
@@ -8,6 +12,7 @@ MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.121.250.72:9000}"
 MINIO_SECURE="${MINIO_SECURE:-false}"
 MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY:-minioadmin}"
 MINIO_SECRET_KEY="${MINIO_SECRET_KEY:-minioadmin}"
+export WORKSPACE_ROOT
 
 start_local_minio() {
     mkdir -p ./data/minio

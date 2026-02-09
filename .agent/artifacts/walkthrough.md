@@ -1,4 +1,6 @@
-﻿# Walkthrough - cres_ytdlp Project History
+# Walkthrough - cres_ytdlp Project History
+
+Time Zone Standard: `America/Toronto` (EST/EDT).
 
 ## Date: 2026-02-08 // OBLONG State Consolidation
 
@@ -29,7 +31,8 @@
   * `/batch` responses report orchestrator mode as `inline` with accepted request IDs.
   * Worker logs confirm `QueryOrchestratorWorkflow` inline activity chain execution.
   * Anti-gravity query now yields multi-source key sentences instead of first-video-only output.
-  * Frontend build succeeded (`next build`) and instance restart returned `3000:200` and `8000:200` after targeted service restarts.
+  * Frontend build succeeded (
+ext build`) and instance restart returned `3000:200` and `8000:200` after targeted service restarts.
 
 ## Date: 2026-02-09 // Artifact Detail Expansion (Doc-Referenced)
 
@@ -67,9 +70,9 @@
     * recompute combined sentence/key sentences
     * generate server-side combined video (`ffmpeg`)
     * write MinIO artifact `queries/<slug>/combined/combined-video.mp4`
-    * persist version flags (`recombined_sentence`, `combined_sentence_version`, `combined_rebuilt_at_utc`).
+    * persist version flags (ecombined_sentence`, `combined_sentence_version`, `combined_rebuilt_at_utc`).
   * Updated transcriptions API/frontend contract:
-    * API returns `combined_video_url`, `recombined_sentence`, `sentence_version`
+    * API returns `combined_video_url`, ecombined_sentence`, `sentence_version`
     * frontend prefers prebuilt combined video when present
     * cache compatibility guard forces recompute if required new fields are missing.
 * **Verification:**
@@ -77,5 +80,24 @@
   * Bulk historical rebuild completed with zero failures (`--all --refresh-index`).
   * Query checks (e.g., `科技之光`, `记忆系统`, `Oracle`) returned:
     * `combined_video_url` present
-    * `recombined_sentence=true`
+    * ecombined_sentence=true`
     * `sentence_version=recombined-v2`.
+
+## Date: 2026-02-09 // Remote Deployment Policy + Instance Shutdown Closeout
+
+* **Plan Statement:** Close the iteration with remote-first deployment rules, final marquee readability tuning, and explicit shutdown handoff status.
+* **Root Cause/Findings:**
+  * Local build outputs were not reliable indicators of the live vast.ai behavior.
+  * Homepage marquee perceived speed remained too high until runtime tuning was applied and revalidated on instance.
+  * User manually terminated instance after stabilization and requested incremental artifact consolidation.
+* **Final Solution:**
+  * Locked operational rule to remote sync/build/restart for acceptance checks.
+  * Tuned marquee behavior so non-hover rows are slower and hovered row uses fixed faster duration target.
+  * Preserved tested code baseline in git and documented closure state for next startup session.
+* **Verification:**
+  * Baseline commit recorded on `main`: `9ed118b`.
+  * Working tree confirmed clean at artifact closeout time.
+  * Instance shutdown ownership recorded as manual user action (post-validation).
+
+
+

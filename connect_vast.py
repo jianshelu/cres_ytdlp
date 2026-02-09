@@ -2,6 +2,14 @@ import os
 import subprocess
 import sys
 
+
+DEFAULT_TUNNELS = [
+    "3000:127.0.0.1:3000",  # Next.js
+    "8000:127.0.0.1:8000",  # FastAPI
+    "8080:127.0.0.1:8081",  # llama.cpp
+]
+
+
 def read_env():
     """Read .env file manually to avoid dependencies."""
     env_vars = {}
@@ -13,18 +21,48 @@ def read_env():
                     continue
                 if "=" in line:
                     key, value = line.split("=", 1)
+                    key = key.lstrip("\ufeff")
                     # Remove potential quotes
                     value = value.strip('\'"')
                     env_vars[key.strip()] = value
     return env_vars
 
+
+def parse_tunnels(env):
+    """
+    Parse tunnel list from .env.
+    Priority:
+    1) CONNECT_TUNNELS (comma-separated local:host:port tuples)
+    2) defaults suitable for this project.
+    """
+    raw = env.get("CONNECT_TUNNELS", "").strip()
+    if not raw:
+        return list(DEFAULT_TUNNELS)
+
+    tunnels = []
+    for item in raw.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        # Allow "3000:3000" shorthand -> local:127.0.0.1:remote
+        parts = item.split(":")
+        if len(parts) == 2:
+            item = f"{parts[0]}:127.0.0.1:{parts[1]}"
+        elif len(parts) != 3:
+            raise ValueError(f"Invalid CONNECT_TUNNELS item: {item}")
+        tunnels.append(item)
+
+    return tunnels or list(DEFAULT_TUNNELS)
+
+
 def main():
     env = read_env()
-    
+
     user = env.get("VAST_USER", "root")
     host = env.get("VAST_HOST", "ssh3.vast.ai")
     port = env.get("VAST_PORT", "32069")
     key_path = env.get("VAST_SSH_KEY", "")
+    tunnels = parse_tunnels(env)
 
     # Fix WSL paths for Windows execution
     if sys.platform == "win32" and key_path.startswith("/mnt/"):
@@ -34,21 +72,6 @@ def main():
             rest = "/".join(parts[3:])
             key_path = f"{drive}:/{rest}"
             print(f"Converted WSL path to Windows: {key_path}")
-
-    # Ports to tunnel (Local:Remote)
-    # Using 127.0.0.1 to avoid IPv6/localhost resolution issues
-    tunnels = [
-        "3000:127.0.0.1:3000", # Next.js App
-        "8000:127.0.0.1:8000", # FastAPI
-        "8080:127.0.0.1:8081", # Llama Server
-        "8233:127.0.0.1:8233", # Temporal Web UI
-        "7233:127.0.0.1:7233", # Temporal Service
-        "9001:127.0.0.1:9001", # MinIO Console
-        "9000:127.0.0.1:9000", # MinIO API
-        "1111:127.0.0.1:1111", # ComfyUI
-        "6006:127.0.0.1:6006", # Tensorboard
-        "8384:127.0.0.1:8384"  # Syncthing
-    ]
 
     print("========================================")
     print(f"Connecting to {user}@{host}:{port}")
@@ -82,10 +105,9 @@ def main():
     print("\nStarting Tunnel... (Press Ctrl+C to stop)")
     print("Once connected, access your services at:")
     print("  -> Web App:       http://localhost:3000")
-    print("  -> Temporal UI:   http://localhost:8233")
-    print("  -> MinIO Console: http://localhost:9001")
     print("  -> FastAPI Docs:  http://localhost:8000/docs")
-    
+    print("  -> llama.cpp:     http://localhost:8080")
+
     try:
         subprocess.run(cmd)
     except KeyboardInterrupt:

@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 set -euo pipefail
 
 SOCK="/var/run/tailscale/tailscaled.sock"
