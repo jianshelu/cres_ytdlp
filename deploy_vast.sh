@@ -14,6 +14,10 @@ PORT="${VAST_PORT:-36535}"
 USER="${VAST_USER:-root}"
 SSH_KEY="${VAST_SSH_KEY}" # Optional, if empty will use default ssh agent/key
 TARGET_DIR="/workspace"
+CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
+TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.121.250.72:7233}"
+MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.121.250.72:9000}"
+MINIO_SECURE="${MINIO_SECURE:-false}"
 
 # Determine SSH command (Configured to prefer Linux ssh in WSL for path compatibility)
 if [ -f "/usr/bin/ssh" ]; then
@@ -45,6 +49,7 @@ echo "========================================"
 echo "Deploying to $USER@$HOST (Port $PORT)"
 echo "Target Directory: $TARGET_DIR"
 echo "Using SSH Key: $SSH_KEY"
+echo "Control Plane Mode: $CONTROL_PLANE_MODE"
 echo "========================================"
 
 # 1. Sync files
@@ -95,18 +100,33 @@ $SSH_CMD $SSH_OPTS $USER@$HOST << EOF
     cd web && npm install && npm run build
     cd ..
 
-    echo "Installing Temporal CLI..."
-    if ! command -v temporal &> /dev/null; then
-        curl -sSf https://temporal.download/cli.sh | sh
-        mv /root/.temporalio/bin/temporal /usr/local/bin/
-    fi
-
-    echo "Installing MinIO..."
-    if [ ! -f /usr/local/bin/minio ]; then
-        wget -q https://dl.min.io/server/minio/release/linux-amd64/minio -O /usr/local/bin/minio
-        chmod +x /usr/local/bin/minio
-        curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
-        chmod +x /usr/local/bin/mc
+    if [ "$CONTROL_PLANE_MODE" = "external" ]; then
+        echo "Installing Tailscale..."
+        if ! command -v tailscale &> /dev/null; then
+            curl -fsSL https://tailscale.com/install.sh | sh
+        fi
+        mkdir -p /var/run/tailscale
+        nohup tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/var/run/tailscale/tailscaled.sock > /var/log/tailscaled.log 2>&1 &
+        sleep 2
+        if [ -n "${TAILSCALE_AUTHKEY}" ]; then
+            tailscale --socket=/var/run/tailscale/tailscaled.sock up --authkey "${TAILSCALE_AUTHKEY}" --accept-dns=false --accept-routes || true
+        else
+            echo "TAILSCALE_AUTHKEY not set; skipping tailscale up."
+        fi
+    else
+        echo "CONTROL_PLANE_MODE=local: install local Temporal/MinIO tools..."
+        if ! command -v temporal &> /dev/null; then
+            curl -sSf https://temporal.download/cli.sh | sh
+            mv /root/.temporalio/bin/temporal /usr/local/bin/ || true
+        fi
+        if [ ! -f /usr/local/bin/minio ]; then
+            wget -q https://dl.min.io/server/minio/release/linux-amd64/minio -O /usr/local/bin/minio
+            chmod +x /usr/local/bin/minio
+        fi
+        if [ ! -f /usr/local/bin/mc ]; then
+            curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+            chmod +x /usr/local/bin/mc
+        fi
     fi
 
     # Killing only project-managed services (avoid touching unrelated host services)
@@ -114,8 +134,6 @@ $SSH_CMD $SSH_OPTS $USER@$HOST << EOF
     pkill -9 -f "/workspace/entrypoint.sh bash -c cd /workspace/web && npm start" || true
     pkill -9 -f "uvicorn src.api.main:app --host 0.0.0.0 --port 8000" || true
     pkill -9 -f "python3 -m src.backend.worker" || true
-    pkill -9 -f "temporal server start-dev --ip 0.0.0.0" || true
-    pkill -9 -f "minio server ./data/minio --address :9000 --console-address :9001" || true
     pkill -9 -f "llama-server --model" || true
     sleep 2
 
@@ -127,6 +145,12 @@ $SSH_CMD $SSH_OPTS $USER@$HOST << EOF
     export WHISPER_MODEL_PATH="/workspace/packages/models/whisper"
     export XDG_CACHE_HOME="/workspace/.cache"
     export PATH="/workspace:${PATH}"
+    export CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE}"
+    export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS}"
+    export MINIO_ENDPOINT="${MINIO_ENDPOINT}"
+    export MINIO_SECURE="${MINIO_SECURE}"
+    export MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY:-minioadmin}"
+    export MINIO_SECRET_KEY="${MINIO_SECRET_KEY:-minioadmin}"
     
     mkdir -p $LLM_MODEL_PATH $WHISPER_MODEL_PATH /workspace/.cache
 

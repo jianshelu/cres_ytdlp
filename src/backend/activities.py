@@ -23,11 +23,15 @@ class VideoInfo:
     duration: float
 
 def get_minio_client():
+    endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
+    access_key = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+    secret_key = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+    secure = os.getenv("MINIO_SECURE", "false").lower() in {"1", "true", "yes"}
     return Minio(
-        "localhost:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False
+        endpoint,
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=secure,
     )
 
 
@@ -543,7 +547,8 @@ async def summarize_content(params: tuple) -> dict:
 
     try:
         activity.logger.info(f"LLM Prompt: {prompt[:500]}...")
-        response = requests.post("http://localhost:8081/completion", json=payload, timeout=300)
+        llm_base = os.getenv("LLAMA_URL", "http://localhost:8081").rstrip("/")
+        response = requests.post(f"{llm_base}/completion", json=payload, timeout=300)
         response.raise_for_status()
         result = response.json()
         activity.logger.info(f"LLM Raw Result: {json.dumps(result, ensure_ascii=False)}")

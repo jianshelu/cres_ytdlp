@@ -87,11 +87,15 @@ def _query_slug(query: str) -> str:
 
 
 def _get_client() -> Minio:
+    endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
+    access_key = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+    secret_key = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+    secure = os.getenv("MINIO_SECURE", "false").lower() in {"1", "true", "yes"}
     return Minio(
-        "localhost:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False,
+        endpoint,
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=secure,
     )
 
 
@@ -360,7 +364,13 @@ def _build_combined_video_for_query(client: Minio, bucket: str, query: str) -> d
         combined_video_key = f"queries/{slug}/combined/combined-video.mp4"
         client.fput_object(bucket, combined_video_key, str(out_video), content_type="video/mp4")
         encoded_key = urllib.parse.quote(combined_video_key)
-        combined_video_url = f"http://localhost:9000/{bucket}/{encoded_key}"
+        minio_public_base = os.getenv("MINIO_PUBLIC_BASE_URL", "").strip().rstrip("/")
+        if minio_public_base:
+            combined_video_url = f"{minio_public_base}/{bucket}/{encoded_key}"
+        else:
+            scheme = "https" if os.getenv("MINIO_SECURE", "false").lower() in {"1", "true", "yes"} else "http"
+            endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
+            combined_video_url = f"{scheme}://{endpoint}/{bucket}/{encoded_key}"
 
         rebuilt_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
         payload["combined_video_key"] = combined_video_key

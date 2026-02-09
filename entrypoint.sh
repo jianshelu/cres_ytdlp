@@ -2,6 +2,54 @@
 set -e
 PID_DIR="/workspace/run"
 mkdir -p "$PID_DIR"
+CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
+TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.121.250.72:7233}"
+MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.121.250.72:9000}"
+MINIO_SECURE="${MINIO_SECURE:-false}"
+MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY:-minioadmin}"
+MINIO_SECRET_KEY="${MINIO_SECRET_KEY:-minioadmin}"
+
+start_local_minio() {
+    mkdir -p ./data/minio
+    echo "Starting local MinIO..."
+    minio server ./data/minio --address ":9000" --console-address ":9001" > /var/log/minio.log 2>&1 &
+    echo $! > "$PID_DIR/cres_minio.pid"
+    echo "Waiting for local MinIO..."
+    local max_retries=30
+    local count=0
+    until curl -s http://localhost:9000/minio/health/live >/dev/null || [ $count -eq $max_retries ]; do
+      sleep 1
+      count=$((count + 1))
+    done
+    if [ $count -eq $max_retries ]; then
+      echo "Local MinIO failed to start"
+      exit 1
+    fi
+    echo "Configuring local MinIO bucket..."
+    mc alias set cres http://localhost:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" >/dev/null 2>&1 || true
+    mc mb cres/cres --ignore-existing >/dev/null 2>&1 || true
+    mc anonymous set download cres/cres >/dev/null 2>&1 || true
+    export MINIO_ENDPOINT="localhost:9000"
+    export MINIO_SECURE="false"
+}
+
+start_local_temporal() {
+    echo "Starting local Temporal dev server..."
+    temporal server start-dev --ip 0.0.0.0 > /var/log/temporal.log 2>&1 &
+    echo $! > "$PID_DIR/cres_temporal.pid"
+    echo "Waiting for local Temporal..."
+    local max_retries=30
+    local count=0
+    until temporal operator cluster health >/dev/null 2>&1 || [ $count -eq $max_retries ]; do
+      sleep 1
+      count=$((count + 1))
+    done
+    if [ $count -eq $max_retries ]; then
+      echo "Local Temporal failed to start"
+      exit 1
+    fi
+    export TEMPORAL_ADDRESS="localhost:7233"
+}
 
 echo "Starting services..."
 
@@ -16,48 +64,24 @@ export PATH="/root/.deno/bin:$PATH"
 # Install yt-dlp-ejs if not present
 python3 -c "import yt_dlp_ejs" 2>/dev/null || pip3 install yt-dlp-ejs > /dev/null 2>&1
 
-# Start MinIO in the background
-mkdir -p ./data/minio
-echo "Starting MinIO..."
-minio server ./data/minio --address ":9000" --console-address ":9001" > /var/log/minio.log 2>&1 &
-echo $! > "$PID_DIR/cres_minio.pid"
-
-# Wait for MinIO to be ready
-echo "Waiting for MinIO to start..."
-MAX_RETRIES=30
-COUNT=0
-until curl -s http://localhost:9000/minio/health/live || [ $COUNT -eq $MAX_RETRIES ]; do
-  sleep 1
-  COUNT=$((COUNT + 1))
-done
-
-if [ $COUNT -eq $MAX_RETRIES ]; then
-  echo "MinIO failed to start"
-  exit 1
+if [ "$CONTROL_PLANE_MODE" = "local" ]; then
+    if command -v temporal >/dev/null 2>&1 && command -v minio >/dev/null 2>&1 && command -v mc >/dev/null 2>&1; then
+        start_local_minio
+        start_local_temporal
+        echo "Using local control plane (Temporal + MinIO)."
+    else
+        echo "CONTROL_PLANE_MODE=local requested but temporal/minio tools missing; fallback to external mode."
+        CONTROL_PLANE_MODE="external"
+    fi
 fi
 
-echo "MinIO is ready."
+if [ "$CONTROL_PLANE_MODE" = "external" ]; then
+    echo "Using external control plane via Tailscale."
+    echo "TEMPORAL_ADDRESS=$TEMPORAL_ADDRESS"
+    echo "MINIO_ENDPOINT=$MINIO_ENDPOINT"
+fi
 
-# Configure mc
-echo "Configuring MinIO client..."
-mc alias set cres http://localhost:9000 minioadmin minioadmin
-mc mb cres/cres --ignore-existing
-mc anonymous set download cres/cres
-
-# Start Temporal Dev Server if requested or as default
-# Note: In a production environment on vast.ai, you might want a persistent Temporal cluster,
-# but for standalone Docker, start-dev is useful.
-echo "Starting Temporal dev server..."
-temporal server start-dev --ip 0.0.0.0 > /var/log/temporal.log 2>&1 &
-echo $! > "$PID_DIR/cres_temporal.pid"
-
-# Wait for Temporal
-echo "Waiting for Temporal..."
-COUNT=0
-until temporal operator cluster health || [ $COUNT -eq $MAX_RETRIES ]; do
-  sleep 1
-  COUNT=$((COUNT + 1))
-done
+export CONTROL_PLANE_MODE TEMPORAL_ADDRESS MINIO_ENDPOINT MINIO_SECURE MINIO_ACCESS_KEY MINIO_SECRET_KEY
 
 # Start LLM Server if model is present
 # Start LLM Server if model is present

@@ -41,19 +41,48 @@ check_http() {
     fi
 }
 
+check_temporal_grpc() {
+    local target="$1"
+    python3 - "$target" <<'PY'
+import asyncio
+import sys
+from temporalio.client import Client
+
+target = sys.argv[1]
+
+async def main():
+    try:
+        await Client.connect(target)
+        print(f"[OK]      Temporal gRPC {target}")
+    except Exception as e:
+        print(f"[FAIL]    Temporal gRPC {target} err={e}")
+
+asyncio.run(main())
+PY
+}
+
 show_status() {
+    local control_plane_mode="${CONTROL_PLANE_MODE:-external}"
+    local temporal_addr="${TEMPORAL_ADDRESS:-localhost:7233}"
+    local minio_endpoint="${MINIO_ENDPOINT:-localhost:9000}"
+    local minio_scheme="http"
+    if [ "${MINIO_SECURE:-false}" = "true" ] || [ "${MINIO_SECURE:-false}" = "1" ]; then
+        minio_scheme="https"
+    fi
     echo "== CRES Service Status =="
     pid_status_line "next-wrapper" "$PID_DIR/cres_next_wrapper.pid"
     pid_status_line "worker" "$PID_DIR/cres_worker.pid"
     pid_status_line "fastapi" "$PID_DIR/cres_fastapi.pid"
     pid_status_line "llama" "$PID_DIR/cres_llama.pid"
-    pid_status_line "temporal" "$PID_DIR/cres_temporal.pid"
-    pid_status_line "minio" "$PID_DIR/cres_minio.pid"
+    if [ "$control_plane_mode" = "local" ]; then
+        pid_status_line "temporal" "$PID_DIR/cres_temporal.pid"
+        pid_status_line "minio" "$PID_DIR/cres_minio.pid"
+    fi
     echo
     check_http "Next.js" "http://127.0.0.1:3000"
     check_http "FastAPI" "http://127.0.0.1:8000/health"
-    check_http "MinIO" "http://127.0.0.1:9000/minio/health/live"
-    check_http "Temporal UI" "http://127.0.0.1:8233"
+    check_http "MinIO" "${minio_scheme}://${minio_endpoint}/minio/health/live"
+    check_temporal_grpc "${temporal_addr}"
     echo
     echo "== Recent Logs =="
     echo "-- /workspace/logs/app.log --"
@@ -149,15 +178,22 @@ restart_services() {
     pkill -9 -f "/workspace/entrypoint.sh bash -c cd /workspace/web && npm start" || true
     pkill -9 -f "uvicorn src.api.main:app --host 0.0.0.0 --port 8000" || true
     pkill -9 -f "python3 -m src.backend.worker" || true
-    pkill -9 -f "temporal server start-dev --ip 0.0.0.0" || true
-    pkill -9 -f "minio server ./data/minio --address :9000 --console-address :9001" || true
     sleep 2
 
     # Environment setup.
     export LLM_MODEL_PATH="${LLM_MODEL_PATH:-/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
     export WHISPER_MODEL_PATH="${WHISPER_MODEL_PATH:-/workspace/packages/models/whisper}"
+    export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.121.250.72:7233}"
+    export MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.121.250.72:9000}"
+    export MINIO_SECURE="${MINIO_SECURE:-false}"
+    export CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
     export PATH="/root/.local/bin:/usr/local/bin:/usr/bin:/bin:/workspace:${PATH}"
     mkdir -p /workspace/logs
+
+    if [ -f /workspace/scripts/setup_tailscale.sh ]; then
+        chmod +x /workspace/scripts/setup_tailscale.sh
+        /workspace/scripts/setup_tailscale.sh || true
+    fi
 
     echo "Starting services via entrypoint..."
     rm -f "$PID_DIR/cres_next_wrapper.pid"

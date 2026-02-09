@@ -8,6 +8,7 @@ from src.backend.workflows import (
 from src.api.routers import transcriptions
 import re
 import uuid
+import os
 try:
     from pypinyin import lazy_pinyin
 except Exception:  # pragma: no cover - optional fallback
@@ -17,6 +18,16 @@ app = FastAPI()
 
 # Include routers
 app.include_router(transcriptions.router)
+
+TEMPORAL_ADDRESS = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
+LLAMA_HEALTH_URL = os.getenv("LLAMA_HEALTH_URL", "http://localhost:8081/health")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
+MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() in {"1", "true", "yes"}
+
+
+def _minio_health_url() -> str:
+    scheme = "https" if MINIO_SECURE else "http"
+    return f"{scheme}://{MINIO_ENDPOINT}/minio/health/live"
 
 
 class ProcessRequest(BaseModel):
@@ -73,7 +84,7 @@ def _safe_query_slug(query: str) -> str:
 @app.post("/process")
 async def process_video(request: ProcessRequest):
     try:
-        client = await Client.connect("localhost:7233")
+        client = await Client.connect(TEMPORAL_ADDRESS)
 
         video_id = request.url.split('=')[-1] if '=' in request.url else request.url[-12:]
         handle = await client.start_workflow(
@@ -92,7 +103,7 @@ async def process_video(request: ProcessRequest):
 @app.post("/batch")
 async def batch_process(request: BatchRequest):
     try:
-        client = await Client.connect("localhost:7233")
+        client = await Client.connect(TEMPORAL_ADDRESS)
 
         parallelism = _resolve_batch_parallelism(request.limit, request.parallelism)
         max_duration_minutes = _resolve_max_duration_minutes(request.max_duration_minutes)
@@ -141,23 +152,22 @@ async def health():
     # Check llama-server (port 8081)
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
-            resp = await client.get("http://localhost:8081/health")
+            resp = await client.get(LLAMA_HEALTH_URL)
             checks["llama"] = "ok" if resp.status_code == 200 else "down"
     except Exception:
         checks["llama"] = "down"
 
-    # Check Temporal (port 8233 UI API)
+    # Check Temporal via gRPC connection test.
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            resp = await client.get("http://localhost:8233/api/v1/namespaces")
-            checks["temporal"] = "ok" if resp.status_code == 200 else "down"
+        await Client.connect(TEMPORAL_ADDRESS)
+        checks["temporal"] = "ok"
     except Exception:
         checks["temporal"] = "down"
 
-    # Check MinIO (port 9000 health endpoint)
+    # Check MinIO endpoint.
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
-            resp = await client.get("http://localhost:9000/minio/health/live")
+            resp = await client.get(_minio_health_url())
             checks["minio"] = "ok" if resp.status_code == 200 else "down"
     except Exception:
         checks["minio"] = "down"

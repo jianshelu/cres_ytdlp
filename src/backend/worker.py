@@ -1,5 +1,6 @@
 import asyncio
 import concurrent.futures
+import os
 from temporalio.client import Client
 from temporalio.worker import Worker
 
@@ -26,11 +27,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 async def main():
-    # Connect to the Temporal server using the Docker networking or localhost
-    # Since we are running in the same container/network space as CLI:
-    client = await Client.connect("localhost:7233")
-    
-    print("Worker connecting to Temporal server on localhost:7233...")
+    temporal_address = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
+    client = await Client.connect(temporal_address)
+    print(f"Worker connecting to Temporal server on {temporal_address}...")
 
     # Determine identity
     import socket
