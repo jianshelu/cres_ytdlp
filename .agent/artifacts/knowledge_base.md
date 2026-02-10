@@ -34,7 +34,7 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
 | :--- | :--- | :--- |
 | 2026-02-08 | Artifact set incomplete | Added required artifact files |
 
-### ? Optimization
+### Optimization
 
 | Area | Guidance | Rationale |
 | :--- | :--- | :--- |
@@ -48,9 +48,7 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
 | Area | Dev (Local) | Deployment (Vast.ai) |
 | :--- | :--- | :--- |
 | Batch mode switch | Env var `BATCH_ORCHESTRATOR_MODE` | `inline` default, `legacy` rollback |
-| Frontend release mode | Local 
-ext build` validation | Must run build on instance before 
-ext start` |
+| Frontend release mode | Local `next build` validation | Must run build on instance before `next start` |
 | Script execution | Standalone script invocation | `google_ai_pipeline_test.py` no bootstrap coupling |
 
 ### Infra Ledger
@@ -79,7 +77,7 @@ ext start` |
 | 2026-02-09 | Combined video progress reset on scroll | Clip load effect re-triggered on render churn | Added memoized source list + clip-key guard |
 | 2026-02-09 | Home marquee not visible on instance | No remote rebuild after source sync | Build + targeted Next restart |
 
-### ? Optimization
+### Optimization
 
 | Area | Pattern | Effect |
 | :--- | :--- | :--- |
@@ -94,10 +92,7 @@ ext start` |
 | Domain | Local Dev Runtime | Vast.ai Runtime | Operational Note |
 | :--- | :--- | :--- | :--- |
 | API orchestration mode | `BATCH_ORCHESTRATOR_MODE` optional in local env | Default `inline` unless explicitly set to `legacy` | Enables zero-code rollback behavior |
-| Frontend release cycle | Local 
-pm run build` used for compile checks | Must run remote 
-pm run build` before 
-ext start` | Source sync alone does not update live pages |
+| Frontend release cycle | Local `npm run build` used for compile checks | Must run remote `npm run build` before `next start` | Source sync alone does not update live pages |
 | Temporal client usage | Local tooling may lack `temporalio` package | Worker/API always run inside instance python env | Query verification should run in-instance |
 | Data index source | `web/src/data.json` can be local stale snapshot | `/workspace/web/src/data.json` is live source-of-truth | Always regenerate index on instance after storage changes |
 
@@ -130,7 +125,7 @@ ext start` | Source sync alone does not update live pages |
 | 2026-02-09 | Homepage marquee not visible after code change | Remote runtime still serving previous build | User saw old grid layout | Deploy source + run remote build + restart Next |
 | 2026-02-09 | Query alias split (`Antigravity` vs `Anti gravity`) | Different slug normalization paths over time | Separate combined outputs/caches created | Recompute both slugs + clear cache branch |
 
-### ? Optimization
+### Optimization
 
 | Area | Tactic | Operational Benefit |
 | :--- | :--- | :--- |
@@ -138,8 +133,7 @@ ext start` | Source sync alone does not update live pages |
 | Temporal traceability | Single orchestrator timeline in test phase | Easier debugging of activity ordering and latency |
 | Cache control | Targeted key deletion instead of full bucket purge | Faster reset cycles with lower collateral impact |
 | Frontend stability | Avoid unnecessary media source/seek resets | Maintains uninterrupted playback during UI state changes |
-| Deployment safety | Restart only affected services (`api+worker` or 
-ext`) | Minimizes disruption to Temporal/MinIO/llama services |
+| Deployment safety | Restart only affected services (`api+worker` or `next`) | Minimizes disruption to Temporal/MinIO/llama services |
 
 ## Date: 2026-02-09 // Incremental Closeout (Manual Instance Shutdown)
 
@@ -172,6 +166,105 @@ ext`) | Minimizes disruption to Temporal/MinIO/llama services |
 | :--- | :--- | :--- |
 | Cold-start recovery | Run service health + one smoke query before heavy tests | Avoid false negatives after instance reboot |
 | UX readability | Prefer stable idle motion and explicit hover acceleration | Reduces motion fatigue on dense query rows |
+
+## Date: 2026-02-09 // Hybrid Topology Cutover Backfill
+
+### Env Specs
+
+| Area | Final Host | Notes |
+| :--- | :--- | :--- |
+| Web (`:3000`) | `huihuang` | User-facing page should be served from LAN host |
+| FastAPI (`:8000`) | `huihuang` | `/batch` and `/admin/reindex` hosted with web-side data authority |
+| Temporal (`:7233`) | `huihuang` (reachable from instance) | Control plane for workflow state |
+| MinIO (`:9000`) | `huihuang` | Object store for query artifacts |
+| Worker + GPU inference | Vast instance | Whisper/LLM-heavy tasks kept remote on GPU host |
+
+### Infra Ledger
+
+| Topic | Learned Constraint | Operational Rule |
+| :--- | :--- | :--- |
+| Endpoint ownership | Mixed host assumptions caused repeated failures | Keep one authoritative host map in env/runbook |
+| Access path | Tunnel and direct LAN paths were mixed during cutover | Prefer direct LAN for LAN services; use SSH only for instance-specific ops |
+| Data visibility | MinIO writes do not guarantee homepage freshness | Reindex path must target web host authority |
+
+### Bug Log
+
+| Date | Issue | Root Cause | Resolution |
+| :--- | :--- | :--- | :--- |
+| 2026-02-09 | Web reachable then unreachable | Proxy/tunnel leftovers after host changes | Cleaned up access path assumptions and revalidated direct LAN route |
+| 2026-02-09 | Query succeeded but no homepage updates | Index source-of-truth and refresh callback split across hosts | Re-aligned refresh/index ownership to web host |
+| 2026-02-09 | Worker role confusion (cpu vs gpu host) | Temporary split experimentation during migration | Reverted to workers on instance to match dependency/GPU needs |
+
+### Optimization
+
+| Area | Recommendation | Benefit |
+| :--- | :--- | :--- |
+| Runbooks | Add explicit host-ownership matrix near startup scripts | Faster recovery after reboot/migration |
+| Health checks | Add single command that validates all four services + worker | Prevent partial-green states |
+| Config drift | Keep one canonical env template for hybrid mode | Reduce URL/path formatting errors |
+
+## Date: 2026-02-10 // Hybrid LAN Control Plane + Remote GPU Worker
+
+### Env Specs
+
+| Area | Runtime Location | Notes |
+| :--- | :--- | :--- |
+| Web UI (`:3000`) | `huihuang` LAN host | Browser-facing source of truth for UI state |
+| FastAPI (`:8000`) | `huihuang` LAN host | Receives `/batch`, serves API and reindex admin endpoint |
+| Temporal (`:7233`) | `huihuang` LAN host (with public forwarding) | Workflow control plane endpoint for worker/API clients |
+| MinIO (`:9000`) | `huihuang` LAN host (with public forwarding) | Object storage for videos, metadata, combined artifacts |
+| GPU Worker + Whisper + llama.cpp | Vast.ai instance | Final decision: heavy activities stay on instance |
+
+### Infra Ledger
+
+| Topic | Current Rule/Fact | Practical Check |
+| :--- | :--- | :--- |
+| Tailscale usage | Removed from active architecture | Use direct LAN/public forwarding paths only |
+| Worker placement | All workers on instance | Temporal worker list must show active worker after startup |
+| Reindex trigger | Worker calls API reindex endpoint after batch completion | Verify homepage reflects new query without manual rebuild |
+| Index authority | `web/src/data.json` on `huihuang` host | Do not treat local dev machine file as production truth |
+
+### Magazine
+
+| Subject | Recommendation | Reason |
+| :--- | :--- | :--- |
+| Network path stability | Prefer fixed endpoint scheme and avoid mixed localhost/public concatenations | Prevent `Failed to parse URL` and intermittent `fetch failed` |
+| Activity throughput | Keep per-video pipeline dependency strict but cross-video parallel | Maximizes utilization without violating data dependencies |
+| Download optimization | Prioritize queue partitioning and bounded concurrency before segmented file download complexity | Better ROI and lower failure surface |
+
+### Bug Log
+
+| Date | Issue | Root Cause | Resolution |
+| :--- | :--- | :--- | :--- |
+| 2026-02-10 | `API 502` on batch submit (`Failed to parse URL`) | Malformed backend URL path (`...8000 /batch`) | Corrected target URL formatting and backend routing path |
+| 2026-02-10 | No activities started (`No worker running`) | Worker runtime missing transcription dependency | Restored dependency/runtime alignment on instance |
+| 2026-02-10 | Workflow completed but homepage not updated | Reindex/data authority split across hosts | Reconfirmed callback and host ownership for index generation |
+
+### Optimization
+
+| Area | Next Action | Expected Effect |
+| :--- | :--- | :--- |
+| Temporal queues | Split `download` and `transcribe/summarize` queues | Reduce long download blocking of GPU transcription slots |
+| Worker boot | Add dependency preflight (`import` check + endpoint health) | Fail fast before queue starvation |
+| Observability | Persist per-run activity timing summary | Faster diagnosis of regression and tuning impact |
+
+## Date: 2026-02-10 // Reconciliation Findings
+
+### Infra Ledger
+
+| Item | Source | Status | Note |
+| :--- | :--- | :--- | :--- |
+| Artifact chronology ordering | `.agent/artifacts/*.md` | Resolved | Date ordering corrected in task ledger |
+| Text integrity defects | `.agent/artifacts/*.md` | Resolved | Fixed malformed field names and broken command snippets |
+| Runtime-to-artifact coverage check | `logs/instance.log` + pipeline reports | In progress | Missing-item list captured in reconciliation checklist |
+
+### Bug Log
+
+| Date | Issue | Status | Next Action |
+| :--- | :--- | :--- | :--- |
+| 2026-02-10 | SSL `HTTP_REQUEST` warnings on TLS endpoint in instance logs | Open | Add permanent probe/protocol fix note to runbook |
+| 2026-02-10 | RSS title mojibake from external feed (`Here's`) | Open | Add feed text normalization step in pipeline |
+| 2026-02-10 | Low-information keyword extraction (`ai-related`) quality | Open | Add keyword quality threshold and fallback extraction rule |
 
 
 

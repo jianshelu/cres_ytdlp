@@ -8,6 +8,8 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
 | 2026-02-08 | Artifact System | OBLONG Consolidation | `[DONE]` | 11:19:16 |
 | 2026-02-09 | Temporal Orchestrator + Frontend + Batch Test Harness | Unified Orchestration and UX Stabilization | `[DONE]` | 00:41:30 |
 | 2026-02-09 | Workflow Runtime + Combined Sentence/Video + Cache/UX | Platform Baseline Lock (Do-Not-Rollback) | `[DONE]` | 02:30:00 |
+| 2026-02-09 | Control Plane Migration + LAN Web Hosting + Runtime Recovery | Hybrid Topology Cutover | `[DONE]` | 23:40:00 |
+| 2026-02-10 | Local Control Plane + Remote GPU Worker + Service Recovery | Hybrid Runtime Stabilization | `[DONE]` | 02:33:01 |
 
 ---
 
@@ -115,13 +117,13 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
   * Outcome: API detects incomplete cache payload and recomputes response to refresh cache.
   * Strategy: Cache-read compatibility checks before return; fallback to recompute when required fields are missing.
   * Scope: `src/api/routers/transcriptions.py`.
-  * Guardrail: New combined fields (`key_sentences`, `combined_video_url`, ecombined_sentence`, `sentence_version`) are required for cache hits.
+  * Guardrail: New combined fields (`key_sentences`, `combined_video_url`, `recombined_sentence`, `sentence_version`) are required for cache hits.
 
 * Plan 15: Mark rebuilt combined sentence/video explicitly for auditability
   * Context: Need visible evidence that historical results were rebuilt by new logic.
   * Outcome: Rebuilt outputs carry explicit version/flag metadata.
   * Strategy: Store and expose:
-    * ecombined_sentence: true`
+    * `recombined_sentence: true`
     * `combined_sentence_version: "recombined-v2"`
     * `combined_rebuilt_at_utc`
   * Scope: MinIO combined output + API response + frontend badge.
@@ -132,8 +134,7 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
 * Plan 16: Lock deployment behavior to remote instance build/restart only
   * Context: Local build verification did not reflect user-visible runtime state.
   * Outcome: Frontend/backend changes are validated only after remote sync and remote service restart.
-  * Strategy: Use instance-side source sync, remote 
-ext build`, and targeted restart of affected services.
+  * Strategy: Use instance-side source sync, remote `next build`, and targeted restart of affected services.
   * Scope: `web` runtime release flow, operational scripts and runbook conventions.
   * Guardrail: Avoid local-only build conclusions for UI behavior acceptance.
 
@@ -150,6 +151,64 @@ ext build`, and targeted restart of affected services.
   * Strategy: Persist final operational facts (commit, push, shutdown owner, pending resume checks) into artifacts.
   * Scope: `.agent/artifacts/*.md`, git baseline tracking.
   * Guardrail: Do not reopen architecture decisions implicitly in later sessions without explicit request.
+
+## Date: 2026-02-09 // Hybrid Topology Cutover (Afternoon/Evening Backfill)
+
+* Plan 23: Transition from in-instance full stack to LAN-hosted control plane/web
+  * Context: User moved Temporal/MinIO/web responsibilities to LAN server and kept instance primarily for GPU workloads.
+  * Outcome: Service ownership boundaries were redefined across hosts.
+  * Strategy: Shift runtime endpoints and startup scripts from single-host defaults to cross-host addresses.
+  * Scope: deployment/run scripts, env variables, host runbooks.
+
+* Plan 24: Validate and repair access paths after tunnel/proxy churn
+  * Context: Connect scripts, reverse tunnel assumptions, and host reboot caused intermittent service inaccessibility.
+  * Outcome: Direct LAN access to web was restored and conflicting forwarding assumptions were reduced.
+  * Strategy: re-test each service path independently (web, API, Temporal UI, MinIO UI) and remove stale proxy dependencies.
+  * Scope: operational connection scripts, endpoint checks, startup sequence.
+
+* Plan 25: Align index update flow with new web host authority
+  * Context: Workflows and MinIO objects completed successfully but homepage did not reflect new results.
+  * Outcome: Reindex ownership and callback path became explicit under LAN web host model.
+  * Strategy: keep API-side reindex endpoint reachable from worker host and ensure generated index lands on production web host.
+  * Scope: `refresh_index` activity behavior, API admin endpoint, web data source placement.
+
+* Plan 26: Restore stable worker runtime after host role split
+  * Context: During migration, worker placement briefly diverged and dependency/runtime mismatches appeared.
+  * Outcome: Final rule set clarified: workers execute on instance, control plane/web on LAN host.
+  * Strategy: normalize worker startup to instance and keep dependency set complete there.
+  * Scope: worker runtime env, startup commands, dependency packaging.
+
+## Date: 2026-02-10 // Hybrid Runtime Stabilization
+
+* Plan 19: Migrate web and API serving baseline to `huihuang` LAN server, keep GPU-heavy execution on Vast instance
+  * Context: User moved Web/FastAPI/Temporal/MinIO control functions to LAN host and kept Whisper/LLM-heavy workload on instance.
+  * Outcome: Control plane and user-facing web stabilized on LAN host; worker execution path clarified.
+  * Strategy: Align env and startup scripts with LAN control plane endpoints; avoid stale local machine paths.
+  * Scope: deployment scripts, runtime env, startup/runbook procedures.
+
+* Plan 20: Harden cross-host index refresh and object visibility after workflow completion
+  * Context: Workflows completed and objects appeared in MinIO, but homepage did not show new query results.
+  * Outcome: Reindex callback path verified and refresh flow made explicit between instance worker and LAN API/web host.
+  * Strategy: Keep `REINDEX_URL` callback reachable from instance, add fallback local index generation behavior, and verify `data.json` source-of-truth host.
+  * Scope: `src/backend/activities.py`, runtime env config, operational checks.
+
+* Plan 21: Recover worker activity execution by correcting runtime dependencies on instance
+  * Context: Temporal showed no running activities and failure `No module named 'faster_whisper'`.
+  * Outcome: Worker runtime dependency expectations documented and aligned with "all workers on instance" final decision.
+  * Strategy: Keep Whisper dependency resolved in instance runtime where GPU execution happens; avoid drift between hosts.
+  * Scope: worker runtime image/env and startup sequence.
+
+* Plan 22: Performance evaluation pass for multi-video keyword workflows
+  * Context: User requested comparison between `阿里千问` and `开源模型` workflow runs and optimization space.
+  * Outcome: Download/transcribe/summarize critical path and latency contributors identified; optimization backlog updated.
+  * Strategy: Compare completed run durations and activity timeline shape, then prioritize queue/concurrency and network-path tuning.
+  * Scope: Temporal workflow timelines, `download_video` / `transcribe_video` / `summarize_content` activities, network path to external control plane.
+
+* Plan 27: Perform full artifact reconciliation and generate explicit missing-item backfill list
+  * Context: Long session compaction raised risk of partial history gaps and visible text corruption in artifacts.
+  * Outcome: Chronological ordering corrected, visible garble fixed, and a recorded/missing checklist produced.
+  * Strategy: Audit artifacts against logs and pipeline report outputs, then store results in a dedicated reconciliation document.
+  * Scope: `.agent/artifacts/*.md`, `logs/instance.log`, `.agent/artifacts/google_ai_pipeline_report*.json`.
 
 
 

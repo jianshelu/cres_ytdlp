@@ -31,8 +31,7 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
   * `/batch` responses report orchestrator mode as `inline` with accepted request IDs.
   * Worker logs confirm `QueryOrchestratorWorkflow` inline activity chain execution.
   * Anti-gravity query now yields multi-source key sentences instead of first-video-only output.
-  * Frontend build succeeded (
-ext build`) and instance restart returned `3000:200` and `8000:200` after targeted service restarts.
+  * Frontend build succeeded (`next build`) and instance restart returned `3000:200` and `8000:200` after targeted service restarts.
 
 ## Date: 2026-02-09 // Artifact Detail Expansion (Doc-Referenced)
 
@@ -70,9 +69,9 @@ ext build`) and instance restart returned `3000:200` and `8000:200` after target
     * recompute combined sentence/key sentences
     * generate server-side combined video (`ffmpeg`)
     * write MinIO artifact `queries/<slug>/combined/combined-video.mp4`
-    * persist version flags (ecombined_sentence`, `combined_sentence_version`, `combined_rebuilt_at_utc`).
+    * persist version flags (`recombined_sentence`, `combined_sentence_version`, `combined_rebuilt_at_utc`).
   * Updated transcriptions API/frontend contract:
-    * API returns `combined_video_url`, ecombined_sentence`, `sentence_version`
+    * API returns `combined_video_url`, `recombined_sentence`, `sentence_version`
     * frontend prefers prebuilt combined video when present
     * cache compatibility guard forces recompute if required new fields are missing.
 * **Verification:**
@@ -80,7 +79,7 @@ ext build`) and instance restart returned `3000:200` and `8000:200` after target
   * Bulk historical rebuild completed with zero failures (`--all --refresh-index`).
   * Query checks (e.g., `科技之光`, `记忆系统`, `Oracle`) returned:
     * `combined_video_url` present
-    * ecombined_sentence=true`
+    * `recombined_sentence=true`
     * `sentence_version=recombined-v2`.
 
 ## Date: 2026-02-09 // Remote Deployment Policy + Instance Shutdown Closeout
@@ -98,6 +97,70 @@ ext build`) and instance restart returned `3000:200` and `8000:200` after target
   * Baseline commit recorded on `main`: `9ed118b`.
   * Working tree confirmed clean at artifact closeout time.
   * Instance shutdown ownership recorded as manual user action (post-validation).
+
+## Date: 2026-02-09 // Hybrid Topology Cutover Backfill (Afternoon/Evening)
+
+* **Plan Statement:** Cut over to a hybrid topology: LAN host (`huihuang`) for web/control-plane services and Vast instance for GPU-heavy worker execution.
+* **Root Cause/Findings:**
+  * Previous deployment assumptions mixed local dev machine, LAN host, and instance responsibilities, creating endpoint ambiguity.
+  * Tunnel/proxy remnants and host restarts produced repeated access regressions and inconsistent service reachability.
+  * Workflow completion and MinIO object writes did not always surface in homepage results due to index authority split.
+* **Final Solution:**
+  * Re-established service ownership boundaries:
+    * Web + FastAPI + Temporal + MinIO on LAN host.
+    * GPU worker activities on instance.
+  * Revalidated direct web access model and reduced dependency on stale reverse-tunnel paths.
+  * Synced index refresh logic to the production web host authority so workflow completion updates user-visible results.
+* **Verification:**
+  * LAN web page reached and rendered after path cleanup.
+  * Batch queries executed to completion in Temporal with matching MinIO artifacts.
+  * Subsequent debugging focused on worker/runtime and API path correctness rather than service availability.
+
+## Date: 2026-02-10 // LAN Control Plane Recovery and Worker Reactivation
+
+* **Plan Statement:** Stabilize the post-reboot hybrid deployment where web/control plane services are on `huihuang` and GPU worker execution remains on the Vast instance.
+* **Root Cause/Findings:**
+  * Service access became inconsistent after host reboot and tunnel/proxy changes.
+  * Query submission intermittently failed with `API 502` (`Failed to parse URL`, then `fetch failed`) due to malformed/invalid backend target path and unreachable API pathing.
+  * Temporal runs completed but homepage data did not refresh, indicating index refresh path mismatch between worker host and web host.
+* **Final Solution:**
+  * Revalidated service topology and startup ownership: web/API/index source on `huihuang`, GPU worker and model inference on instance.
+  * Corrected backend connectivity pathing and re-verified health checks against active API endpoint.
+  * Reconfirmed reindex callback flow from worker side to LAN API host so completed workflows update homepage-visible index data.
+* **Verification:**
+  * API health check returned fully healthy payload (`api/llama/temporal/minio` all `ok`).
+  * Batch query start succeeded (`batch-oracle-...` accepted and executed).
+  * MinIO objects and Temporal completion aligned with successful pipeline progression.
+
+## Date: 2026-02-10 // Activity Failure Diagnosis and Throughput Assessment
+
+* **Plan Statement:** Diagnose "No worker running" / no activity execution and evaluate activity-level optimization opportunities.
+* **Root Cause/Findings:**
+  * Temporal failure payload showed `ModuleNotFoundError: faster_whisper`, blocking transcription activities.
+  * User clarified final runtime rule: keep Whisper/GPU execution on instance instead of LAN host.
+  * Comparative runs (`阿里千问` 8 targets, `开源模型` 10 targets) showed expected scaling with download/transcribe stages dominating wall-clock.
+* **Final Solution:**
+  * Restored worker execution consistency on instance and aligned dependency expectations with that runtime location.
+  * Confirmed `build_batch_combined_output` output quality for `阿里千问` and validated combined artifact generation path.
+  * Produced optimization recommendations around activity parallelism, queue partitioning, and network-path stability.
+* **Verification:**
+  * User confirmed instance service normal and query pipelines completed successfully (including `阿里千问` with 8 results).
+  * Combined output metrics returned valid non-empty values (`combined_keyword_count`, `combined_sentence_len`, `count`, `status`).
+
+## Date: 2026-02-10 // Artifact Full Reconciliation
+
+* **Plan Statement:** Perform a full artifact reconciliation to remove chronology drift and text corruption, then produce a gap list from concrete evidence files.
+* **Root Cause/Findings:**
+  * `task_list.md` had a date-order drift (`2026-02-09 backfill` placed after `2026-02-10` block).
+  * Multiple visible text defects existed (`recombined_sentence` field typo, broken command markdown, garbled arrow text).
+  * Logs/reports contained additional signals not yet fully represented as bug/backlog items.
+* **Final Solution:**
+  * Reordered artifact sections by date in task ledger.
+  * Repaired visible malformed fields and command snippets across artifacts.
+  * Added dedicated reconciliation file: `.agent/artifacts/reconciliation_checklist_2026-02-10.md`.
+* **Verification:**
+  * Reconciliation matrix now explicitly marks items as `Recorded` or `Missing`.
+  * Follow-up backlog items were appended into task ledger for unresolved missing entries.
 
 
 

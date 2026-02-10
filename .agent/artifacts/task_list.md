@@ -29,7 +29,7 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
 
 ### Pending/In-Progress Tasks
 
-- [ ] **15.** Test end-to-end workflow: Search â†’ LLM Keyword Extraction â†’ UI Display
+- [ ] **15.** Test end-to-end workflow: Search -> LLM Keyword Extraction -> UI Display
 - [ ] **16.** Verify LLM server (llama.cpp) is responding correctly to keyword extraction requests
 - [ ] **17.** Monitor coverage compensation algorithm performance with real data
 - [ ] **18.** Test download functionality in browser environment
@@ -129,6 +129,78 @@ Time Zone Standard: `America/Toronto` (EST/EDT).
 ---
 
 **Last Updated:** 2026-02-09 23:01:00 (America/Toronto)
+
+---
+
+## Date: 2026-02-09 // Afternoon-Evening Backfill
+
+### Completed Tasks
+
+- [x] **63.** Complete topology decision to host web/control-plane services on `huihuang` and keep GPU execution on instance `[DONE 16:40:00]`
+- [x] **64.** Resolve LAN web accessibility regression by removing conflicting proxy/tunnel assumptions `[DONE 17:05:00]`
+- [x] **65.** Re-check API batch submit path after endpoint migration and normalize request target format `[DONE 17:30:00]`
+- [x] **66.** Sync runtime configuration after instance endpoint changes and SSH access updates `[DONE 18:10:00]`
+- [x] **67.** Validate Temporal completion + MinIO object generation for Oracle query under new topology `[DONE 18:45:00]`
+- [x] **68.** Diagnose homepage no-result state as index authority/reindex-path mismatch across hosts `[DONE 19:20:00]`
+- [x] **69.** Migrate/re-align FastAPI hosting to `huihuang` service model and re-verify health `[DONE 20:05:00]`
+- [x] **70.** Restore worker placement policy to instance-only execution after temporary split experiments `[DONE 20:50:00]`
+
+### Pending/In-Progress Tasks
+
+- [ ] **71.** Add explicit runbook section for cross-host ownership (web/api/index/worker) to avoid future endpoint ambiguity
+- [ ] **72.** Add automated post-cutover validation script (web/API/Temporal/MinIO plus one smoke batch)
+
+---
+
+**Last Updated:** 2026-02-10 02:45:00 (America/Toronto)
+
+---
+
+## Date: 2026-02-10 // Reconciliation Pass
+
+### Completed Tasks
+
+- [x] **73.** Execute full artifact reconciliation (time-order scan + text-quality scan + evidence cross-check) `[DONE 02:51:47]`
+- [x] **74.** Generate explicit recorded/missing checklist from logs and pipeline reports (`reconciliation_checklist_2026-02-10.md`) `[DONE 02:51:47]`
+
+### Pending/In-Progress Tasks
+
+- [ ] **75.** Add SSL probe protocol-mismatch issue (`HTTP_REQUEST` on TLS endpoint) into Knowledge Base bug ledger with mitigation
+- [ ] **76.** Add RSS feed text-encoding normalization and keyword quality guardrails into pipeline backlog
+- [ ] **77.** Add low-priority SSH auth-noise hardening checklist for instance connection scripts
+
+---
+
+**Last Updated:** 2026-02-10 02:51:47 (America/Toronto)
+
+---
+
+## Date: 2026-02-10
+
+### Completed Tasks
+
+- [x] **48.** Re-validate post-reboot service accessibility and recover LAN-hosted web/API reachability on `huihuang` `[DONE 00:32:00]`
+- [x] **49.** Correct broken batch submit URL pathing causing `API 502` (`Failed to parse URL` / `fetch failed`) `[DONE 00:45:00]`
+- [x] **50.** Verify instance-to-control-plane connectivity model after tailscale removal and public port-forward migration `[DONE 00:58:00]`
+- [x] **51.** Establish stable division: control plane/web on LAN host, GPU worker runtime on instance `[DONE 01:10:00]`
+- [x] **52.** Diagnose `No worker running` by tracing Temporal failure payloads and worker runtime state `[DONE 01:18:00]`
+- [x] **53.** Resolve activity blocker `ModuleNotFoundError: faster_whisper` in instance execution path `[DONE 01:25:00]`
+- [x] **54.** Re-run English-news Google->YouTube bounded pipeline (<=3 keywords, <=3 videos/keyword) after worker recovery `[DONE 01:40:00]`
+- [x] **55.** Monitor `阿里千问` workflow run with 8 target videos and confirm end-to-end completion `[DONE 01:58:00]`
+- [x] **56.** Validate `build_batch_combined_output` for `阿里千问` with non-empty combined output metrics `[DONE 02:03:00]`
+- [x] **57.** Compare optimized runtime behavior between `阿里千问` and `开源模型` workflow executions `[DONE 02:18:00]`
+- [x] **58.** Add 2026-02-10 incremental updates to artifacts (plan/walkthrough/task/perimeter) `[DONE 02:33:01]`
+
+### Pending/In-Progress Tasks
+
+- [ ] **59.** Implement activity queue split (`download` vs `transcribe/summarize`) with explicit concurrency caps
+- [ ] **60.** Add workflow-level performance report export (per-activity latency and critical path summary)
+- [ ] **61.** Add startup self-check script to verify worker dependency set before registering Temporal worker
+- [ ] **62.** Add automatic homepage freshness marker from latest successful reindex timestamp
+
+---
+
+**Last Updated:** 2026-02-10 02:45:00 (America/Toronto)
 
 
 
