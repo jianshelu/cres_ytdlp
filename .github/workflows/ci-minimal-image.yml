@@ -1,0 +1,85 @@
+name: CI Minimal Image Boot
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.base"
+      - "requirements.instance.txt"
+      - "scripts/supervisord.conf"
+      - "scripts/container_smoke.sh"
+      - "src/**"
+      - ".github/workflows/ci-minimal-image.yml"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.base"
+      - "requirements.instance.txt"
+      - "scripts/supervisord.conf"
+      - "scripts/container_smoke.sh"
+      - "src/**"
+      - ".github/workflows/ci-minimal-image.yml"
+  workflow_dispatch:
+
+jobs:
+  minimal-build-and-boot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image (local)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.base
+          push: false
+          load: true
+          tags: cres-base-ci:${{ github.sha }}
+
+      - name: Build app image (local)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            BASE_IMAGE=cres-base-ci:${{ github.sha }}
+          push: false
+          load: true
+          tags: cres-app-ci:${{ github.sha }}
+
+      - name: Start minimal dependencies
+        run: |
+          set -euxo pipefail
+          docker network create cres-ci || true
+          docker run -d --name temporal-ci --network cres-ci temporalio/auto-setup:1.24.2
+          docker run -d --name minio-ci --network cres-ci \
+            -e MINIO_ROOT_USER=cres \
+            -e MINIO_ROOT_PASSWORD='Qh@113113' \
+            quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
+
+      - name: Boot app container and run smoke
+        run: |
+          set -euxo pipefail
+          docker run -d --name app-ci --network cres-ci \
+            -e CONTROL_PLANE_MODE=external \
+            -e TEMPORAL_ADDRESS=temporal-ci:7233 \
+            -e MINIO_ENDPOINT=minio-ci:9000 \
+            -e MINIO_SECURE=false \
+            -e MINIO_ACCESS_KEY=cres \
+            -e MINIO_SECRET_KEY='Qh@113113' \
+            -e AWS_ACCESS_KEY_ID=cres \
+            -e AWS_SECRET_ACCESS_KEY='Qh@113113' \
+            -e ENABLE_WEB=false \
+            cres-app-ci:${{ github.sha }}
+          docker exec app-ci /bin/bash /workspace/scripts/container_smoke.sh
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f app-ci temporal-ci minio-ci || true
+          docker network rm cres-ci || true

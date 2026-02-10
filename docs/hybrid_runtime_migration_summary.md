@@ -100,6 +100,10 @@ Current scripts also include defaults in:
 
 If topology changes, update these values first, then restart services.
 
+Instance image dependency source:
+- Use `requirements.instance.txt` for build-time runtime dependencies.
+- Avoid post-deploy `pip install` as part of normal operations.
+
 ---
 
 ## 6. Startup and Monitoring
@@ -188,6 +192,20 @@ Fix:
    - service restart,
    - `/health` verification,
    - one smoke query.
+5. Image release policy:
+   - publish `:canary` first,
+   - promote to `:stable` only after runtime validation.
+6. Worker startup policy:
+   - `worker-cpu` and `worker-gpu` are on-demand (not autostart),
+   - scheduler-trigger endpoints can request worker start via supervisor.
+
+## 9.1 Release/Validation Pipeline
+
+- GHCR workflow: `.github/workflows/deploy.yml`
+  - default publish tag: `canary`
+  - optional stable promotion input: `promote_stable=true`
+- Minimal boot CI: `.github/workflows/ci-minimal-image.yml`
+  - validates build + container boot + dependency wiring + queue registration smoke.
 
 ---
 

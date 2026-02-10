@@ -15,48 +15,6 @@ MINIO_SECRET_KEY="${MINIO_SECRET_KEY:-minioadmin}"
 REINDEX_URL="${REINDEX_URL:-http://64.229.113.233:8000/admin/reindex}"
 export WORKSPACE_ROOT
 
-start_local_minio() {
-    mkdir -p ./data/minio
-    echo "Starting local MinIO..."
-    minio server ./data/minio --address ":9000" --console-address ":9001" > /var/log/minio.log 2>&1 &
-    echo $! > "$PID_DIR/cres_minio.pid"
-    echo "Waiting for local MinIO..."
-    local max_retries=30
-    local count=0
-    until curl -s http://localhost:9000/minio/health/live >/dev/null || [ $count -eq $max_retries ]; do
-      sleep 1
-      count=$((count + 1))
-    done
-    if [ $count -eq $max_retries ]; then
-      echo "Local MinIO failed to start"
-      exit 1
-    fi
-    echo "Configuring local MinIO bucket..."
-    mc alias set cres http://localhost:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" >/dev/null 2>&1 || true
-    mc mb cres/cres --ignore-existing >/dev/null 2>&1 || true
-    mc anonymous set download cres/cres >/dev/null 2>&1 || true
-    export MINIO_ENDPOINT="localhost:9000"
-    export MINIO_SECURE="false"
-}
-
-start_local_temporal() {
-    echo "Starting local Temporal dev server..."
-    temporal server start-dev --ip 0.0.0.0 > /var/log/temporal.log 2>&1 &
-    echo $! > "$PID_DIR/cres_temporal.pid"
-    echo "Waiting for local Temporal..."
-    local max_retries=30
-    local count=0
-    until temporal operator cluster health >/dev/null 2>&1 || [ $count -eq $max_retries ]; do
-      sleep 1
-      count=$((count + 1))
-    done
-    if [ $count -eq $max_retries ]; then
-      echo "Local Temporal failed to start"
-      exit 1
-    fi
-    export TEMPORAL_ADDRESS="localhost:7233"
-}
-
 echo "Starting services..."
 
 # Install Deno if not present (required for yt-dlp to solve YouTube n-challenge)
@@ -70,22 +28,13 @@ export PATH="/root/.deno/bin:$PATH"
 # Install yt-dlp-ejs if not present
 python3 -c "import yt_dlp_ejs" 2>/dev/null || pip3 install yt-dlp-ejs > /dev/null 2>&1
 
-if [ "$CONTROL_PLANE_MODE" = "local" ]; then
-    if command -v temporal >/dev/null 2>&1 && command -v minio >/dev/null 2>&1 && command -v mc >/dev/null 2>&1; then
-        start_local_minio
-        start_local_temporal
-        echo "Using local control plane (Temporal + MinIO)."
-    else
-        echo "CONTROL_PLANE_MODE=local requested but temporal/minio tools missing; fallback to external mode."
-        CONTROL_PLANE_MODE="external"
-    fi
+if [ "$CONTROL_PLANE_MODE" != "external" ]; then
+    echo "CONTROL_PLANE_MODE=$CONTROL_PLANE_MODE is not supported in this image. Forcing external mode."
+    CONTROL_PLANE_MODE="external"
 fi
-
-if [ "$CONTROL_PLANE_MODE" = "external" ]; then
-    echo "Using external control plane via Tailscale."
-    echo "TEMPORAL_ADDRESS=$TEMPORAL_ADDRESS"
-    echo "MINIO_ENDPOINT=$MINIO_ENDPOINT"
-fi
+echo "Using external control plane endpoints."
+echo "TEMPORAL_ADDRESS=$TEMPORAL_ADDRESS"
+echo "MINIO_ENDPOINT=$MINIO_ENDPOINT"
 
 export CONTROL_PLANE_MODE TEMPORAL_ADDRESS MINIO_ENDPOINT MINIO_SECURE MINIO_ACCESS_KEY MINIO_SECRET_KEY REINDEX_URL
 

@@ -644,7 +644,7 @@ export default function TranscriptionsClient({ data, query }: Props) {
                     Search Query: <span className="keyword-badge" style={{ fontSize: '1.2rem', padding: '0.5rem 1rem' }}>{query}</span>
                 </p>
                 <p style={{ color: 'var(--muted)', marginTop: '0.5rem' }}>
-                    Showing {data.videos.length} video{data.videos.length !== 1 ? 's' : ''} (max 5)
+                    Showing {data.videos.length} video{data.videos.length !== 1 ? 's' : ''} (max 50)
                 </p>
             </div>
 

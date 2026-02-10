@@ -1,7 +1,6 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
 # Base image includes CUDA-enabled llama-server
 FROM ghcr.io/ggml-org/llama.cpp:server-cuda
-ARG INCLUDE_LOCAL_CONTROL_PLANE=true
 
 WORKDIR /workspace
 
@@ -24,16 +23,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get update \
  && apt-get install -y --no-install-recommends nodejs \
  && rm -rf /var/lib/apt/lists/*
-
-# Optional local control-plane tools (rollback mode only).
-RUN if [ "$INCLUDE_LOCAL_CONTROL_PLANE" = "true" ]; then \
-      curl -fsSL https://temporal.download/cli.sh | bash && \
-      mv /root/.temporalio/bin/temporal /usr/local/bin/temporal && \
-      curl -fsSL -o /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio && \
-      chmod +x /usr/local/bin/minio && \
-      curl -fsSL -o /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc && \
-      chmod +x /usr/local/bin/mc; \
-    fi
 
 # Default model/cache paths
 ENV LLM_MODEL_PATH=/workspace/packages/models/llm \

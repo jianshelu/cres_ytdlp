@@ -4,10 +4,10 @@ FROM ${BASE_IMAGE} AS base
 
 WORKDIR /workspace
 
-# Install Python deps
-COPY requirements.txt .
+# Install Python deps (instance runtime only: FastAPI + worker CPU/GPU stack)
+COPY requirements.instance.txt .
 RUN pip3 install --upgrade pip \
- && pip3 install --no-cache-dir -r requirements.txt \
+ && pip3 install --no-cache-dir -r requirements.instance.txt \
  && rm -rf /root/.cache/pip \
  && find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
  && find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete \

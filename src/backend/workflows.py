@@ -16,6 +16,9 @@ with workflow.unsafe.imports_passed_through():
     )
     from pypinyin import lazy_pinyin
 
+CPU_TASK_QUEUE = "video-processing-queue"
+GPU_TASK_QUEUE = "video-gpu-queue"
+
 
 def _safe_query_slug(query: str) -> str:
     pinyin_slug = "".join(lazy_pinyin(query or ""))
@@ -33,6 +36,7 @@ async def _run_query_pipeline_inline(
         search_videos,
         (query, limit, max_duration_minutes),
         start_to_close_timeout=timedelta(minutes=10),
+        task_queue=CPU_TASK_QUEUE,
     )
     workflow.logger.info(f"Found {len(urls)} videos to process (inline mode)")
 
@@ -55,16 +59,19 @@ async def _run_query_pipeline_inline(
             (url, query),
             start_to_close_timeout=timedelta(minutes=30),
             retry_policy=RetryPolicy(maximum_attempts=3),
+            task_queue=CPU_TASK_QUEUE,
         )
         transcript_text = await workflow.execute_activity(
             transcribe_video,
             filepath,
             start_to_close_timeout=timedelta(minutes=60),
+            task_queue=GPU_TASK_QUEUE,
         )
         summary = await workflow.execute_activity(
             summarize_content,
             (transcript_text, filepath, query),
             start_to_close_timeout=timedelta(minutes=10),
+            task_queue=GPU_TASK_QUEUE,
         )
         return {
             "status": "completed",
@@ -98,10 +105,12 @@ async def _run_query_pipeline_inline(
         (query, completed_results),
         start_to_close_timeout=timedelta(minutes=20),
         retry_policy=RetryPolicy(maximum_attempts=2),
+        task_queue=CPU_TASK_QUEUE,
     )
     await workflow.execute_activity(
         refresh_index,
         start_to_close_timeout=timedelta(minutes=2),
+        task_queue=CPU_TASK_QUEUE,
     )
 
     return {
@@ -137,7 +146,8 @@ class VideoProcessingWorkflow:
             download_video,
             (url, search_query),
             start_to_close_timeout=timedelta(minutes=30),
-            retry_policy=RetryPolicy(maximum_attempts=3)
+            retry_policy=RetryPolicy(maximum_attempts=3),
+            task_queue=CPU_TASK_QUEUE,
         )
 
         # 2. Transcribe Activity
@@ -145,7 +155,8 @@ class VideoProcessingWorkflow:
         transcript_text = await workflow.execute_activity(
             transcribe_video,
             filepath,
-            start_to_close_timeout=timedelta(minutes=60)
+            start_to_close_timeout=timedelta(minutes=60),
+            task_queue=GPU_TASK_QUEUE,
         )
 
         # 3. Summarize Activity
@@ -153,14 +164,16 @@ class VideoProcessingWorkflow:
         summary = await workflow.execute_activity(
             summarize_content,
             (transcript_text, filepath, search_query),
-            start_to_close_timeout=timedelta(minutes=10)
+            start_to_close_timeout=timedelta(minutes=10),
+            task_queue=GPU_TASK_QUEUE,
         )
 
 
         # 4. Refresh Index
         await workflow.execute_activity(
             refresh_index,
-            start_to_close_timeout=timedelta(minutes=2)
+            start_to_close_timeout=timedelta(minutes=2),
+            task_queue=CPU_TASK_QUEUE,
         )
 
         return {
@@ -271,7 +284,7 @@ class QueryDispatcherWorkflow:
                     BatchProcessingWorkflow.run,
                     (query, limit, parallelism, max_duration_minutes),
                     id=child_workflow_id,
-                    task_queue="video-processing-queue",
+                    task_queue=CPU_TASK_QUEUE,
                 )
             except Exception as e:
                 workflow.logger.error(f"Dispatcher child failed for query='{query}': {e}")
@@ -377,7 +390,8 @@ class ReprocessVideoWorkflow:
         summary_data = await workflow.execute_activity(
             summarize_content,
             (text, object_name, None),  # No search query for reprocessing
-            start_to_close_timeout=timedelta(minutes=10)
+            start_to_close_timeout=timedelta(minutes=10),
+            task_queue=GPU_TASK_QUEUE,
         )
 
         

@@ -24,12 +24,14 @@ app = FastAPI()
 app.include_router(transcriptions.router)
 
 TEMPORAL_ADDRESS = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
+CPU_TASK_QUEUE = "video-processing-queue"
 LLAMA_HEALTH_URL = os.getenv("LLAMA_HEALTH_URL", "http://localhost:8081/health")
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() in {"1", "true", "yes"}
 AUTO_REINDEX_ENABLED = os.getenv("AUTO_REINDEX_ENABLED", "false").lower() in {"1", "true", "yes"}
 AUTO_REINDEX_INTERVAL_SECONDS = max(15, int(os.getenv("AUTO_REINDEX_INTERVAL_SECONDS", "45")))
 AUTO_REINDEX_ON_START = os.getenv("AUTO_REINDEX_ON_START", "true").lower() in {"1", "true", "yes"}
+AUTO_START_WORKERS_ON_BATCH = os.getenv("AUTO_START_WORKERS_ON_BATCH", "true").lower() in {"1", "true", "yes"}
 _reindex_task: asyncio.Task | None = None
 _reindex_lock = asyncio.Lock()
 
@@ -52,6 +54,36 @@ def _run_index_rebuild_sync() -> str:
         check=True,
     )
     return (proc.stdout or proc.stderr or "index rebuilt").strip()
+
+
+def _start_workers_best_effort_sync() -> str:
+    """
+    Best-effort on-demand worker start for single-host deployments.
+    In split-host mode (API not colocated with supervisor), this safely no-ops.
+    """
+    cmds = [
+        ["supervisorctl", "-s", "unix:///tmp/supervisor.sock", "start", "worker-cpu"],
+        ["supervisorctl", "-s", "unix:///tmp/supervisor.sock", "start", "worker-gpu"],
+    ]
+    lines = []
+    for cmd in cmds:
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            out = (proc.stdout or proc.stderr or "").strip()
+            lines.append(out or f"{cmd[-1]}: no output")
+        except Exception as e:
+            lines.append(f"{cmd[-1]}: skipped ({e})")
+    return " | ".join(lines)
+
+
+async def _maybe_start_workers_on_demand() -> None:
+    if not AUTO_START_WORKERS_ON_BATCH:
+        return
+    try:
+        result = await asyncio.to_thread(_start_workers_best_effort_sync)
+        print(f"[worker-autostart] {result}")
+    except Exception as e:
+        print(f"[worker-autostart] skipped: {e}")
 
 
 async def _rebuild_index_once() -> str:
@@ -152,6 +184,7 @@ async def _shutdown_tasks():
 @app.post("/process")
 async def process_video(request: ProcessRequest):
     try:
+        await _maybe_start_workers_on_demand()
         client = await Client.connect(TEMPORAL_ADDRESS)
 
         video_id = request.url.split('=')[-1] if '=' in request.url else request.url[-12:]
@@ -159,7 +192,7 @@ async def process_video(request: ProcessRequest):
             VideoProcessingWorkflow.run,
             request.url,
             id=f"video-{video_id}",
-            task_queue="video-processing-queue",
+            task_queue=CPU_TASK_QUEUE,
         )
 
         return {"status": "started", "workflow_id": handle.id, "run_id": handle.run_id}
@@ -171,6 +204,7 @@ async def process_video(request: ProcessRequest):
 @app.post("/batch")
 async def batch_process(request: BatchRequest):
     try:
+        await _maybe_start_workers_on_demand()
         client = await Client.connect(TEMPORAL_ADDRESS)
 
         parallelism = _resolve_batch_parallelism(request.limit, request.parallelism)
@@ -183,7 +217,7 @@ async def batch_process(request: BatchRequest):
             BatchProcessingWorkflow.run,
             (request.query, request.limit, parallelism, max_duration_minutes),
             id=workflow_id,
-            task_queue="video-processing-queue",
+            task_queue=CPU_TASK_QUEUE,
         )
 
         return {

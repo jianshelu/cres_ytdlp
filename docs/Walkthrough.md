@@ -224,3 +224,52 @@ Transcriptions page loads with keyword badge and navigation
 Note: Sidebar shows "No keywords extracted yet" because 
 data.json
  has empty keyword arrays (requires running workflow processing to populate)
+ # #   D a t e :   2 0 2 6 - 0 2 - 1 0   / /   P r o j e c t   M i g r a t i o n   E x p l a n a t i o n 
+       *   * * P l a n   S t a t e m e n t : * *   R e a d   a n d   e x p l a i n   t h e   h y b r i d   r u n t i m e   m i g r a t i o n   s u m m a r y   ( d o c s / h y b r i d _ r u n t i m e _ m i g r a t i o n _ s u m m a r y . m d ) . 
+       *   * * R o o t   C a u s e / F i n d i n g s : * *   T h e   p r o j e c t   h a s   s u c c e s s f u l l y   m o v e d   f r o m   a   s i n g l e - h o s t   m o n l i t h   o n   V a s t . a i   ( P h a s e   A )   t o   a   h y b r i d   m o d e l   ( P h a s e   C )   w i t h   a   L A N - h o s t e d   c o n t r o l   p l a n e   ( h u i h u a n g )   a n d   a   V a s t . a i   c o m p u t e   p l a n e . 
+       *   * * F i n a l   S o l u t i o n : * *   D o c u m e n t e d   t h e   s e r v i c e   o w n e r s h i p   a n d   r e q u e s t   f l o w   t o   t h e   u s e r   a n d   i n i t i a l i z e d   t o d a y ' s   t r a c k i n g   a r t i f a c t s . 
+       *   * * V e r i f i c a t i o n : * *   E x p l a i n e d   t h e   a u t h o r i t a t i v e   a r c h i t e c t u r e   a n d   k e y   f a i l u r e   p a t t e r n s   t o   t h e   u s e r .  
+ 
+       *   * * T o p o l o g y   F a c t : * *   U s e r   c o n f i r m e d   a   3 - n o d e   s e t u p :   N o r f o l k   ( D e v / 1 3 1 ) ,   H u i h u a n g   ( S e r v e r / 1 3 0 ) ,   a n d   I n s t a n c e   ( G P U / R e m o t e ) .   I n s t a n c e   c o n n e c t s   t o   H u i h u a n g   v i a   r o u t e r   f o r w a r d i n g .  
+ 
+       *   * * C o n n e c t i v i t y   U p d a t e : * *   U p d a t e d   . e n v   a n d   P e r i m e t e r   w i t h   n e w   V a s t   ( s s h 5 . v a s t . a i : 1 1 3 1 9 )   a n d   H u i h u a n g   ( 1 9 2 . 1 6 8 . 2 . 1 3 0 )   d e t a i l s   i n c l u d i n g   M i n I O   c r e d e n t i a l s .  
+ 
+       *   * * T e s t   F a i l u r e : * *   s c r i p t s / g o o g l e _ a i _ p i p e l i n e _ t e s t . p y   f a i l e d   t o   c o n n e c t   t o   b a c k e n d   o n   p o r t   8 0 0 0 .   C o n f i r m e d   F a s t A P I   o n   H u i h u a n g   i s   n o t   r e a c h a b l e   f r o m   N o r f o l k   w i t h   l o c a l h o s t : 8 0 0 0   d e f a u l t .   M u s t   u p d a t e   s c r i p t   t o   u s e   h t t p : / / 1 9 2 . 1 6 8 . 2 . 1 3 0 : 8 0 0 0 .  
+ 
+       *   * * S S H   A u t h   F a i l u r e : * *   T h e   n e w   V a s t   i n s t a n c e   ( s s h 5 . v a s t . a i : 1 1 3 1 9 )   r e j e c t e d   o u r   S S H   k e y .   W e   n e e d   t o   d e p l o y   t h e   p u b l i c   k e y   o r   u s e   t h e   c o r r e c t   I d e n t i t y F i l e .  
+ 
+       *   * * W o r k e r   S t a t u s : * *   s u p e r v i s o r d   w a s   n o t   r u n n i n g .   S t a r t e d   i t   m a n u a l l y .   w o r k e r   p r o c e s s   i s   n o w   S T A R T I N G .   l l a m a   i s   R U N N I N G .  
+ 
+       *   * * W o r k e r   C r a s h : * *   W o r k e r   f a i l e d   w i t h   C o n n e c t i o n   r e f u s e d   t o   1 2 7 . 0 . 0 . 1 : 7 2 3 3   b e c a u s e   s u p e r v i s o r   o r   t h e   w o r k e r   s c r i p t   i s   n o t   p i c k i n g   u p   T E M P O R A L _ A D D R E S S   f r o m   t h e   t r a n s p a r e n t   . e n v   w e   j u s t   u p l o a d e d .   O r   s u p e r v i s o r d . c o n f   e n v i r o n m e n t   l o a d i n g   i s   t r i c k y .  
+ 
+       *   * * S u p e r v i s o r d   C o n f i g   C o r r u p t i o n : * *   T h e   s e d   o r   e c h o   c o m m a n d   c o r r u p t e d   t h e   c o n f i g   f i l e .   T h e r e   s e e m s   t o   b e   a   c l o s i n g   q u o t a t i o n   i s s u e .   R e - u p l o a d i n g   a   c l e a n   s u p e r v i s o r d . c o n f   i s   s a f e r .  
+ 
+## Date: 2026-02-10 // Last 6 Hours Operational Walkthrough (EST)
+
+Plan Statement
+Capture the latest operations window and persist architecture/runtime decisions so subsequent sessions can execute without re-discovery.
+
+Root Cause/Findings
+- Combined/transcriptions view was still bounded by a 5-video ceiling across backend and frontend fetch paths.
+- Team workflow requires Conda-first execution on Norfolk/huihuang and no WSL path.
+- Current production split remains: huihuang hosts control-plane and web/API, instance hosts worker/GPU stack.
+
+Final Solution
+1. Lifted hard limit in API and page fetch defaults:
+   - `src/api/routers/transcriptions.py`: query limit default/max changed to 50.
+   - `web/src/app/transcriptions/page.tsx`: read/bound limit from URL, default 50.
+   - `web/src/app/sentence/page.tsx`: read/bound limit from URL, default 50.
+   - `web/src/app/api/transcriptions/route.ts`: default forwarded limit changed to 50.
+   - `web/src/app/transcriptions/TranscriptionsClient.tsx`: display text changed to `max 50`.
+2. Reconfirmed runtime policy for this architecture window:
+   - No WSL execution path.
+   - Conda environments on Norfolk/huihuang are the standard operator path.
+   - Instance should not own local Temporal/MinIO in the current topology.
+
+Verification
+- Static code scan confirmed removal of hardcoded `limit = 5` in transcriptions/sentence fetch paths.
+- API constraint now accepts up to 50 videos for combine/transcription response generation.
+- Docs updated to keep architecture and operational conventions discoverable.
+
+Notes
+- This update does not claim all workflow activity-level limits are removed; it addresses the fetch/response cap path that caused 5-only combine behavior in pages.

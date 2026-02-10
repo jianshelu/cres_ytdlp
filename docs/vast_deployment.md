@@ -34,8 +34,43 @@ Run the deployment script:
 
 ### What `deploy_vast.sh` does:
 1.  **Syncs Code**: Uses `rsync` to upload the current directory to `/workspace` on the remote instance.
-2.  **Installs Dependencies**: Installs Python and Node.js packages.
-3.  **Starts Services**: Launches MinIO, Temporal, FastAPI, and Next.js in the background.
+2.  **Uses Prebuilt Image Runtime**: The instance image already contains runtime dependencies.
+3.  **Starts Services**: Launches supervisord-managed services (FastAPI, CPU/GPU workers, llama; web disabled by default in hybrid mode).
+
+## Instance Dependency Policy
+
+The instance image must install runtime dependencies at build time from:
+
+- `requirements.instance.txt`
+
+Do **not** rely on post-deploy `pip install` for normal startup.  
+`requirements.txt` may still be used for local/full development, but instance runtime should stay on the minimal/validated set in `requirements.instance.txt`.
+
+## GHCR Tag Policy
+
+- `:canary` = default publish target for current changes
+- `:stable` = manual promotion tag (only when explicitly requested/validated)
+
+### Promotion Workflow (Recommended)
+
+1. Trigger `Build and Push to GHCR` with default options.
+2. Validate `:canary` on target instance (health, queues, one batch run).
+3. Re-trigger workflow with `promote_stable=true` to publish `:stable`.
+
+### Runtime Startup Policy
+
+- Image startup is supervisord-driven.
+- `fastapi` autostarts.
+- `worker-cpu` and `worker-gpu` are configured as **on-demand** (`autostart=false`).
+- Workers are started by scheduler-trigger path (`/batch`/`/process`) via best-effort `supervisorctl start worker-cpu/worker-gpu` when colocated.
+
+### CI Guardrail
+
+Minimal image boot validation is enforced in CI via:
+
+- `.github/workflows/ci-minimal-image.yml`
+
+It builds base + app image, starts Temporal/MinIO test dependencies, boots app container, and runs `scripts/container_smoke.sh`.
 
 ## Verification
 

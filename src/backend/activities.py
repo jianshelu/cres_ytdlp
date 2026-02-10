@@ -3,6 +3,7 @@ import asyncio
 import yt_dlp
 import os
 import json
+import errno
 import requests
 import re
 import sys
@@ -10,7 +11,7 @@ import threading
 from dataclasses import dataclass
 from minio import Minio
 from io import BytesIO
-from datetime import timedelta
+from datetime import timedelta, datetime
 from yt_dlp.utils import DownloadError
 try:
     from pypinyin import lazy_pinyin
@@ -27,6 +28,39 @@ class VideoInfo:
 
 _WHISPER_MODEL_CACHE = {}
 _WHISPER_MODEL_LOCK = threading.Lock()
+_LOCAL_DOWNLOAD_ROOT = "web/public/downloads"
+
+
+def _cleanup_local_temp_files(root: str = _LOCAL_DOWNLOAD_ROOT) -> int:
+    """
+    Best-effort cleanup for stale temp artifacts left by yt-dlp / MinIO partial uploads.
+    Returns number of removed files.
+    """
+    removed = 0
+    suffixes = (".part", ".part.minio", ".ytdl", ".tmp")
+    if not os.path.isdir(root):
+        return 0
+
+    for dirpath, _, filenames in os.walk(root):
+        for name in filenames:
+            if not name.endswith(suffixes):
+                continue
+            file_path = os.path.join(dirpath, name)
+            try:
+                os.remove(file_path)
+                removed += 1
+            except Exception:
+                pass
+
+    for dirpath, dirnames, filenames in os.walk(root, topdown=False):
+        if dirnames or filenames:
+            continue
+        try:
+            os.rmdir(dirpath)
+        except Exception:
+            pass
+
+    return removed
 
 def get_minio_client():
     endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
@@ -311,7 +345,10 @@ def download_video(params) -> str:
     if not isinstance(url, str):
         raise TypeError(f"download_video expected URL string, got {type(url).__name__}: {url!r}")
     activity.logger.info(f"Downloading video from {url} (query: {search_query})")
-    download_root = "web/public/downloads"
+    download_root = _LOCAL_DOWNLOAD_ROOT
+    removed_temp = _cleanup_local_temp_files(download_root)
+    if removed_temp:
+        activity.logger.info(f"Pre-download temp cleanup removed {removed_temp} stale files")
     query_local_dir = None
     if search_query:
         query_local_dir = os.path.join(download_root, _query_prefix(search_query), "videos")
@@ -378,8 +415,8 @@ def download_video(params) -> str:
                     live_status = info.get('live_status')
                     is_live = info.get('is_live')
 
-                    # If it's currently live or upcoming, we skip it
-                    if is_live and live_status != 'was_live':
+                    # Skip active or upcoming live streams; allow recorded live ("was_live")
+                    if is_live or live_status in {"is_live", "is_upcoming", "upcoming", "live"}:
                         activity.logger.warning(f"Video is an active/upcoming live stream (status: {live_status}), skipping: {url}")
                         raise Exception(f"Live streams (active/upcoming) are not supported. Status: {live_status}")
 
@@ -444,12 +481,14 @@ def download_video(params) -> str:
         # Clean up local file on failure as well
         if filepath and os.path.exists(filepath):
              os.remove(filepath)
+        _cleanup_local_temp_files(download_root)
         raise
 
     # Clean up local file 
     if filepath and os.path.exists(filepath):
         os.remove(filepath)
         activity.logger.info(f"Deleted local file: {filepath}")
+    _cleanup_local_temp_files(download_root)
 
     if search_query:
         _upsert_query_manifest(
@@ -474,7 +513,10 @@ def transcribe_video(object_name: str) -> str:
     # Download from MinIO
     client = get_minio_client()
     bucket_name = "cres"
-    download_dir = "web/public/downloads"
+    download_dir = _LOCAL_DOWNLOAD_ROOT
+    removed_temp = _cleanup_local_temp_files(download_dir)
+    if removed_temp:
+        activity.logger.info(f"Pre-transcribe temp cleanup removed {removed_temp} stale files")
     
     # object_name is now "videos/filename.mp4"
     local_path = os.path.join(download_dir, object_name)
@@ -513,8 +555,19 @@ def transcribe_video(object_name: str) -> str:
     json_path = os.path.join(download_dir, transcript_key)
     os.makedirs(os.path.dirname(json_path), exist_ok=True)
     
-    with open(json_path, "w", encoding='utf-8') as f:
-        json.dump(result, f, indent=4, ensure_ascii=False)
+    try:
+        with open(json_path, "w", encoding='utf-8') as f:
+            json.dump(result, f, indent=4, ensure_ascii=False)
+    except OSError as e:
+        if e.errno == errno.ENOSPC:
+            cleaned = _cleanup_local_temp_files(download_dir)
+            activity.logger.warning(
+                f"ENOSPC while writing transcript JSON; cleaned {cleaned} temp files and retrying once"
+            )
+            with open(json_path, "w", encoding='utf-8') as f:
+                json.dump(result, f, indent=4, ensure_ascii=False)
+        else:
+            raise
     
     # Upload transcript to MinIO (query-scoped path if available).
     client.fput_object(bucket_name, transcript_key, json_path)
@@ -528,6 +581,7 @@ def transcribe_video(object_name: str) -> str:
     if os.path.exists(json_path):
         os.remove(json_path)
         activity.logger.info(f"Deleted local transcript: {json_path}")
+    _cleanup_local_temp_files(download_dir)
 
     slug = _extract_query_slug_from_object_key(object_name)
     if slug:
@@ -683,14 +737,22 @@ async def summarize_content(params: tuple) -> dict:
 
 @activity.defn
 async def search_videos(params: tuple) -> list:
-    if isinstance(params, (tuple, list)) and len(params) >= 3:
+    if isinstance(params, (tuple, list)) and len(params) >= 4:
+        query, limit, max_duration_minutes, max_age_days = params[0], params[1], params[2], params[3]
+    elif isinstance(params, (tuple, list)) and len(params) >= 3:
         query, limit, max_duration_minutes = params[0], params[1], params[2]
+        max_age_days = int(os.getenv("YOUTUBE_MAX_AGE_DAYS", "0") or "0")
     else:
         query, limit = params
         max_duration_minutes = 10
+        max_age_days = int(os.getenv("YOUTUBE_MAX_AGE_DAYS", "0") or "0")
     max_duration_seconds = max(60, int(max_duration_minutes) * 60)
+    max_age_days = max(0, int(max_age_days))
+    min_upload_date = None
+    if max_age_days > 0:
+        min_upload_date = (datetime.utcnow() - timedelta(days=max_age_days)).strftime("%Y%m%d")
     activity.logger.info(
-        f"Searching for videos with query: {query}, limit: {limit}, max_duration_minutes: {max_duration_minutes}"
+        f"Searching for videos with query: {query}, limit: {limit}, max_duration_minutes: {max_duration_minutes}, max_age_days: {max_age_days}"
     )
     
     ydl_opts = {
@@ -755,8 +817,13 @@ async def search_videos(params: tuple) -> list:
             dur = cand.get('duration')
             if dur and dur > MAX_DURATION:
                 continue
+            if min_upload_date:
+                upload_date = str(cand.get("upload_date") or "").strip()
+                if upload_date and upload_date < min_upload_date:
+                    continue
 
-            if cand.get('is_live'):
+            live_status = cand.get("live_status")
+            if cand.get('is_live') or live_status in {"is_live", "is_upcoming", "upcoming", "live"}:
                 continue
 
             # extract_flat may return id/url/webpage_url with varying formats.

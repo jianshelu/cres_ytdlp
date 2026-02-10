@@ -1,5 +1,6 @@
 📋 GLOBAL RULES: ARCHITECTURAL STATE & TEMPORAL MANAGEMENT 🚀
 Date 📅	Models/Systems ⚙️	Threads 🧵	Status 🚦	Completion Time ⏱️
+2026-02-10	Infrastructure	Migration Explanation	[IN-PROGRESS]	-
 2026-02-06	Script Analysis	Analyzing Scripts	[DONE]	19:25:00
 2026-02-06	Project Cleanup	Archive Deletion	[DONE]	20:05:00
 2026-02-06	Workspace Rules	Rule Reintegration	[DONE]	20:16:00
@@ -257,3 +258,28 @@ Scope:
 Verification:
 Run temporal workflow list and verify new Oracle workflows complete.
 Check worker.log for successful downloads.
+## Date: 2026-02-10 // Incremental Plan Update (Last 6 Hours, EST)
+
+Plan Statement
+Consolidate the latest runtime/ops decisions into docs while keeping architecture authoritative and executable across Norfolk, huihuang, and Vast instance.
+
+Scope
+1. Keep control plane on `huihuang` (Temporal/MinIO/Web/FastAPI) and compute on Vast instance (worker + llama/whisper).
+2. Remove hardcoded 5-video cap in transcriptions/sentence data fetch path.
+3. Standardize execution preference: Conda on Norfolk/huihuang, avoid WSL usage.
+4. Validate instance cleanup direction (no local Temporal/MinIO service ownership on instance for current topology).
+
+Execution Notes
+- Backend transcriptions API limit ceiling updated from 5 to 50.
+- Frontend transcriptions/sentence pages no longer hardcode limit 5; now bounded and default to 50.
+- API proxy default limit updated to 50.
+- UI label updated from `max 5` to `max 50`.
+
+Verification Plan
+1. Query path: `/api/transcriptions?query=<q>&limit=20` returns up to 20 items when data exists.
+2. UI path: `transcriptions` and `sentence` pages reflect fetched count >5.
+3. Runtime path: worker remains on instance; control-plane services remain on huihuang.
+
+Risks / Follow-ups
+- Large limit values increase LLM/extraction latency and payload size.
+- If workflow-level combine still uses legacy caps elsewhere, continue follow-up in activity/workflow layer.

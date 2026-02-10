@@ -43,3 +43,24 @@ description: Guidelines for working with Vast.ai deployment
 7. RAM Optimization: Balance RAM for tasks on GPU, Llama, GPU Worker to ensure system stability under the 11GB constraint. 
 8. Append new content to the artifacts instead of overwrite the old one.
 9. Input, output and related workflow and process should named with suffix of orginal video id. like: https://www.youtube.com/watch?v=u1BAG9bGp74, workflow named as video-u1BAG9bGp74，thumbnails named as thumbnails-u1BAG9bGp74. batch workflow suffix is query keyword, for example, query keyword "Genimi", batch workflow named as batch-Genimi.
+10. Current architecture (Feb 2026):
+    - Control plane is on huihuang (LAN): `192.168.2.130`
+      - Web: `http://192.168.2.130:3000`
+      - FastAPI: `http://192.168.2.130:8000`
+      - Temporal UI: `http://192.168.2.130:8233`
+      - MinIO: `http://192.168.2.130:9000`
+      - Data index (`data.json`) is stored/served on huihuang.
+    - GPU processing is on vast.ai instance (access via SSH tunnel).
+    - Control plane access from instance uses external endpoints (port-forwarded via public IP when needed).
+      - Example external endpoints used by instance:
+        - `TEMPORAL_SERVER=64.229.113.233:7233`
+        - `MINIO_ENDPOINT=64.229.113.233:9000`
+    - Tailscale is not used.
+11. Queue split on instance:
+    - CPU queue: `video-processing-queue` (search, download, build combined output, refresh index)
+    - GPU queue: `video-gpu-queue` (transcribe, summarize)
+    - Both CPU and GPU workers run on the instance.
+12. huihuang project sync location:
+    - Windows path: `C:\\Users\\rama\\cres_ytdlp_norfolk`
+
+

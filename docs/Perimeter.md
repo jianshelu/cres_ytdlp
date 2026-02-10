@@ -13,28 +13,46 @@ Structure:
 : Dependency bugs, system incompatibility solutions
 ⚡ Optimization
 : GPU processes, memory utilization, code patterns
-🌐 Infra Ledger: Network Topology & Service Dependencies
+🌐 Infra Ledger: Hybrid Network Topology (Phase C - 3-Node Setup)
+Current Architecture Overview
+As of 2026-02-10, the project uses a specific 3-node Hybrid Architecture:
+
+1. Development Host (Norfolk): Windows 11 Dev Machine (192.168.2.131).
+   - Role: Code editing, git management, deploying code to Instance via SSH/Rsync.
+2. Control Plane (Huihuang): Local Server (192.168.2.130).
+   - Role: Runs backend services (Temporal, MinIO, FastAPI) and Frontend Web UI.
+   - Connectivity: Accessible internally via LAN. Exposed to Instance via Router Port Forwarding.
+   - Services:
+     - Web UI: http://192.168.2.130:3000/
+     - MinIO Console: http://192.168.2.130:9001/
+     - Temporal UI: http://192.168.2.130:8233/
+3. Compute Plane (Instance): Vast.ai GPU Server (ssh5.vast.ai).
+   - Role: Runs heavy compute tasks (Worker, Llama, Whisper).
+   - Connectivity: Connected via SSH from Norfolk for management. Connects back to Huihuang for data/API access via public IP/Port Forwarding.
+
+Service Distribution matrix
+Service	Host	IP	Port	Role
+Web (Next.js)	Huihuang	192.168.2.130	3000	User Interface.
+FastAPI	Huihuang	192.168.2.130	8000	Backend API & Health.
+Temporal Server	Huihuang	192.168.2.130	7233/8233	Workflow Orchestration.
+MinIO Storage	Huihuang	192.168.2.130	9000	Object Storage (User: cres).
+Temporal Worker	Instance (ssh5.vast.ai)	Remote	N/A	GPU Task Execution.
+llama-server	Instance (ssh5.vast.ai)	Remote	8081	LLM Inference.
+Development	Norfolk	192.168.2.131	N/A	Code & Deploy.
+
 SSH Connectivity & Tunneling
-Connection Details:
+- **Norfolk -> Instance**: `ssh -p 11319 root@ssh5.vast.ai -L 8080:localhost:8080`
+  - Purpose: Mangement and forwarding llama-server (8081->8080) for debugging if needed.
+- **Instance -> Huihuang**: Traffic routes through Router Port Forwarding (Public IP -> 192.168.2.130).
+- **Norfolk -> Huihuang**: Direct LAN connection (User: `rama`).
 
-Current Host: ssh3.vast.ai:36535 (Dynamic IP, updated 2026-02-07)
-SSH Config: ~/.ssh/config → Host alias vastai2s
-Auth Method: SSH key authentication (no password)
-Port Forwarding Strategy: Vast.ai instances have limited public ports. Services are accessed via SSH tunnels:
-
-bash
-# Local → Remote tunnel pattern
-ssh -L LOCAL_PORT:localhost:REMOTE_PORT vastai2s
-# Example: Access remote FastAPI on local port 8000
-ssh -L 8000:localhost:8000 vastai2s
-Common Connectivity Issues:
+Common Connectivity Issues (Phase C):
 
 Issue	Cause	Resolution
-Connection refused	Instance restarted with new IP/port	Update 
-.env
- and ~/.ssh/config
-Tunnel not forwarding	Service not started on remote	Check supervisorctl status
-SSH timeout	Instance suspended/terminated	Check Vast.ai dashboard
+API 502: fetch failed	FastAPI process on huihuang down	Restart FastAPI on LAN host.
+No worker running	Worker process on Vast down	Run ./start_remote.sh --restart on Vast.
+MinIO unreachable	LAN networking / Firewall issue	Check 192.168.2.130:9000 reachability.
+Homepage unchanged	Index authority mismatch	Ensure generate_index.py writes to huihuang path.
 Health Monitoring & Service Dependencies
 FastAPI Health Check Endpoint
 Endpoint: GET /health
@@ -419,3 +437,55 @@ llama-server:
 RLIMIT_AS=4GB: Virtual memory limit (allows weights to be in VRAM while capping CPU side). Optimized to 3GB for 11GB RAM instances.
 Temporal Worker:
 RLIMIT_AS=6GB: Prevents worker from consuming remaining system RAM during parallel downloads. Optimized to 4GB for 11GB RAM instances.
+## Infra Ledger Addendum (2026-02-10, Last 6 Hours, EST)
+
+### Authoritative Runtime Placement
+- `huihuang` (LAN server) remains control-plane owner:
+  - Temporal server/UI
+  - MinIO API/Console
+  - FastAPI
+  - Next.js Web
+- Vast instance remains compute-plane owner:
+  - Temporal worker process(es)
+  - llama.cpp service
+  - whisper/faster-whisper runtime
+
+### Execution Convention
+- Do not use WSL for this project's operational commands.
+- Use Conda environments on Norfolk/huihuang as the standard operator shell.
+
+### Data/Combine Limit Policy (Current)
+- API/page fetch path no longer capped at 5 by default.
+- Current transcriptions/sentence fetch defaults and max are 50 (bounded).
+- Practical combine count equals returned result count, subject to available query-matched videos and downstream processing capacity.
+
+### Queue/Worker Identity Convention (Target)
+- Desired worker IDs:
+  - CPU queue worker: `<host>@cpu`
+  - GPU queue worker: `<host>@gpu`
+- Avoid suffix chaining patterns like `@gpu@cpuq`.
+
+### Operations Guardrails
+- Instance should not run local Temporal/MinIO when externalized to huihuang.
+- After host reboot, check in order:
+  1. Temporal reachable from worker
+  2. MinIO credentials valid
+  3. FastAPI upstream reachable
+  4. Worker queue registration healthy
+
+### Release Tags & CI Guardrails (2026-02-10 Addendum)
+- GHCR app image tags:
+  - `:canary` = current change stream
+  - `:stable` = validated promotion
+- Promotion method:
+  - manual `workflow_dispatch` in `.github/workflows/deploy.yml`
+  - set `promote_stable=true` after canary verification
+- CI minimal runtime check:
+  - `.github/workflows/ci-minimal-image.yml`
+  - builds base/app images, boots container with externalized control-plane deps, runs `scripts/container_smoke.sh`
+
+### Worker Startup Mode (Current)
+- Supervisord programs:
+  - `worker-cpu` (`autostart=false`)
+  - `worker-gpu` (`autostart=false`)
+- Worker boot is demand-driven by scheduler/API trigger path where supervisor is colocated.

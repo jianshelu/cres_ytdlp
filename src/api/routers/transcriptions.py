@@ -288,7 +288,7 @@ def _load_batch_combined_output(query: str) -> Optional[dict]:
 @router.get("/transcriptions", response_model=TranscriptionsResponse)
 async def get_transcriptions_with_combined_keywords(
     query: str = Query(..., description="Search query keyword"),
-    limit: int = Query(5, ge=1, le=5, description="Maximum number of videos to return")
+    limit: int = Query(50, ge=1, le=50, description="Maximum number of videos to return")
 ):
     """
     Get transcriptions with combined keywords for a search query.
@@ -303,7 +303,7 @@ async def get_transcriptions_with_combined_keywords(
     
     Args:
         query: Search query keyword
-        limit: Maximum number of videos (default: 5, max: 5)
+        limit: Maximum number of videos (default: 50, max: 50)
         
     Returns:
         TranscriptionsResponse with videos, combined keywords, and metadata

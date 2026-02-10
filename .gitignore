@@ -61,6 +61,12 @@ scripts/backfill_missing_transcripts_tmp.py
 .agent/artifacts/start_web_task.cmd
 .agent/artifacts/start_web_task_system.cmd
 
+# Playwright / local screenshots / temp scripts
+.playwright-cli/
+output/
+scripts/_tmp_*.sh
+docs/Implementation
+.agent/artifacts/google_ai_pipeline_report.json
 
 
 

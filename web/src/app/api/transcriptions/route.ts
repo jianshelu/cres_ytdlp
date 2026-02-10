@@ -8,7 +8,7 @@ function getUpstreams() {
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('query') || '';
-  const limit = request.nextUrl.searchParams.get('limit') || '5';
+  const limit = request.nextUrl.searchParams.get('limit') || '50';
 
   if (!query) {
     return NextResponse.json({ detail: 'query is required' }, { status: 400 });

@@ -10,7 +10,8 @@ interface Props {
 export default async function TranscriptionsPage({ searchParams }: Props) {
     const resolvedParams = await searchParams;
     const query = (resolvedParams?.query as string) || '';
-    const limit = 5;
+    const parsedLimit = Number(resolvedParams?.limit || 50);
+    const limit = Number.isFinite(parsedLimit) ? Math.max(1, Math.min(50, parsedLimit)) : 50;
 
     if (!query) {
         return (
@@ -85,4 +86,3 @@ export default async function TranscriptionsPage({ searchParams }: Props) {
         </main>
     );
 }
-

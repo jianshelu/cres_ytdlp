@@ -8,6 +8,11 @@ on:
         description: "Optional label (e.g., fix qemu / test build)"
         required: false
         default: ""
+      promote_stable:
+        description: "Also publish stable tag (manual promotion)"
+        required: false
+        type: boolean
+        default: false
         
 env:
   REGISTRY: ghcr.io
@@ -135,13 +140,59 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build App image (smoke, no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base:latest
+          push: false
+          load: true
+          tags: cres-smoke:${{ github.sha }}
+          cache-from: type=gha,scope=app
+
+      - name: Start smoke dependencies
+        run: |
+          set -euxo pipefail
+          docker network create cres-smoke || true
+          docker run -d --name temporal-smoke --network cres-smoke temporalio/auto-setup:1.24.2
+          docker run -d --name minio-smoke --network cres-smoke \
+            -e MINIO_ROOT_USER=cres \
+            -e MINIO_ROOT_PASSWORD='Qh@113113' \
+            quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
+
+      - name: Run container smoke checks
+        run: |
+          set -euxo pipefail
+          docker run -d --name app-smoke --network cres-smoke \
+            -e CONTROL_PLANE_MODE=external \
+            -e TEMPORAL_ADDRESS=temporal-smoke:7233 \
+            -e MINIO_ENDPOINT=minio-smoke:9000 \
+            -e MINIO_SECURE=false \
+            -e MINIO_ACCESS_KEY=cres \
+            -e MINIO_SECRET_KEY='Qh@113113' \
+            -e AWS_ACCESS_KEY_ID=cres \
+            -e AWS_SECRET_ACCESS_KEY='Qh@113113' \
+            -e ENABLE_WEB=false \
+            cres-smoke:${{ github.sha }}
+          docker exec app-smoke /bin/bash /workspace/scripts/container_smoke.sh
+
+      - name: Cleanup smoke containers
+        if: always()
+        run: |
+          docker rm -f app-smoke temporal-smoke minio-smoke || true
+          docker network rm cres-smoke || true
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}
           tags: |
-            type=raw,value=latest
+            type=raw,value=canary
+            type=raw,value=stable,enable=${{ github.event_name == 'workflow_dispatch' && inputs.promote_stable }}
             type=sha,format=short
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}

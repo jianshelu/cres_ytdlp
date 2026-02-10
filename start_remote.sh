@@ -11,8 +11,34 @@ cd "$WORKSPACE_ROOT"
 PID_DIR="$WORKSPACE_ROOT/run"
 mkdir -p "$PID_DIR"
 
+# Load runtime env from .env when present so restart/status use the same endpoints/credentials.
+load_workspace_env() {
+    local env_file="$WORKSPACE_ROOT/.env"
+    if [ -f "$env_file" ]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "$env_file"
+        set +a
+    fi
+}
+
+load_workspace_env
+
 # Normalize line endings to avoid Windows CRLF startup issues.
 sed -i 's/\r$//' "$WORKSPACE_ROOT/start_remote.sh" "$WORKSPACE_ROOT/entrypoint.sh" "$WORKSPACE_ROOT/deploy_vast.sh" "$WORKSPACE_ROOT/onstart.sh" 2>/dev/null || true
+
+supervisor_controls_backend() {
+    if ! command -v supervisorctl >/dev/null 2>&1; then
+        return 1
+    fi
+    local status
+    status="$(supervisorctl -s unix:///tmp/supervisor.sock status 2>/dev/null || true)"
+    if [ -z "$status" ]; then
+        return 1
+    fi
+    echo "$status" | grep -q "^fastapi[[:space:]]\+RUNNING" || return 1
+    return 0
+}
 
 pid_status_line() {
     local name="$1"
@@ -110,6 +136,10 @@ show_status() {
     tail -n 20 /var/log/fastapi.log 2>/dev/null || true
     echo "-- /var/log/worker.log --"
     tail -n 20 /var/log/worker.log 2>/dev/null || true
+    echo "-- /var/log/worker-cpu.log --"
+    tail -n 20 /var/log/worker-cpu.log 2>/dev/null || true
+    echo "-- /var/log/worker-gpu.log --"
+    tail -n 20 /var/log/worker-gpu.log 2>/dev/null || true
 }
 
 terminate_pidfile() {
@@ -182,12 +212,21 @@ terminate_workspace_next_server() {
 }
 
 restart_services() {
+    local supervisor_backend=0
+    if supervisor_controls_backend; then
+        supervisor_backend=1
+    fi
+
     echo "Cleaning up existing project processes..."
     # Kill only PIDs previously created by this project.
     terminate_pidfile "$PID_DIR/cres_next_wrapper.pid"
-    terminate_pidfile "$PID_DIR/cres_worker.pid"
-    terminate_pidfile "$PID_DIR/cres_fastapi.pid"
-    terminate_pidfile "$PID_DIR/cres_llama.pid"
+    if [ "$supervisor_backend" -eq 0 ]; then
+        terminate_pidfile "$PID_DIR/cres_worker.pid"
+        terminate_pidfile "$PID_DIR/cres_fastapi.pid"
+        terminate_pidfile "$PID_DIR/cres_llama.pid"
+    else
+        rm -f "$PID_DIR/cres_worker.pid" "$PID_DIR/cres_fastapi.pid" "$PID_DIR/cres_llama.pid"
+    fi
     terminate_pidfile "$PID_DIR/cres_temporal.pid"
     terminate_pidfile "$PID_DIR/cres_minio.pid"
     terminate_workspace_next
@@ -195,8 +234,10 @@ restart_services() {
 
     # Conservative fallback for stale processes from old scripts.
     pkill -9 -f "$WORKSPACE_ROOT/entrypoint.sh bash -c cd $WORKSPACE_ROOT/web && npm start" || true
-    pkill -9 -f "uvicorn src.api.main:app --host 0.0.0.0 --port 8000" || true
-    pkill -9 -f "python3 -m src.backend.worker" || true
+    if [ "$supervisor_backend" -eq 0 ]; then
+        pkill -9 -f "uvicorn src.api.main:app --host 0.0.0.0 --port 8000" || true
+        pkill -9 -f "python3 -m src.backend.worker" || true
+    fi
     sleep 2
 
     # Environment setup.
@@ -215,15 +256,27 @@ restart_services() {
         "$WORKSPACE_ROOT/scripts/setup_tailscale.sh" || true
     fi
 
-    echo "Starting services via entrypoint..."
     rm -f "$PID_DIR/cres_next_wrapper.pid"
-    if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:3000 || true)" = "200" ]; then
-        echo "Detected healthy service on :3000, skipping Next.js relaunch command."
-        nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -lc "while true; do sleep 3600; done" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
-        echo $! > "$PID_DIR/cres_next_wrapper.pid"
+    if [ "$supervisor_backend" -eq 1 ]; then
+        echo "Supervisor is managing backend services; restarting Next.js only."
+        if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:3000 || true)" = "200" ]; then
+            echo "Detected healthy service on :3000, skipping Next.js relaunch command."
+            nohup bash -lc "while true; do sleep 3600; done" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
+            echo $! > "$PID_DIR/cres_next_wrapper.pid"
+        else
+            nohup bash -lc "cd '$WORKSPACE_ROOT/web' && npm start" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
+            echo $! > "$PID_DIR/cres_next_wrapper.pid"
+        fi
     else
-        nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -c "cd $WORKSPACE_ROOT/web && npm start" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
-        echo $! > "$PID_DIR/cres_next_wrapper.pid"
+        echo "Starting services via entrypoint..."
+        if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:3000 || true)" = "200" ]; then
+            echo "Detected healthy service on :3000, skipping Next.js relaunch command."
+            nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -lc "while true; do sleep 3600; done" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
+            echo $! > "$PID_DIR/cres_next_wrapper.pid"
+        else
+            nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -c "cd $WORKSPACE_ROOT/web && npm start" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &
+            echo $! > "$PID_DIR/cres_next_wrapper.pid"
+        fi
     fi
     echo "Started. Monitor status with: ./start_remote.sh --status"
 }
