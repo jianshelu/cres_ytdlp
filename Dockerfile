@@ -9,9 +9,12 @@ COPY requirements.instance.txt .
 RUN pip3 install --upgrade pip \
  && pip3 install --no-cache-dir -r requirements.instance.txt \
  && rm -rf /root/.cache/pip \
- && find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
- && find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete \
- && find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete
+ && PY_SITE="$(python3 -c 'import sysconfig; print(sysconfig.get_paths().get(\"purelib\", \"\"))')" \
+ && if [ -n "$PY_SITE" ] && [ -d "$PY_SITE" ]; then \
+      find "$PY_SITE" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true; \
+      find "$PY_SITE" -type f -name "*.pyc" -delete || true; \
+      find "$PY_SITE" -type f -name "*.pyo" -delete || true; \
+    fi
 
 # Frontend build stage
 FROM node:20-slim AS frontend-builder
