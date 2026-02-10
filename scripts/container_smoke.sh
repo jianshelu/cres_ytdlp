@@ -65,7 +65,19 @@ async def has_poller(client, q):
     return bool(rsp.pollers)
 
 async def main():
-    client = await Client.connect(addr)
+    # Temporal may take a bit to become reachable on fresh CI networks.
+    client = None
+    last_err = None
+    for _ in range(60):
+        try:
+            client = await Client.connect(addr)
+            break
+        except Exception as e:
+            last_err = e
+            await asyncio.sleep(1)
+    if client is None:
+        raise SystemExit(f"temporal connect failed at {addr}: {last_err}")
+
     for _ in range(40):
         ok = True
         for q in queues:
