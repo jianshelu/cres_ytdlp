@@ -37,12 +37,20 @@ done
 curl -fsS http://127.0.0.1:8000/docs >/dev/null
 echo "fastapi docs ok"
 
-echo "[smoke] start workers on-demand..."
-if command -v supervisorctl >/dev/null 2>&1; then
-  supervisorctl -s unix:///tmp/supervisor.sock start worker-cpu || true
-  supervisorctl -s unix:///tmp/supervisor.sock start worker-gpu || true
-else
-  echo "supervisorctl not found; skip explicit worker start"
+echo "[smoke] start worker process (both queues)..."
+WORKER_MODE=both WORKER_CPU_THREADS=1 WORKER_GPU_THREADS=1 python3 -m src.backend.worker >/tmp/smoke-worker.log 2>&1 &
+SMOKE_WORKER_PID=$!
+cleanup() {
+  if [ -n "${SMOKE_WORKER_PID:-}" ] && kill -0 "$SMOKE_WORKER_PID" >/dev/null 2>&1; then
+    kill "$SMOKE_WORKER_PID" >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup EXIT
+sleep 2
+if ! kill -0 "$SMOKE_WORKER_PID" >/dev/null 2>&1; then
+  echo "worker failed to start"
+  cat /tmp/smoke-worker.log || true
+  exit 1
 fi
 
 echo "[smoke] check temporal queue registration..."
