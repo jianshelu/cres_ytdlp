@@ -1,6 +1,7 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
 # Base image includes CUDA-enabled llama-server
-FROM ghcr.io/ggml-org/llama.cpp:server-cuda
+ARG BASE_IMAGE=ghcr.io/ggml-org/llama.cpp:server-cuda
+FROM ${BASE_IMAGE}
 
 WORKDIR /workspace
 
