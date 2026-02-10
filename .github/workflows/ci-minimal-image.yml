@@ -66,30 +66,38 @@ jobs:
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
 
-      - name: Boot app container and run smoke
+      - name: Resolve dependency endpoints
+        id: deps
         run: |
           set -euxo pipefail
-          resolve_host() {
+          resolve_ip() {
             local name="$1"
-            local host=""
-            for _ in $(seq 1 30); do
-              host="$(docker inspect -f '{{if .State.Running}}{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}{{end}}' "$name" 2>/dev/null || true)"
-              if [ -n "$host" ]; then
-                echo "$host"
+            local ip=""
+            for _ in $(seq 1 60); do
+              ip="$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$name" 2>/dev/null || true)"
+              if [ -n "$ip" ]; then
+                echo "$ip"
                 return 0
               fi
               sleep 1
             done
-            # Fallback to docker DNS name in case IP is temporarily unavailable.
-            echo "$name"
-            return 0
+            echo "Failed to resolve IP for $name" >&2
+            docker ps -a || true
+            docker logs "$name" || true
+            return 1
           }
-          TEMPORAL_HOST="$(resolve_host temporal-ci)"
-          MINIO_HOST="$(resolve_host minio-ci)"
+          TEMPORAL_IP="$(resolve_ip temporal-ci)"
+          MINIO_IP="$(resolve_ip minio-ci)"
+          echo "temporal_ip=$TEMPORAL_IP" >> "$GITHUB_OUTPUT"
+          echo "minio_ip=$MINIO_IP" >> "$GITHUB_OUTPUT"
+
+      - name: Boot app container and run smoke
+        run: |
+          set -euxo pipefail
           docker run -d --name app-ci --network cres-ci \
             -e CONTROL_PLANE_MODE=external \
-            -e TEMPORAL_ADDRESS=${TEMPORAL_HOST}:7233 \
-            -e MINIO_ENDPOINT=${MINIO_HOST}:9000 \
+            -e TEMPORAL_ADDRESS=${{ steps.deps.outputs.temporal_ip }}:7233 \
+            -e MINIO_ENDPOINT=${{ steps.deps.outputs.minio_ip }}:9000 \
             -e MINIO_SECURE=false \
             -e MINIO_ACCESS_KEY=cres \
             -e MINIO_SECRET_KEY='Qh@113113' \
