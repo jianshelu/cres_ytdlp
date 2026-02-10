@@ -166,12 +166,26 @@ jobs:
       - name: Run container smoke checks
         run: |
           set -euxo pipefail
-          TEMPORAL_IP="$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' temporal-smoke)"
-          MINIO_IP="$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' minio-smoke)"
+          resolve_host() {
+            local name="$1"
+            local host=""
+            for _ in $(seq 1 30); do
+              host="$(docker inspect -f '{{if .State.Running}}{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}{{end}}' "$name" 2>/dev/null || true)"
+              if [ -n "$host" ]; then
+                echo "$host"
+                return 0
+              fi
+              sleep 1
+            done
+            echo "$name"
+            return 0
+          }
+          TEMPORAL_HOST="$(resolve_host temporal-smoke)"
+          MINIO_HOST="$(resolve_host minio-smoke)"
           docker run -d --name app-smoke --network cres-smoke \
             -e CONTROL_PLANE_MODE=external \
-            -e TEMPORAL_ADDRESS=${TEMPORAL_IP}:7233 \
-            -e MINIO_ENDPOINT=${MINIO_IP}:9000 \
+            -e TEMPORAL_ADDRESS=${TEMPORAL_HOST}:7233 \
+            -e MINIO_ENDPOINT=${MINIO_HOST}:9000 \
             -e MINIO_SECURE=false \
             -e MINIO_ACCESS_KEY=cres \
             -e MINIO_SECRET_KEY='Qh@113113' \
