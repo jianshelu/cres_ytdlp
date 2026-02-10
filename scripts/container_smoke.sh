@@ -54,12 +54,13 @@ if ! kill -0 "$SMOKE_WORKER_PID" >/dev/null 2>&1; then
 fi
 
 echo "[smoke] check temporal queue registration..."
-python3 - <<'PY'
+if ! python3 - <<'PY'
 import asyncio
 import os
 from temporalio.client import Client
 from temporalio.api.workflowservice.v1 import DescribeTaskQueueRequest
 from temporalio.api.taskqueue.v1 import TaskQueue
+from temporalio.api.enums.v1.task_queue_pb2 import TASK_QUEUE_TYPE_ACTIVITY
 
 addr = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
 queues = ["video-processing-queue", "video-gpu-queue"]
@@ -68,6 +69,7 @@ async def has_poller(client, q):
     req = DescribeTaskQueueRequest(
         namespace="default",
         task_queue=TaskQueue(name=q),
+        task_queue_type=TASK_QUEUE_TYPE_ACTIVITY,
     )
     rsp = await client.workflow_service.describe_task_queue(req)
     return bool(rsp.pollers)
@@ -100,5 +102,10 @@ async def main():
 
 asyncio.run(main())
 PY
+then
+  echo "[smoke] queue check failed; worker log:"
+  cat /tmp/smoke-worker.log || true
+  exit 1
+fi
 
 echo "[smoke] all checks passed."
