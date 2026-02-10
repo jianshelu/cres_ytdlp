@@ -157,8 +157,10 @@ jobs:
         run: |
           set -euxo pipefail
           docker network create cres-smoke || true
-          docker run -d --name temporal-smoke --network cres-smoke temporalio/server:1.24.2 \
-            temporal server start-dev --ip 0.0.0.0
+          docker run -d --name temporal-smoke --network cres-smoke \
+            --entrypoint temporal \
+            temporalio/server:1.24.2 \
+            server start-dev --ip 0.0.0.0
           docker run -d --name minio-smoke --network cres-smoke \
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
