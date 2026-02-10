@@ -60,7 +60,8 @@ jobs:
         run: |
           set -euxo pipefail
           docker network create cres-ci || true
-          docker run -d --name temporal-ci --network cres-ci temporalio/auto-setup:1.24.2
+          docker run -d --name temporal-ci --network cres-ci temporalio/server:1.24.2 \
+            temporal server start-dev --ip 0.0.0.0
           docker run -d --name minio-ci --network cres-ci \
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
@@ -82,8 +83,8 @@ jobs:
               sleep 1
             done
             echo "Failed to resolve IP for $name" >&2
-            docker ps -a || true
-            docker logs "$name" || true
+            docker ps -a >&2 || true
+            docker logs "$name" >&2 || true
             return 1
           }
           TEMPORAL_IP="$(resolve_ip temporal-ci)"
