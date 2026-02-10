@@ -5,6 +5,8 @@ import os
 import json
 import requests
 import re
+import sys
+import threading
 from dataclasses import dataclass
 from minio import Minio
 from io import BytesIO
@@ -21,6 +23,10 @@ class VideoInfo:
     title: str
     filepath: str
     duration: float
+
+
+_WHISPER_MODEL_CACHE = {}
+_WHISPER_MODEL_LOCK = threading.Lock()
 
 def get_minio_client():
     endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
@@ -221,7 +227,36 @@ def _sanitize_summary_data(raw: dict, text: str, is_chinese: bool) -> dict:
     summary = str(raw.get("summary", "")).strip() if isinstance(raw, dict) else ""
     keywords_raw = raw.get("keywords", []) if isinstance(raw, dict) else []
     keywords = [str(k).strip() for k in keywords_raw if str(k).strip()] if isinstance(keywords_raw, list) else []
-    keywords = keywords[:5]
+
+    seen = set()
+    filtered_keywords = []
+    lowered_text = (text or "").lower()
+    for kw in keywords:
+        norm = kw.lower()
+        if norm in seen:
+            continue
+        seen.add(norm)
+
+        if is_chinese:
+            if not _is_chinese_text(kw):
+                continue
+        else:
+            cjk_ratio = sum(1 for c in kw if "\u4e00" <= c <= "\u9fff") / max(len(kw), 1)
+            if cjk_ratio > 0.20:
+                continue
+
+        # Keep only keywords that appear in transcript text.
+        if _is_chinese_text(kw):
+            if kw not in text:
+                continue
+        elif norm not in lowered_text:
+            continue
+
+        filtered_keywords.append(kw)
+        if len(filtered_keywords) >= 5:
+            break
+
+    keywords = filtered_keywords
 
     if not summary or len(summary) < 10:
         return _fallback_summary_data(text, is_chinese)
@@ -234,6 +269,34 @@ def _sanitize_summary_data(raw: dict, text: str, is_chinese: bool) -> dict:
         keywords = _fallback_summary_data(text, is_chinese)["keywords"]
 
     return {"summary": summary[:1000], "keywords": keywords}
+
+
+def _get_whisper_model():
+    """
+    Reuse faster-whisper model across activities to avoid per-activity cold start.
+    """
+    model_size = os.getenv("WHISPER_MODEL_SIZE", "base").strip() or "base"
+
+    with _WHISPER_MODEL_LOCK:
+        gpu_key = ("cuda", model_size)
+        if gpu_key in _WHISPER_MODEL_CACHE:
+            return _WHISPER_MODEL_CACHE[gpu_key], "CUDA (GPU)"
+
+        cpu_key = ("cpu", model_size)
+        if cpu_key in _WHISPER_MODEL_CACHE:
+            return _WHISPER_MODEL_CACHE[cpu_key], "CPU"
+
+        from faster_whisper import WhisperModel
+
+        try:
+            model = WhisperModel(model_size, device="cuda", compute_type="float16")
+            _WHISPER_MODEL_CACHE[gpu_key] = model
+            return model, "CUDA (GPU)"
+        except Exception as e:
+            activity.logger.error(f"Failed to load faster-whisper on CUDA, falling back to CPU: {e}")
+            model = WhisperModel(model_size, device="cpu", compute_type="int8")
+            _WHISPER_MODEL_CACHE[cpu_key] = model
+            return model, "CPU"
 
 # Re-using logic from original main.py but adapted for Activities
 
@@ -248,12 +311,18 @@ def download_video(params) -> str:
     if not isinstance(url, str):
         raise TypeError(f"download_video expected URL string, got {type(url).__name__}: {url!r}")
     activity.logger.info(f"Downloading video from {url} (query: {search_query})")
-    download_dir = "web/public/downloads"
-    if not os.path.exists(download_dir):
-        os.makedirs(download_dir, exist_ok=True)
+    download_root = "web/public/downloads"
+    query_local_dir = None
+    if search_query:
+        query_local_dir = os.path.join(download_root, _query_prefix(search_query), "videos")
+        os.makedirs(query_local_dir, exist_ok=True)
+        outtmpl = f"{query_local_dir}/%(title)s_%(id)s.%(ext)s"
+    else:
+        os.makedirs(download_root, exist_ok=True)
+        outtmpl = f"{download_root}/%(title)s_%(id)s.%(ext)s"
 
     base_opts = {
-        'outtmpl': f'{download_dir}/%(title)s_%(id)s.%(ext)s',
+        'outtmpl': outtmpl,
         'writethumbnail': True,
         'writeinfojson': True,  # Save metadata for title extraction
         'noplaylist': True,
@@ -344,10 +413,10 @@ def download_video(params) -> str:
         activity.logger.info(f"Uploaded {video_key} to MinIO bucket '{bucket_name}'")
 
         # Upload Sidecar Files (Thumbnail, InfoJson)
-        base_name = os.path.splitext(filepath)[0]  # e.g. web/public/downloads/Title_ID
-        # List all files in download dir
-        for f in os.listdir(download_dir):
-            full_f = os.path.join(download_dir, f)
+        base_name = os.path.splitext(filepath)[0]
+        sidecar_scan_dir = os.path.dirname(filepath)
+        for f in os.listdir(sidecar_scan_dir):
+            full_f = os.path.join(sidecar_scan_dir, f)
 
             # Check if it starts with the base filename
             if f.startswith(os.path.basename(base_name)) and f != object_name:
@@ -417,16 +486,8 @@ def transcribe_video(object_name: str) -> str:
     if not os.path.exists(local_path):
         client.fget_object(bucket_name, object_name, local_path)
 
-    # Attempting to use GPU as requested with faster-whisper
-    try:
-        from faster_whisper import WhisperModel
-        model = WhisperModel("base", device="cuda", compute_type="float16")
-        activity.logger.info("Faster-Whisper model loaded on device: CUDA (GPU)")
-    except Exception as e:
-        activity.logger.error(f"Failed to load on CUDA, falling back to CPU: {e}")
-        from faster_whisper import WhisperModel
-        model = WhisperModel("base", device="cpu", compute_type="int8")
-        activity.logger.info("Faster-Whisper model loaded on device: CPU")
+    model, model_device = _get_whisper_model()
+    activity.logger.info(f"Faster-Whisper model loaded on device: {model_device}")
         
     segments, info = model.transcribe(local_path, beam_size=5)
     
@@ -447,23 +508,15 @@ def transcribe_video(object_name: str) -> str:
         "language": info.language
     }
     
-    # Save transcript locally (temp)
-    # object_name = "videos/filename.mp4"
-    # base = "filename.mp4"
-    base_filename = os.path.basename(object_name)
-    base_name_no_ext = os.path.splitext(base_filename)[0]
-    
-    # Save to a flat downloads dir or structured? 
-    # Let's save flat to avoid deep nesting issues for temp files, or mirror
-    # simpler: save flat in downloads dir
-    json_path = os.path.join(download_dir, f"{base_name_no_ext}.json")
+    # Save transcript locally in query-scoped temp path to avoid cross-query filename collisions.
+    transcript_key = _transcript_key_from_video_key(object_name)
+    json_path = os.path.join(download_dir, transcript_key)
+    os.makedirs(os.path.dirname(json_path), exist_ok=True)
     
     with open(json_path, "w", encoding='utf-8') as f:
         json.dump(result, f, indent=4, ensure_ascii=False)
     
-    # Upload transcript to MinIO (query-scoped path if available)
-    transcript_key = _transcript_key_from_video_key(object_name)
-        
+    # Upload transcript to MinIO (query-scoped path if available).
     client.fput_object(bucket_name, transcript_key, json_path)
     
     # Cleanup local video copy
@@ -741,10 +794,43 @@ def refresh_index() -> str:
     activity.logger.info("Refreshing video index...")
     try:
         import subprocess
-        # Run generate_index.py from the root directory
-        result = subprocess.run(["python3", "generate_index.py"], capture_output=True, text=True, check=True)
-        activity.logger.info(f"Index refreshed: {result.stdout}")
-        return result.stdout
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+        # Optional path: refresh index through external API endpoint.
+        # Useful when web/data.json is hosted on a separate server.
+        reindex_url = os.getenv("REINDEX_URL", "").strip()
+        if reindex_url:
+            resp = requests.post(reindex_url, timeout=20)
+            resp.raise_for_status()
+            payload = (resp.text or "remote reindex ok").strip()
+            activity.logger.info(f"Index refreshed via REINDEX_URL: {payload[:600]}")
+            return payload
+
+        run_env = os.environ.copy()
+        # Force explicit MinIO config for subprocess, preventing localhost fallback.
+        run_env["MINIO_ENDPOINT"] = run_env.get("MINIO_ENDPOINT", "localhost:9000")
+        run_env["MINIO_SECURE"] = run_env.get("MINIO_SECURE", "false")
+        run_env["MINIO_ACCESS_KEY"] = run_env.get(
+            "MINIO_ACCESS_KEY",
+            run_env.get("AWS_ACCESS_KEY_ID", "minioadmin"),
+        )
+        run_env["MINIO_SECRET_KEY"] = run_env.get(
+            "MINIO_SECRET_KEY",
+            run_env.get("AWS_SECRET_ACCESS_KEY", "minioadmin"),
+        )
+        run_env["MINIO_PUBLIC_BASE_URL"] = run_env.get("MINIO_PUBLIC_BASE_URL", "")
+
+        result = subprocess.run(
+            [sys.executable, "generate_index.py"],
+            cwd=project_root,
+            env=run_env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        out = (result.stdout or result.stderr or "index refreshed").strip()
+        activity.logger.info(f"Index refreshed: {out[:1200]}")
+        return out
     except Exception as e:
         activity.logger.error(f"Failed to refresh index: {e}")
         return str(e)

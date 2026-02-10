@@ -28,6 +28,32 @@ function safelyEncodeURI(uri: string) {
     return uri.split('/').map(part => encodeURIComponent(part)).join('/');
 }
 
+function normalizeAssetUrl(rawUrl: string) {
+    const raw = (rawUrl || '').trim();
+    if (!raw) return '';
+    if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+        return safelyEncodeURI(raw);
+    }
+    try {
+        const url = new URL(raw);
+        const encodedPath = url.pathname
+            .split('/')
+            .map((part) => {
+                if (!part) return part;
+                try {
+                    return encodeURIComponent(decodeURIComponent(part));
+                } catch {
+                    return encodeURIComponent(part);
+                }
+            })
+            .join('/');
+        url.pathname = encodedPath;
+        return url.toString();
+    } catch {
+        return encodeURI(raw);
+    }
+}
+
 export default function VideoCard({ video, index }: Props) {
     const router = useRouter();
 
@@ -37,7 +63,7 @@ export default function VideoCard({ video, index }: Props) {
 
     const thumbSrc = video.thumb_path
         ? (video.thumb_path.startsWith('http')
-            ? video.thumb_path
+            ? normalizeAssetUrl(video.thumb_path)
             : safelyEncodeURI(`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`))
         : null;
 

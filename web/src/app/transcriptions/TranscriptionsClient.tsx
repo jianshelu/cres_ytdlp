@@ -108,7 +108,26 @@ export default function TranscriptionsClient({ data, query }: Props) {
     const resolveVideoSrc = (videoPath: string) => {
         const raw = (videoPath || '').trim();
         if (!raw) return '';
-        if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+        if (raw.startsWith('http://') || raw.startsWith('https://')) {
+            try {
+                const url = new URL(raw);
+                const encodedPath = url.pathname
+                    .split('/')
+                    .map((part) => {
+                        if (!part) return part;
+                        try {
+                            return encodeURIComponent(decodeURIComponent(part));
+                        } catch {
+                            return encodeURIComponent(part);
+                        }
+                    })
+                    .join('/');
+                url.pathname = encodedPath;
+                return url.toString();
+            } catch {
+                return encodeURI(raw);
+            }
+        }
         return `/${raw.replace(/^\/+/, '')}`;
     };
 

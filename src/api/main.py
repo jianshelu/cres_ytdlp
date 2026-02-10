@@ -9,6 +9,10 @@ from src.api.routers import transcriptions
 import re
 import uuid
 import os
+import sys
+import asyncio
+import subprocess
+from pathlib import Path
 try:
     from pypinyin import lazy_pinyin
 except Exception:  # pragma: no cover - optional fallback
@@ -23,6 +27,45 @@ TEMPORAL_ADDRESS = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
 LLAMA_HEALTH_URL = os.getenv("LLAMA_HEALTH_URL", "http://localhost:8081/health")
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() in {"1", "true", "yes"}
+AUTO_REINDEX_ENABLED = os.getenv("AUTO_REINDEX_ENABLED", "false").lower() in {"1", "true", "yes"}
+AUTO_REINDEX_INTERVAL_SECONDS = max(15, int(os.getenv("AUTO_REINDEX_INTERVAL_SECONDS", "45")))
+AUTO_REINDEX_ON_START = os.getenv("AUTO_REINDEX_ON_START", "true").lower() in {"1", "true", "yes"}
+_reindex_task: asyncio.Task | None = None
+_reindex_lock = asyncio.Lock()
+
+
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _run_index_rebuild_sync() -> str:
+    root = _project_root()
+    script_path = root / "generate_index.py"
+    if not script_path.exists():
+        raise RuntimeError(f"generate_index.py not found: {script_path}")
+
+    proc = subprocess.run(
+        [sys.executable, str(script_path)],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return (proc.stdout or proc.stderr or "index rebuilt").strip()
+
+
+async def _rebuild_index_once() -> str:
+    async with _reindex_lock:
+        return await asyncio.to_thread(_run_index_rebuild_sync)
+
+
+async def _auto_reindex_loop() -> None:
+    while True:
+        try:
+            await _rebuild_index_once()
+        except Exception as e:
+            print(f"[auto-reindex] failed: {e}")
+        await asyncio.sleep(AUTO_REINDEX_INTERVAL_SECONDS)
 
 
 def _minio_health_url() -> str:
@@ -79,6 +122,31 @@ def _safe_query_slug(query: str) -> str:
     candidate = re.sub(r"[^a-z0-9\-_]", "_", candidate)
     candidate = re.sub(r"_+", "_", candidate).strip("_-")
     return candidate or "batch"
+
+
+@app.on_event("startup")
+async def _startup_tasks():
+    global _reindex_task
+    if AUTO_REINDEX_ON_START:
+        try:
+            await _rebuild_index_once()
+        except Exception as e:
+            print(f"[auto-reindex] startup rebuild failed: {e}")
+
+    if AUTO_REINDEX_ENABLED and _reindex_task is None:
+        _reindex_task = asyncio.create_task(_auto_reindex_loop())
+
+
+@app.on_event("shutdown")
+async def _shutdown_tasks():
+    global _reindex_task
+    if _reindex_task:
+        _reindex_task.cancel()
+        try:
+            await _reindex_task
+        except asyncio.CancelledError:
+            pass
+        _reindex_task = None
 
 
 @app.post("/process")
@@ -177,3 +245,12 @@ async def health():
         content=checks,
         status_code=status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
     )
+
+
+@app.post("/admin/reindex")
+async def admin_reindex():
+    try:
+        result = await _rebuild_index_once()
+        return {"status": "ok", "message": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"reindex failed: {e}")

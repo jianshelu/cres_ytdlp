@@ -37,6 +37,30 @@ build/
 id_vast_key
 *.key
 
+# Temporary local artifacts (session-generated)
+.tmp_*
+backend_deploy.tar
+backend_deploy.zip
+web_deploy.tar
+run_fastapi_norfolk.clean.cmd
+scripts/backfill_missing_transcripts_tmp.py
+.agent/artifacts/data_from_huihuang.json
+.agent/artifacts/data_from_instance.json
+.agent/artifacts/homepage_remote*.html
+.agent/artifacts/google_ai_pipeline_report.en.*.json
+.agent/artifacts/create_api_tunnel_task.cmd
+.agent/artifacts/create_api_tunnel_task_system.cmd
+.agent/artifacts/deploy_web_local.cmd
+.agent/artifacts/rebuild_restart_huihuang_web.ps1
+.agent/artifacts/recreate_tunnel_task_abs_ssh.cmd
+.agent/artifacts/register_tunnel_task.ps1
+.agent/artifacts/restart_web_huihuang_public.ps1
+.agent/artifacts/run_api_tunnel_8000.cmd
+.agent/artifacts/run_fastapi_huihuang.cmd
+.agent/artifacts/start_web_huihuang.ps1
+.agent/artifacts/start_web_task.cmd
+.agent/artifacts/start_web_task_system.cmd
+
 
 
 

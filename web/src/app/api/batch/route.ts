@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const backendUrl = process.env.API_URL || 'http://127.0.0.1:8000';
+    const backendUrl = (process.env.API_URL || 'http://127.0.0.1:8000').trim().replace(/\/+$/, '');
 
     const response = await fetch(`${backendUrl}/batch`, {
       method: 'POST',

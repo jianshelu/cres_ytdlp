@@ -22,8 +22,39 @@ interface VideoData {
   query_updated_at?: string | null;
 }
 
+interface IndexedVideo {
+  video: VideoData;
+  index: number;
+}
+
 function safelyEncodeURI(uri: string) {
   return uri.split('/').map((part) => encodeURIComponent(part)).join('/');
+}
+
+function normalizeAssetUrl(rawUrl: string) {
+  const raw = (rawUrl || '').trim();
+  if (!raw) return '';
+  if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+    return safelyEncodeURI(raw);
+  }
+  try {
+    const url = new URL(raw);
+    const encodedPath = url.pathname
+      .split('/')
+      .map((part) => {
+        if (!part) return part;
+        try {
+          return encodeURIComponent(decodeURIComponent(part));
+        } catch {
+          return encodeURIComponent(part);
+        }
+      })
+      .join('/');
+    url.pathname = encodedPath;
+    return url.toString();
+  } catch {
+    return encodeURI(raw);
+  }
 }
 
 export default async function Home() {
@@ -44,22 +75,22 @@ export default async function Home() {
     console.error('Failed to load video data:', e);
   }
 
-  const grouped = new Map<string, VideoData[]>();
-  data.forEach((video) => {
+  const grouped = new Map<string, IndexedVideo[]>();
+  data.forEach((video, index) => {
     const query = (video.search_query || 'Uncategorized').trim() || 'Uncategorized';
     if (!grouped.has(query)) grouped.set(query, []);
-    grouped.get(query)!.push(video);
+    grouped.get(query)!.push({ video, index });
   });
 
   const queryRows = Array.from(grouped.entries())
-    .map(([query, videos]) => {
-      const latestTs = videos.reduce<number>((maxTs, v) => {
-        const raw = v.query_updated_at || '';
+    .map(([query, items]) => {
+      const latestTs = items.reduce<number>((maxTs, item) => {
+        const raw = item.video.query_updated_at || '';
         const ts = raw ? Date.parse(raw) : NaN;
         if (!Number.isNaN(ts)) return Math.max(maxTs, ts);
         return maxTs;
       }, 0);
-      return { query, videos, count: videos.length, latestTs };
+      return { query, items, count: items.length, latestTs };
     })
     .sort((a, b) => b.latestTs - a.latestTs || b.count - a.count || a.query.localeCompare(b.query));
 
@@ -85,13 +116,13 @@ export default async function Home() {
         )}
 
         {queryRows.map((row, rowIndex) => {
-          const repeated = row.videos.length > 1 ? [...row.videos, ...row.videos] : row.videos;
+          const repeated = row.items.length > 1 ? [...row.items, ...row.items] : row.items;
           const visibleCards = repeated.slice(0, 24);
           const hiddenCount = Math.max(0, repeated.length - visibleCards.length);
           const directionClass = rowIndex % 2 === 0 ? 'left' : 'right';
           // Idle: much slower when not hovered.
           // 8s per result, minimum 120s per full loop.
-          const idleDurationSeconds = Math.max(120, row.videos.length * 8);
+          const idleDurationSeconds = Math.max(120, row.items.length * 8);
           // Hover: unified quick speed for all rows.
           const hoverDurationSeconds = 14;
 
@@ -114,16 +145,17 @@ export default async function Home() {
                     ['--marquee-hover-duration' as string]: `${hoverDurationSeconds}s`,
                   }}
                 >
-                  {visibleCards.map((video, idx) => {
+                  {visibleCards.map((item, idx) => {
+                    const video = item.video;
                     const thumbSrc = video.thumb_path
                       ? video.thumb_path.startsWith('http')
-                        ? video.thumb_path
+                        ? normalizeAssetUrl(video.thumb_path)
                         : safelyEncodeURI(`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`)
                       : null;
                     return (
                       <Link
-                        key={`${row.query}-${idx}-${video.title}`}
-                        href={`/transcriptions?query=${encodeURIComponent(row.query)}`}
+                        key={`${row.query}-${idx}-${video.title}-${item.index}`}
+                        href={`/video/${item.index}`}
                         className="marquee-card"
                         title={video.title}
                       >

@@ -165,6 +165,27 @@ def process_transcript(client, bucket: str, object_key: str):
     return summary, keywords, search_query
 
 
+def _contains_cjk(text: str) -> bool:
+    return any("\u4e00" <= ch <= "\u9fff" for ch in (text or ""))
+
+
+def _is_likely_garbled_query(text: str) -> bool:
+    s = (text or "").strip()
+    if not s:
+        return False
+    # Common mojibake signals when UTF-8 Chinese was decoded using a wrong code page.
+    if "�" in s:
+        return True
+    if any("\u0400" <= ch <= "\u04ff" for ch in s):  # Cyrillic range
+        return True
+    # Non-empty but not CJK/ASCII-ish often indicates encoding damage in this project context.
+    if not _contains_cjk(s):
+        non_ascii = sum(1 for ch in s if ord(ch) > 127)
+        if non_ascii > 0 and re.search(r"[A-Za-z0-9]", s) is None:
+            return True
+    return False
+
+
 def generate_index():
     _load_env_file_if_present()
     _endpoint, _ak, _sk, _secure, bucket, url_base = _resolve_minio_settings()
@@ -284,8 +305,8 @@ def generate_index():
             summary = s
             keywords = k
             search_query = sq
-        if not search_query and assets.get("query_slug"):
-            q_slug = assets.get("query_slug")
+        q_slug = assets.get("query_slug")
+        if q_slug and (not search_query or _is_likely_garbled_query(search_query)):
             search_query = query_slug_to_query_text.get(q_slug, q_slug)
 
         query_updated_at = None

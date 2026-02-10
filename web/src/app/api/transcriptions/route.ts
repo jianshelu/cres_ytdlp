@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const UPSTREAMS = ['http://127.0.0.1:8000', 'http://localhost:8000'];
+function getUpstreams() {
+  const envBase = (process.env.API_URL || '').trim();
+  if (!envBase) return ['http://127.0.0.1:8000', 'http://localhost:8000'];
+  return [envBase, 'http://127.0.0.1:8000', 'http://localhost:8000'];
+}
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('query') || '';
@@ -12,10 +16,11 @@ export async function GET(request: NextRequest) {
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
+  const upstreams = getUpstreams();
 
   try {
     let lastErr: unknown = null;
-    for (const base of UPSTREAMS) {
+    for (const base of upstreams) {
       try {
         const url = `${base}/api/transcriptions?query=${encodeURIComponent(query)}&limit=${encodeURIComponent(limit)}`;
         const res = await fetch(url, {
@@ -40,4 +45,3 @@ export async function GET(request: NextRequest) {
     clearTimeout(timer);
   }
 }
-

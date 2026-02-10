@@ -13,6 +13,33 @@ function safelyEncodeURI(uri: string) {
     return uri.split('/').map(part => encodeURIComponent(part)).join('/');
 }
 
+function normalizeMediaUrl(rawUrl: string) {
+    const raw = (rawUrl || '').trim();
+    if (!raw) return '';
+    if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+        return safelyEncodeURI(raw);
+    }
+
+    try {
+        const url = new URL(raw);
+        const encodedPath = url.pathname
+            .split('/')
+            .map((part) => {
+                if (!part) return part;
+                try {
+                    return encodeURIComponent(decodeURIComponent(part));
+                } catch {
+                    return encodeURIComponent(part);
+                }
+            })
+            .join('/');
+        url.pathname = encodedPath;
+        return url.toString();
+    } catch {
+        return encodeURI(raw);
+    }
+}
+
 export default async function VideoPage({ params, searchParams }: Props) {
     const resolvedParams = await params;
     const resolvedSearchParams = await searchParams;
@@ -20,10 +47,17 @@ export default async function VideoPage({ params, searchParams }: Props) {
 
     const initialTime = resolvedSearchParams?.t ? parseInt(resolvedSearchParams.t as string) : 0;
 
-    // Read data at runtime
-    const dataPath = path.join(process.cwd(), 'src', 'data.json');
+    // Read data at runtime (support both legacy and current index paths).
+    const candidateDataPaths = [
+        path.join(process.cwd(), 'src', 'data.json'),
+        path.join(process.cwd(), 'web', 'src', 'data.json'),
+    ];
     let videoData = null;
     try {
+        const dataPath = candidateDataPaths.find((p) => fs.existsSync(p));
+        if (!dataPath) {
+            throw new Error(`data.json not found in: ${candidateDataPaths.join(', ')}`);
+        }
         const fileContent = fs.readFileSync(dataPath, 'utf8');
         const data = JSON.parse(fileContent);
         videoData = data[index];
@@ -40,7 +74,7 @@ export default async function VideoPage({ params, searchParams }: Props) {
         try {
             if (videoData.json_path.startsWith('http')) {
                 // Fetch from MinIO (or remote URL)
-                const res = await fetch(videoData.json_path, { cache: 'no-store' });
+                const res = await fetch(normalizeMediaUrl(videoData.json_path), { cache: 'no-store' });
                 if (res.ok) {
                     transcript = await res.json();
                 } else {
@@ -60,7 +94,7 @@ export default async function VideoPage({ params, searchParams }: Props) {
 
     let videoSrc = '';
     if (videoData.video_path.startsWith('http')) {
-        videoSrc = videoData.video_path;
+        videoSrc = normalizeMediaUrl(videoData.video_path);
     } else {
         const videoPath = videoData.video_path.replace('test_downloads/', 'downloads/');
         videoSrc = safelyEncodeURI(`/${videoPath}`);
@@ -69,7 +103,7 @@ export default async function VideoPage({ params, searchParams }: Props) {
     let posterSrc = undefined;
     if (videoData.thumb_path) {
         if (videoData.thumb_path.startsWith('http')) {
-            posterSrc = videoData.thumb_path;
+            posterSrc = normalizeMediaUrl(videoData.thumb_path);
         } else {
             const thumbPath = videoData.thumb_path.replace('test_downloads/', 'downloads/');
             posterSrc = safelyEncodeURI(`/${thumbPath}`);

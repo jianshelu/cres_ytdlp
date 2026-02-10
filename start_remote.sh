@@ -202,9 +202,10 @@ restart_services() {
     # Environment setup.
     export LLM_MODEL_PATH="${LLM_MODEL_PATH:-$WORKSPACE_ROOT/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
     export WHISPER_MODEL_PATH="${WHISPER_MODEL_PATH:-$WORKSPACE_ROOT/packages/models/whisper}"
-    export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.121.250.72:7233}"
-    export MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.121.250.72:9000}"
+    export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-64.229.113.233:7233}"
+    export MINIO_ENDPOINT="${MINIO_ENDPOINT:-64.229.113.233:9000}"
     export MINIO_SECURE="${MINIO_SECURE:-false}"
+    export REINDEX_URL="${REINDEX_URL:-http://64.229.113.233:8000/admin/reindex}"
     export CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
     export PATH="/root/.local/bin:/usr/local/bin:/usr/bin:/bin:$WORKSPACE_ROOT:${PATH}"
     mkdir -p "$WORKSPACE_ROOT/logs"
