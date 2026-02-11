@@ -112,12 +112,9 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }} # Don't push on PRs
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Optimize cache
-          cache-from: type=gha,scope=base
-          cache-to: type=gha,scope=base,mode=max
-          # Build optimization
-          provenance: mode=max # SBOM + attestations (security)
-          sbom: true
+          # Reduce runner disk pressure on self-hosted nodes
+          provenance: false
+          sbom: false
 
   build-app:
     needs: [filter, build-base]
@@ -136,6 +133,15 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Pre-clean runner disk (build-app)
+        run: |
+          set -euxo pipefail
+          df -h
+          docker system df || true
+          docker rm -f $(docker ps -aq) 2>/dev/null || true
+          docker system prune -af --volumes || true
+          df -h
+          docker system df || true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -256,8 +262,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Isolate cache per image type
-          cache-from: type=gha,scope=app
-          cache-to: type=gha,scope=app,mode=max
-          provenance: mode=max
-          sbom: true
+          # Reduce runner disk pressure on self-hosted nodes
+          provenance: false
+          sbom: false
