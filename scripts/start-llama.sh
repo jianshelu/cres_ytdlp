@@ -50,14 +50,17 @@ LLAMA_BIN=$(which llama-server 2>/dev/null || echo "")
 if [ -z "$LLAMA_BIN" ] && [ -f "/app/llama-server" ]; then
     LLAMA_BIN="/app/llama-server"
 fi
+if [ -z "$LLAMA_BIN" ] && [ -f "/opt/llama/llama-server" ]; then
+    LLAMA_BIN="/opt/llama/llama-server"
+fi
 
 if [ -z "$LLAMA_BIN" ]; then
     echo "[llama] Error: llama-server executable not found"
     exit 1
 fi
 
-# Ensure /app libraries are available
-export LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH:-}"
+# Ensure llama runtime libraries are available
+export LD_LIBRARY_PATH="/opt/llama:/app:${LD_LIBRARY_PATH:-}"
 
 echo "[llama] Starting llama-server on ${LLAMA_HOST}:${LLAMA_PORT}"
 exec "$LLAMA_BIN" \

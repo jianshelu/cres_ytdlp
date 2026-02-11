@@ -1,7 +1,11 @@
 yt-dlp
 faster-whisper
-torch --index-url https://download.pytorch.org/whl/cu121
+ctranslate2
+tokenizers
+sentencepiece
 numpy
+soundfile
+pydub
 requests
 temporalio
 fastapi

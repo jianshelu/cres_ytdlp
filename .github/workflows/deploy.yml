@@ -2,6 +2,14 @@ name: Build and Push to GHCR
 run-name: Build (release) ${{ inputs.note }} ${{ github.ref_name }} @ ${{ github.sha }}
 
 on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
   workflow_dispatch:
     inputs:
       note:
@@ -162,7 +170,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build App image (smoke, no push)
-        if: ${{ inputs.run_smoke }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_smoke == 'true' }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -176,7 +184,7 @@ jobs:
           tags: cres-smoke:${{ github.sha }}
 
       - name: Start smoke dependencies
-        if: ${{ inputs.run_smoke }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_smoke == 'true' }}
         run: |
           set -euxo pipefail
           docker network create cres-smoke || true
@@ -190,7 +198,7 @@ jobs:
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
 
       - name: Resolve smoke dependency endpoints
-        if: ${{ inputs.run_smoke }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_smoke == 'true' }}
         id: smoke_deps
         run: |
           set -euxo pipefail
@@ -216,7 +224,7 @@ jobs:
           echo "minio_ip=$MINIO_IP" >> "$GITHUB_OUTPUT"
 
       - name: Run container smoke checks
-        if: ${{ inputs.run_smoke }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_smoke == 'true' }}
         run: |
           set -euxo pipefail
           docker run -d --name app-smoke --network cres-smoke \
@@ -235,13 +243,13 @@ jobs:
           docker exec app-smoke /bin/bash /workspace/scripts/container_smoke.sh
 
       - name: Cleanup smoke containers
-        if: ${{ always() && inputs.run_smoke }}
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && github.event.inputs.run_smoke == 'true' }}
         run: |
           docker rm -f app-smoke temporal-smoke minio-smoke || true
           docker network rm cres-smoke || true
 
       - name: Reclaim docker disk after smoke
-        if: ${{ always() && inputs.run_smoke }}
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && github.event.inputs.run_smoke == 'true' }}
         run: |
           set -euxo pipefail
           docker system prune -af --volumes || true
@@ -255,7 +263,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}
           tags: |
             type=raw,value=canary
-            type=raw,value=stable,enable=${{ github.event_name == 'workflow_dispatch' && inputs.promote_stable }}
+            type=raw,value=stable,enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.promote_stable == 'true' }}
             type=sha,format=short
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
