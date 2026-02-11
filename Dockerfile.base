@@ -1,6 +1,7 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
 # Runtime base is Vast.ai image; llama runtime binaries are copied from ggml image.
-ARG BASE_IMAGE=vastai/base-image:vastai-automatic-tag
+# NOTE: "@vastai-automatic-tag" works in Vast template APIs, not in Docker pulls.
+ARG BASE_IMAGE=vastai/base-image:cuda-12.4.1-auto
 FROM ghcr.io/ggml-org/llama.cpp:server-cuda AS llama_runtime
 
 FROM ${BASE_IMAGE}
