@@ -211,6 +211,7 @@ jobs:
         run: |
           set -euxo pipefail
           docker run -d --name app-smoke --network cres-smoke \
+            --entrypoint /bin/bash \
             -e CONTROL_PLANE_MODE=external \
             -e TEMPORAL_ADDRESS=${{ steps.smoke_deps.outputs.temporal_ip }}:7233 \
             -e MINIO_ENDPOINT=${{ steps.smoke_deps.outputs.minio_ip }}:9000 \
@@ -220,7 +221,8 @@ jobs:
             -e AWS_ACCESS_KEY_ID=cres \
             -e AWS_SECRET_ACCESS_KEY='Qh@113113' \
             -e ENABLE_WEB=false \
-            cres-smoke:${{ github.sha }}
+            cres-smoke:${{ github.sha }} \
+            -lc "sleep infinity"
           docker exec app-smoke /bin/bash /workspace/scripts/container_smoke.sh
 
       - name: Cleanup smoke containers

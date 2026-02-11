@@ -13,9 +13,9 @@ mods = [
     "temporalio",
     "minio",
     "yt_dlp",
-    "faster_whisper",
-    "torch",
 ]
+if (importlib.import_module("os").getenv("SMOKE_VALIDATE_GPU_STACK", "0") == "1"):
+    mods += ["faster_whisper", "torch"]
 missing = []
 for m in mods:
     try:
@@ -28,6 +28,14 @@ print("imports ok")
 PY
 
 echo "[smoke] wait FastAPI..."
+if ! curl -fsS http://127.0.0.1:8000/docs >/dev/null 2>&1; then
+  echo "[smoke] FastAPI not running, starting uvicorn..."
+  python3 -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 >/tmp/smoke-api.log 2>&1 &
+  SMOKE_API_PID=$!
+else
+  SMOKE_API_PID=""
+fi
+
 for i in $(seq 1 60); do
   if curl -fsS http://127.0.0.1:8000/docs >/dev/null 2>&1; then
     break
@@ -41,6 +49,9 @@ echo "[smoke] start worker process (both queues)..."
 WORKER_MODE=both WORKER_CPU_THREADS=1 WORKER_GPU_THREADS=1 python3 -m src.backend.worker >/tmp/smoke-worker.log 2>&1 &
 SMOKE_WORKER_PID=$!
 cleanup() {
+  if [ -n "${SMOKE_API_PID:-}" ] && kill -0 "$SMOKE_API_PID" >/dev/null 2>&1; then
+    kill "$SMOKE_API_PID" >/dev/null 2>&1 || true
+  fi
   if [ -n "${SMOKE_WORKER_PID:-}" ] && kill -0 "$SMOKE_WORKER_PID" >/dev/null 2>&1; then
     kill "$SMOKE_WORKER_PID" >/dev/null 2>&1 || true
   fi

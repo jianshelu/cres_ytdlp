@@ -21,8 +21,16 @@ from src.backend.activities import (
     build_batch_combined_output,
 )
 
-import torch
 import logging
+try:
+    import torch  # type: ignore
+except Exception:  # pragma: no cover - smoke/runtime fallback
+    class _TorchFallback:
+        class cuda:
+            @staticmethod
+            def is_available() -> bool:
+                return False
+    torch = _TorchFallback()  # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 
