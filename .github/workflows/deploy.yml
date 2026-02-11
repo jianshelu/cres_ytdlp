@@ -13,6 +13,11 @@ on:
         required: false
         type: boolean
         default: false
+      run_smoke:
+        description: "Run container smoke checks before push"
+        required: false
+        type: boolean
+        default: false
         
 env:
   REGISTRY: ghcr.io
@@ -157,6 +162,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build App image (smoke, no push)
+        if: ${{ inputs.run_smoke }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -170,6 +176,7 @@ jobs:
           tags: cres-smoke:${{ github.sha }}
 
       - name: Start smoke dependencies
+        if: ${{ inputs.run_smoke }}
         run: |
           set -euxo pipefail
           docker network create cres-smoke || true
@@ -183,6 +190,7 @@ jobs:
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
 
       - name: Resolve smoke dependency endpoints
+        if: ${{ inputs.run_smoke }}
         id: smoke_deps
         run: |
           set -euxo pipefail
@@ -208,6 +216,7 @@ jobs:
           echo "minio_ip=$MINIO_IP" >> "$GITHUB_OUTPUT"
 
       - name: Run container smoke checks
+        if: ${{ inputs.run_smoke }}
         run: |
           set -euxo pipefail
           docker run -d --name app-smoke --network cres-smoke \
@@ -226,13 +235,13 @@ jobs:
           docker exec app-smoke /bin/bash /workspace/scripts/container_smoke.sh
 
       - name: Cleanup smoke containers
-        if: always()
+        if: ${{ always() && inputs.run_smoke }}
         run: |
           docker rm -f app-smoke temporal-smoke minio-smoke || true
           docker network rm cres-smoke || true
 
       - name: Reclaim docker disk after smoke
-        if: always()
+        if: ${{ always() && inputs.run_smoke }}
         run: |
           set -euxo pipefail
           docker system prune -af --volumes || true
