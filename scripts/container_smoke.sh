@@ -28,7 +28,21 @@ print("imports ok")
 PY
 
 echo "[smoke] wait FastAPI..."
-if ! curl -fsS http://127.0.0.1:8000/docs >/dev/null 2>&1; then
+check_fastapi_docs() {
+  python3 - <<'PY'
+import sys
+import urllib.request
+
+url = "http://127.0.0.1:8000/docs"
+try:
+    with urllib.request.urlopen(url, timeout=2) as resp:
+        sys.exit(0 if resp.status == 200 else 1)
+except Exception:
+    sys.exit(1)
+PY
+}
+
+if ! check_fastapi_docs >/dev/null 2>&1; then
   echo "[smoke] FastAPI not running, starting uvicorn..."
   python3 -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 >/tmp/smoke-api.log 2>&1 &
   SMOKE_API_PID=$!
@@ -37,12 +51,12 @@ else
 fi
 
 for i in $(seq 1 60); do
-  if curl -fsS http://127.0.0.1:8000/docs >/dev/null 2>&1; then
+  if check_fastapi_docs >/dev/null 2>&1; then
     break
   fi
   sleep 1
 done
-curl -fsS http://127.0.0.1:8000/docs >/dev/null
+check_fastapi_docs >/dev/null
 echo "fastapi docs ok"
 
 echo "[smoke] start worker process (both queues)..."
