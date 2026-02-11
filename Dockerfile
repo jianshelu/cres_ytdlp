@@ -5,9 +5,10 @@ FROM ${BASE_IMAGE} AS base
 WORKDIR /workspace
 
 # Install Python deps (instance runtime only: FastAPI + worker CPU/GPU stack)
-COPY requirements.instance.txt .
+ARG REQUIREMENTS_FILE=requirements.instance.txt
+COPY requirements.instance.txt requirements.smoke.txt ./
 RUN pip3 install --upgrade pip \
- && pip3 install --no-cache-dir -r requirements.instance.txt \
+ && pip3 install --no-cache-dir -r "${REQUIREMENTS_FILE}" \
  && rm -rf /root/.cache/pip \
  && PY_SITE="$(python3 -c "import sysconfig; print(sysconfig.get_paths().get('purelib', ''))")" \
  && if [ -n "$PY_SITE" ] && [ -d "$PY_SITE" ]; then \

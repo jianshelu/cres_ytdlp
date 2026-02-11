@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+temporalio
+httpx
+minio
+requests
+python-multipart
+pypinyin
+yt-dlp

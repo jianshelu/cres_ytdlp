@@ -164,6 +164,7 @@ jobs:
           platforms: linux/amd64
           build-args: |
             BASE_IMAGE=python:3.10-slim
+            REQUIREMENTS_FILE=requirements.smoke.txt
           push: false
           load: true
           tags: cres-smoke:${{ github.sha }}
