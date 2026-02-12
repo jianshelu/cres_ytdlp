@@ -1,4 +1,43 @@
 # PLAN
+## 2026-02-12 - Transcriptions Hot-Path Optimization (AI programming / limit=30)
+
+- Objective: eliminate repeated high-latency rendering on `/transcriptions` for large result sets by removing redundant recomputation in FastAPI hot path.
+- Root cause:
+  - `/api/transcriptions` cache validation rejected valid cached payloads when `combined_video_url` was empty, causing repeated full recomputation.
+  - Transcript fetch path created new HTTP clients repeatedly under large fan-out, adding unnecessary connection overhead.
+  - No in-process hot cache fallback existed when external cache miss/write happened.
+- Changes:
+  - `src/api/routers/transcriptions.py`
+    - Added shared `httpx.AsyncClient` + bounded concurrency (`TRANSCRIPT_FETCH_CONCURRENCY`) for transcript payload fan-out.
+    - Added configurable transcript fetch timeout (`TRANSCRIPT_FETCH_TIMEOUT_SECONDS`).
+    - Removed strict cache rejection rule on empty `combined_video_url`; now cached response is accepted if schema-valid.
+    - Added in-process memory cache with TTL/size bounds:
+      - `TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS`
+      - `TRANSCRIPTIONS_MEMORY_CACHE_MAX_ITEMS`
+    - Added two-level cache order: memory cache -> MinIO cache -> recompute -> backfill both caches.
+  - Runtime operation on huihuang:
+    - Restarted FastAPI process to load updated hot-path code.
+
+### Validation
+
+- Syntax check:
+  - `python -m compileall src/api/routers/transcriptions.py`
+- API performance check (`AI programming`, `limit=30`):
+  - `curl http://127.0.0.1:8000/api/transcriptions?query=AI%20programming&limit=30`
+  - Observed:
+    - run1: `ttfb ~3.14s`, `cache=miss`
+    - run2/run3: `ttfb ~0.01s`, `cache=hit`
+- Page check:
+  - `curl http://127.0.0.1:3000/transcriptions?query=AI%20programming&limit=30`
+  - Observed after warm cache: `ttfb ~0.02s`.
+
+### Rollback
+
+1. Revert router changes:
+   - `git checkout -- src/api/routers/transcriptions.py`
+2. Restart FastAPI service on huihuang.
+3. Re-run the same curl checks to confirm behavior returns to previous baseline.
+
 ## 2026-02-12 - Archive Legacy Code-Sync Deploy Scripts and Enforce Immutable Instance Flow
 
 - Objective: retire legacy instance code-sync deployment scripts, clarify `docker run` ownership, and enforce one-way code flow (`huihuang/GitHub -> GHCR -> instance`).

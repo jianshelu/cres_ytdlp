@@ -9,6 +9,10 @@ import os
 import json
 import asyncio
 import re
+import httpx
+import copy
+import time
+from collections import OrderedDict
 from typing import List, Optional, Literal
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -34,6 +38,14 @@ llm_client = LlamaCppClient(base_url=os.getenv("LLAMA_URL", "http://localhost:80
 keyword_service = KeywordExtractionService(llm_client)
 sentence_service = SentenceService()
 cache_service = MinioTranscriptionsCache()
+TRANSCRIPT_FETCH_TIMEOUT_SECONDS = float(os.getenv("TRANSCRIPT_FETCH_TIMEOUT_SECONDS", "20"))
+TRANSCRIPT_FETCH_CONCURRENCY = max(1, int(os.getenv("TRANSCRIPT_FETCH_CONCURRENCY", "12")))
+TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS = max(0, int(os.getenv("TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS", "600")))
+TRANSCRIPTIONS_MEMORY_CACHE_MAX_ITEMS = max(1, int(os.getenv("TRANSCRIPTIONS_MEMORY_CACHE_MAX_ITEMS", "128")))
+
+_memory_cache_lock = asyncio.Lock()
+_memory_cache: OrderedDict[str, dict] = OrderedDict()
+_memory_cache_expiry: dict[str, float] = {}
 
 # Models
 class VideoTranscription(BaseModel):
@@ -83,7 +95,7 @@ async def load_data_json() -> List[dict]:
         logger.error(f"Failed to load data.json: {e}")
         return []
 
-async def fetch_transcript(json_path: str) -> Optional[str]:
+async def fetch_transcript(json_path: str, http_client: Optional[httpx.AsyncClient] = None) -> Optional[str]:
     """Fetch transcript text from JSON file."""
     if not json_path:
         return None
@@ -91,8 +103,12 @@ async def fetch_transcript(json_path: str) -> Optional[str]:
     try:
         # Handle MinIO URLs (http://...)
         if json_path.startswith('http'):
-            import httpx
-            async with httpx.AsyncClient() as client:
+            if http_client is not None:
+                response = await http_client.get(json_path)
+                response.raise_for_status()
+                data = response.json()
+                return data.get('text', '')
+            async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS) as client:
                 response = await client.get(json_path)
                 response.raise_for_status()
                 data = response.json()
@@ -115,7 +131,10 @@ async def fetch_transcript(json_path: str) -> Optional[str]:
         return None
 
 
-async def fetch_transcript_payload(json_path: str) -> dict:
+async def fetch_transcript_payload(
+    json_path: str,
+    http_client: Optional[httpx.AsyncClient] = None,
+) -> dict:
     """Fetch transcript payload and return text + optional keyword hints/segments."""
     if not json_path:
         return {"text": "", "keywords": [], "segments": []}
@@ -123,8 +142,16 @@ async def fetch_transcript_payload(json_path: str) -> dict:
     try:
         # Handle MinIO/public HTTP URLs
         if json_path.startswith("http"):
-            import httpx
-            async with httpx.AsyncClient() as client:
+            if http_client is not None:
+                response = await http_client.get(json_path)
+                response.raise_for_status()
+                data = response.json()
+                return {
+                    "text": data.get("text", "") or "",
+                    "keywords": data.get("keywords", []) or [],
+                    "segments": data.get("segments", []) or [],
+                }
+            async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS) as client:
                 response = await client.get(json_path)
                 response.raise_for_status()
                 data = response.json()
@@ -284,6 +311,45 @@ def _load_batch_combined_output(query: str) -> Optional[dict]:
             continue
     return None
 
+
+def _memory_cache_key(query: str, limit: int, source_hash: str) -> str:
+    return f"{query.strip().lower()}|{limit}|{source_hash}"
+
+
+async def _memory_cache_get(key: str) -> Optional[dict]:
+    if TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS <= 0:
+        return None
+
+    now = time.monotonic()
+    async with _memory_cache_lock:
+        expired = [k for k, exp in _memory_cache_expiry.items() if exp <= now]
+        for k in expired:
+            _memory_cache.pop(k, None)
+            _memory_cache_expiry.pop(k, None)
+
+        payload = _memory_cache.get(key)
+        if payload is None:
+            return None
+
+        _memory_cache.move_to_end(key)
+        return copy.deepcopy(payload)
+
+
+async def _memory_cache_set(key: str, payload: dict) -> None:
+    if TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS <= 0:
+        return
+
+    now = time.monotonic()
+    expires_at = now + TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS
+    async with _memory_cache_lock:
+        _memory_cache[key] = copy.deepcopy(payload)
+        _memory_cache_expiry[key] = expires_at
+        _memory_cache.move_to_end(key)
+
+        while len(_memory_cache) > TRANSCRIPTIONS_MEMORY_CACHE_MAX_ITEMS:
+            old_key, _ = _memory_cache.popitem(last=False)
+            _memory_cache_expiry.pop(old_key, None)
+
 # API endpoint
 @router.get("/transcriptions", response_model=TranscriptionsResponse)
 async def get_transcriptions_with_combined_keywords(
@@ -339,35 +405,46 @@ async def get_transcriptions_with_combined_keywords(
         # Limit to top N videos
         selected_videos = matching_videos[:limit]
         source_hash = build_source_hash(selected_videos, limit)
+        cache_key = _memory_cache_key(query, limit, source_hash)
 
         cache_enabled = os.getenv("ENABLE_TRANSCRIPTIONS_CACHE", "true").lower() in {"1", "true", "yes"}
         if cache_enabled:
+            memory_hit = await _memory_cache_get(cache_key)
+            if memory_hit:
+                if "meta" in memory_hit and isinstance(memory_hit["meta"], dict):
+                    memory_hit["meta"]["cache"] = "hit"
+                try:
+                    return TranscriptionsResponse(**memory_hit)
+                except Exception:
+                    logger.warning("Memory cache payload was invalid, recomputing", exc_info=True)
+
             cached = cache_service.get(query=query, limit=limit, source_hash=source_hash)
             if cached and isinstance(cached.get("response"), dict):
                 response_obj = cached["response"]
-                cached_combined = response_obj.get("combined", {}) if isinstance(response_obj, dict) else {}
-                cached_key_sentences = cached_combined.get("key_sentences", []) if isinstance(cached_combined, dict) else []
-                cached_sentence = cached_combined.get("sentence", "") if isinstance(cached_combined, dict) else ""
-                cached_video_url = cached_combined.get("combined_video_url", "") if isinstance(cached_combined, dict) else ""
-                # Compatibility guard: old cache entries may miss/empty key_sentences.
-                # In that case, recompute once and refresh cache with structured key sentences.
-                if (not isinstance(cached_key_sentences, list) or len(cached_key_sentences) == 0) and cached_sentence:
-                    logger.info("Cached payload missing key_sentences, recomputing and refreshing cache")
-                elif not str(cached_video_url or "").strip():
-                    logger.info("Cached payload missing combined_video_url, recomputing and refreshing cache")
-                else:
-                    # Ensure cache field is always explicit on read.
-                    if "meta" in response_obj and isinstance(response_obj["meta"], dict):
-                        response_obj["meta"]["cache"] = "hit"
-                    try:
-                        return TranscriptionsResponse(**response_obj)
-                    except Exception:
-                        logger.warning("Cached transcriptions payload was invalid, recomputing", exc_info=True)
+                # Ensure cache field is always explicit on read.
+                if "meta" in response_obj and isinstance(response_obj["meta"], dict):
+                    response_obj["meta"]["cache"] = "hit"
+                try:
+                    await _memory_cache_set(cache_key, response_obj)
+                    return TranscriptionsResponse(**response_obj)
+                except Exception:
+                    logger.warning("Cached transcriptions payload was invalid, recomputing", exc_info=True)
         
         # Fetch transcript payloads concurrently (text + optional keyword hints).
-        payloads = await asyncio.gather(
-            *(fetch_transcript_payload(video.get('json_path')) for video in selected_videos)
+        fetch_concurrency = min(TRANSCRIPT_FETCH_CONCURRENCY, max(1, len(selected_videos)))
+        fetch_semaphore = asyncio.Semaphore(fetch_concurrency)
+        limits = httpx.Limits(
+            max_keepalive_connections=fetch_concurrency,
+            max_connections=max(fetch_concurrency * 2, 20),
         )
+
+        async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS, limits=limits) as shared_client:
+            async def _fetch_payload(video: dict) -> dict:
+                async with fetch_semaphore:
+                    return await fetch_transcript_payload(video.get('json_path'), http_client=shared_client)
+
+            payloads = await asyncio.gather(*(_fetch_payload(video) for video in selected_videos))
+
         transcripts = [p.get("text", "") or "" for p in payloads]
         video_transcriptions = [
             {
@@ -557,18 +634,20 @@ async def get_transcriptions_with_combined_keywords(
                 cache="miss" if cache_enabled else "disabled"
             )
         )
+        response_payload = response.model_dump()
         if cache_enabled:
             try:
                 cache_service.set(
                     query=query,
                     limit=limit,
                     source_hash=source_hash,
-                    response_payload=response.model_dump(),
+                    response_payload=response_payload,
                     combined_transcription=combined_text,
                 )
             except Exception:
                 # Cache write should never break response.
                 logger.warning("Failed to write transcriptions cache", exc_info=True)
+            await _memory_cache_set(cache_key, response_payload)
         return response
     
     except Exception as e:
