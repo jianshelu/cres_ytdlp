@@ -1,4 +1,36 @@
 # PLAN
+## 2026-02-12 - CI Prebuilt Base Dependency Probe Before Reuse
+
+- Objective: prevent smoke failures where app container lacks Python runtime deps after reusing stale GHCR base image.
+- Root cause:
+  - `ci-minimal-image.yml` reused `ghcr.io/<repo>-base:latest` when pull succeeded, but did not validate dependency completeness.
+  - A stale/outdated GHCR base could be pullable yet missing `requirements.instance.txt` packages, leading to smoke import failures (`fastapi`, `temporalio`, `torch`, etc.).
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - In `Resolve base image strategy`, added `verify_base_runtime_deps()` probe:
+      - Runs `python3` import checks inside pulled prebuilt base image.
+      - Validates:
+        - `fastapi`, `uvicorn`, `httpx`, `temporalio`, `minio`, `yt_dlp`, `faster_whisper`, `torch`.
+    - Reuse policy now becomes:
+      - Pull success + dependency probe pass -> reuse GHCR base.
+      - Pull success + dependency probe fail -> fallback local base build.
+      - Pull fail -> fallback local base build.
+
+### Validation
+
+- Verify probe exists:
+  - `rg --line-number "verify_base_runtime_deps|prebuilt base dependency probe|faster_whisper|yt_dlp|torch" .github/workflows/ci-minimal-image.yml`
+- Re-run `CI Minimal Image Boot` with no base file changes:
+  - If GHCR base is stale: logs show probe failure and `build_local=true`.
+  - If GHCR base is valid: logs show probe pass and reuse path.
+- Confirm smoke no longer fails with missing imports in `scripts/container_smoke.sh`.
+
+### Rollback
+
+1. Remove `verify_base_runtime_deps()` function and probe branch from `Resolve base image strategy`.
+2. Restore original reuse rule (pull success -> reuse directly).
+3. Re-run CI workflow to confirm old behavior.
+
 ## 2026-02-12 - Fix CI Base/App Build Cache Backend Mismatch (docker driver)
 
 - Objective: stop `CI Minimal Image Boot` failures caused by Buildx cache backend incompatibility.

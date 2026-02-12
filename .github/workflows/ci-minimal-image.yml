@@ -99,6 +99,36 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          verify_base_runtime_deps() {
+            local image="$1"
+            docker run --rm "$image" python3 - <<'PY'
+import importlib
+import sys
+
+mods = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "temporalio",
+    "minio",
+    "yt_dlp",
+    "faster_whisper",
+    "torch",
+]
+missing = []
+for m in mods:
+    try:
+        importlib.import_module(m)
+    except Exception as e:
+        missing.append(f"{m}: {e}")
+if missing:
+    print("prebuilt base dependency probe failed:")
+    print("\n".join(missing))
+    sys.exit(1)
+print("prebuilt base dependency probe passed")
+PY
+          }
+
           if [ "${{ steps.filter.outputs.base }}" = "true" ]; then
             echo "Base-impacting files changed; build local base image."
             echo "build_local=true" >> "$GITHUB_OUTPUT"
@@ -107,9 +137,14 @@ jobs:
 
           PREBUILT_BASE="ghcr.io/${{ steps.lowercase.outputs.image_name_lower }}-base:latest"
           if docker pull "$PREBUILT_BASE"; then
-            docker tag "$PREBUILT_BASE" "cres-base-ci:${{ github.sha }}"
-            echo "Using prebuilt GHCR base image: $PREBUILT_BASE"
-            echo "build_local=false" >> "$GITHUB_OUTPUT"
+            if verify_base_runtime_deps "$PREBUILT_BASE"; then
+              docker tag "$PREBUILT_BASE" "cres-base-ci:${{ github.sha }}"
+              echo "Using prebuilt GHCR base image: $PREBUILT_BASE"
+              echo "build_local=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Prebuilt GHCR base failed dependency probe; fallback to local base build."
+              echo "build_local=true" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "GHCR base pull failed; fallback to local base build."
             echo "build_local=true" >> "$GITHUB_OUTPUT"
