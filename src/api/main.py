@@ -35,6 +35,7 @@ AUTO_REINDEX_ON_START = os.getenv("AUTO_REINDEX_ON_START", "true").lower() in {"
 AUTO_START_WORKERS_ON_BATCH = os.getenv("AUTO_START_WORKERS_ON_BATCH", "true").lower() in {"1", "true", "yes"}
 SCHEDULER_ACTIVE_INSTANCE = os.getenv("SCHEDULER_ACTIVE_INSTANCE", "true").lower() in {"1", "true", "yes"}
 SCHEDULER_ACTIVE_MAX_PARALLELISM = max(1, int(os.getenv("SCHEDULER_ACTIVE_MAX_PARALLELISM", "2")))
+DEFAULT_YOUTUBE_CATEGORY = os.getenv("YOUTUBE_DEFAULT_CATEGORY", "Science & Technology").strip() or "Science & Technology"
 _reindex_task: asyncio.Task | None = None
 _reindex_lock = asyncio.Lock()
 
@@ -117,6 +118,7 @@ class BatchRequest(BaseModel):
     limit: int = 10
     parallelism: int | None = None
     max_duration_minutes: int | None = None
+    youtube_category: str = DEFAULT_YOUTUBE_CATEGORY
 
 
 def _resolve_batch_parallelism(limit: int, requested: int | None) -> int:
@@ -223,13 +225,14 @@ async def batch_process(request: BatchRequest):
 
         parallelism = _resolve_batch_parallelism(request.limit, request.parallelism)
         max_duration_minutes = _resolve_max_duration_minutes(request.max_duration_minutes)
+        youtube_category = (request.youtube_category or DEFAULT_YOUTUBE_CATEGORY).strip() or DEFAULT_YOUTUBE_CATEGORY
         request_id = str(uuid.uuid4())
         query_slug = _safe_query_slug(request.query)
         workflow_id = f"batch-{query_slug}-{request_id[:12]}"
 
         handle = await client.start_workflow(
             BatchProcessingWorkflow.run,
-            (request.query, request.limit, parallelism, max_duration_minutes),
+            (request.query, request.limit, parallelism, max_duration_minutes, youtube_category),
             id=workflow_id,
             task_queue=CPU_TASK_QUEUE,
         )
@@ -241,6 +244,7 @@ async def batch_process(request: BatchRequest):
             "request_id": request_id,
             "parallelism": parallelism,
             "max_duration_minutes": max_duration_minutes,
+            "youtube_category": youtube_category,
         }
 
     except Exception as e:

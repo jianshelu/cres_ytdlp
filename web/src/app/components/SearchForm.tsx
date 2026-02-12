@@ -2,6 +2,26 @@
 
 import { useState } from 'react';
 
+const DEFAULT_YOUTUBE_CATEGORY = 'Science & Technology';
+const YOUTUBE_CATEGORIES = [
+    'Science & Technology',
+    'Education',
+    'News & Politics',
+    'People & Blogs',
+    'Howto & Style',
+    'Entertainment',
+    'Gaming',
+    'Music',
+    'Film & Animation',
+    'Autos & Vehicles',
+    'Sports',
+    'Travel & Events',
+    'Pets & Animals',
+    'Comedy',
+    'Nonprofits & Activism',
+    'All Categories',
+];
+
 export default function SearchForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState('');
@@ -13,6 +33,8 @@ export default function SearchForm() {
         const search = (formData.get('search') as string || '').trim();
         const limit = Number(formData.get('limit') || 5);
         const maxDurationMinutes = Number(formData.get('maxDurationMinutes') || 10);
+        const youtubeCategory =
+            (formData.get('youtubeCategory') as string || DEFAULT_YOUTUBE_CATEGORY).trim() || DEFAULT_YOUTUBE_CATEGORY;
 
         if (!search) {
             setIsError(true);
@@ -32,6 +54,7 @@ export default function SearchForm() {
                     query: search,
                     limit,
                     max_duration_minutes: maxDurationMinutes,
+                    youtube_category: youtubeCategory,
                 }),
             });
 
@@ -53,7 +76,7 @@ export default function SearchForm() {
 
     return (
         <div>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: '200px' }}>
                     <input
                         type="text"
@@ -63,6 +86,21 @@ export default function SearchForm() {
                         style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #444', background: '#222', color: '#fff' }}
                         required
                     />
+                </div>
+                <div style={{ flex: '0 0 auto' }}>
+                    <select
+                        name="youtubeCategory"
+                        id="youtubeCategory"
+                        defaultValue={DEFAULT_YOUTUBE_CATEGORY}
+                        title="YouTube category"
+                        style={{ width: '190px', padding: '8px', borderRadius: '4px', border: '1px solid #444', background: '#222', color: '#fff' }}
+                    >
+                        {YOUTUBE_CATEGORIES.map((category) => (
+                            <option key={category} value={category}>
+                                {category}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div style={{ flex: '0 0 auto' }}>
                     <input
@@ -84,8 +122,8 @@ export default function SearchForm() {
                         min="1"
                         max="180"
                         defaultValue="10"
-                        placeholder="最大时长(分钟)"
-                        title="最大视频时长（分钟）"
+                        placeholder="Max minutes"
+                        title="Maximum video duration in minutes"
                         style={{ width: '110px', padding: '8px', borderRadius: '4px', border: '1px solid #444', background: '#222', color: '#fff' }}
                     />
                 </div>

@@ -20,6 +20,7 @@ with workflow.unsafe.imports_passed_through():
 BASE_TASK_QUEUE = os.getenv("BASE_TASK_QUEUE", "video-processing").strip() or "video-processing"
 CPU_TASK_QUEUE = f"{BASE_TASK_QUEUE}@cpu"
 GPU_TASK_QUEUE = f"{BASE_TASK_QUEUE}@gpu"
+DEFAULT_YOUTUBE_CATEGORY = os.getenv("YOUTUBE_DEFAULT_CATEGORY", "Science & Technology").strip() or "Science & Technology"
 
 
 def _safe_query_slug(query: str) -> str:
@@ -32,15 +33,18 @@ async def _run_query_pipeline_inline(
     limit: int,
     parallelism: int,
     max_duration_minutes: int,
+    youtube_category: str = DEFAULT_YOUTUBE_CATEGORY,
 ) -> dict:
     """Execute full batch pipeline inline inside one workflow run."""
     urls = await workflow.execute_activity(
         search_videos,
-        (query, limit, max_duration_minutes),
+        (query, limit, max_duration_minutes, youtube_category),
         start_to_close_timeout=timedelta(minutes=10),
         task_queue=CPU_TASK_QUEUE,
     )
-    workflow.logger.info(f"Found {len(urls)} videos to process (inline mode)")
+    workflow.logger.info(
+        f"Found {len(urls)} videos to process (inline mode, category={youtube_category})"
+    )
 
     pipeline_ids = []
     completed_results = []
@@ -120,6 +124,7 @@ async def _run_query_pipeline_inline(
         "query": query,
         "parallelism": parallelism,
         "max_duration_minutes": max_duration_minutes,
+        "youtube_category": youtube_category,
         "dispatched_count": len(pipeline_ids),
         "completed_count": len(completed_results),
         "failed_count": len(failed_children),
@@ -190,7 +195,16 @@ class VideoProcessingWorkflow:
 class BatchProcessingWorkflow:
     @workflow.run
     async def run(self, params: tuple) -> dict:
-        if isinstance(params, (tuple, list)) and len(params) >= 4:
+        youtube_category = DEFAULT_YOUTUBE_CATEGORY
+        if isinstance(params, (tuple, list)) and len(params) >= 5:
+            query, limit, parallelism, max_duration_minutes, youtube_category = (
+                params[0],
+                params[1],
+                params[2],
+                params[3],
+                params[4],
+            )
+        elif isinstance(params, (tuple, list)) and len(params) >= 4:
             query, limit, parallelism, max_duration_minutes = params[0], params[1], params[2], params[3]
         elif isinstance(params, (tuple, list)) and len(params) >= 3:
             query, limit, parallelism = params[0], params[1], params[2]
@@ -202,11 +216,15 @@ class BatchProcessingWorkflow:
 
         parallelism = max(1, min(4, int(parallelism)))
         max_duration_minutes = max(1, min(180, int(max_duration_minutes)))
+        youtube_category = str(youtube_category or DEFAULT_YOUTUBE_CATEGORY).strip() or DEFAULT_YOUTUBE_CATEGORY
         workflow.logger.info(
-            f"Batch processing started for query: {query}, limit: {limit}, parallelism: {parallelism}, max_duration_minutes: {max_duration_minutes}"
+            f"Batch processing started for query: {query}, limit: {limit}, parallelism: {parallelism}, "
+            f"max_duration_minutes: {max_duration_minutes}, youtube_category: {youtube_category}"
         )
         
-        return await _run_query_pipeline_inline(query, limit, parallelism, max_duration_minutes)
+        return await _run_query_pipeline_inline(
+            query, limit, parallelism, max_duration_minutes, youtube_category
+        )
 
 
 @workflow.defn
@@ -242,6 +260,7 @@ class QueryDispatcherWorkflow:
         limit = max(1, min(50, int(payload.get("limit", 5))))
         parallelism = max(1, min(4, int(payload.get("parallelism", 2))))
         max_duration_minutes = max(1, min(180, int(payload.get("max_duration_minutes", 10))))
+        youtube_category = str(payload.get("youtube_category", DEFAULT_YOUTUBE_CATEGORY) or DEFAULT_YOUTUBE_CATEGORY).strip() or DEFAULT_YOUTUBE_CATEGORY
 
         self._queue.append(
             {
@@ -250,6 +269,7 @@ class QueryDispatcherWorkflow:
                 "limit": limit,
                 "parallelism": parallelism,
                 "max_duration_minutes": max_duration_minutes,
+                "youtube_category": youtube_category,
             }
         )
         self._remember_request(request_id)
@@ -270,6 +290,7 @@ class QueryDispatcherWorkflow:
             limit = payload["limit"]
             parallelism = payload["parallelism"]
             max_duration_minutes = payload["max_duration_minutes"]
+            youtube_category = payload.get("youtube_category", DEFAULT_YOUTUBE_CATEGORY)
             request_id = payload["request_id"]
 
             pinyin_slug = "".join(lazy_pinyin(query))
@@ -278,13 +299,14 @@ class QueryDispatcherWorkflow:
             child_workflow_id = f"batch-{safe_query}-{suffix}"
 
             workflow.logger.info(
-                f"Dispatcher starting batch child: {child_workflow_id}, query={query}, limit={limit}, parallelism={parallelism}, max_duration_minutes={max_duration_minutes}"
+                f"Dispatcher starting batch child: {child_workflow_id}, query={query}, limit={limit}, "
+                f"parallelism={parallelism}, max_duration_minutes={max_duration_minutes}, youtube_category={youtube_category}"
             )
 
             try:
                 await workflow.execute_child_workflow(
                     BatchProcessingWorkflow.run,
-                    (query, limit, parallelism, max_duration_minutes),
+                    (query, limit, parallelism, max_duration_minutes, youtube_category),
                     id=child_workflow_id,
                     task_queue=CPU_TASK_QUEUE,
                 )
@@ -337,6 +359,7 @@ class QueryOrchestratorWorkflow:
         limit = max(1, min(50, int(payload.get("limit", 5))))
         parallelism = max(1, min(4, int(payload.get("parallelism", 2))))
         max_duration_minutes = max(1, min(180, int(payload.get("max_duration_minutes", 10))))
+        youtube_category = str(payload.get("youtube_category", DEFAULT_YOUTUBE_CATEGORY) or DEFAULT_YOUTUBE_CATEGORY).strip() or DEFAULT_YOUTUBE_CATEGORY
 
         self._queue.append(
             {
@@ -345,6 +368,7 @@ class QueryOrchestratorWorkflow:
                 "limit": limit,
                 "parallelism": parallelism,
                 "max_duration_minutes": max_duration_minutes,
+                "youtube_category": youtube_category,
             }
         )
         self._remember_request(request_id)
@@ -365,14 +389,16 @@ class QueryOrchestratorWorkflow:
             limit = payload["limit"]
             parallelism = payload["parallelism"]
             max_duration_minutes = payload["max_duration_minutes"]
+            youtube_category = payload.get("youtube_category", DEFAULT_YOUTUBE_CATEGORY)
             request_id = payload["request_id"]
 
             workflow.logger.info(
                 f"Orchestrator running inline pipeline: request_id={request_id}, query={query}, "
-                f"limit={limit}, parallelism={parallelism}, max_duration_minutes={max_duration_minutes}"
+                f"limit={limit}, parallelism={parallelism}, max_duration_minutes={max_duration_minutes}, "
+                f"youtube_category={youtube_category}"
             )
             try:
-                await _run_query_pipeline_inline(query, limit, parallelism, max_duration_minutes)
+                await _run_query_pipeline_inline(query, limit, parallelism, max_duration_minutes, youtube_category)
             except Exception as e:
                 workflow.logger.error(f"Orchestrator failed for query='{query}', request_id={request_id}: {e}")
 

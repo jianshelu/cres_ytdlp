@@ -31,6 +31,7 @@ _WHISPER_MODEL_CACHE = {}
 _WHISPER_MODEL_LOCK = threading.Lock()
 _LOCAL_DOWNLOAD_ROOT = "web/public/downloads"
 _TEMP_CLEANUP_MIN_AGE_SECONDS = max(60, int(os.getenv("TEMP_CLEANUP_MIN_AGE_SECONDS", "900")))
+_DEFAULT_YOUTUBE_CATEGORY = os.getenv("YOUTUBE_DEFAULT_CATEGORY", "Science & Technology").strip() or "Science & Technology"
 
 
 def _cleanup_local_temp_files(root: str = _LOCAL_DOWNLOAD_ROOT) -> int:
@@ -746,24 +747,126 @@ async def summarize_content(params: tuple) -> dict:
 
     return summary_data
 
+_YOUTUBE_CATEGORY_NAME_BY_ID = {
+    "1": "Film & Animation",
+    "2": "Autos & Vehicles",
+    "10": "Music",
+    "15": "Pets & Animals",
+    "17": "Sports",
+    "19": "Travel & Events",
+    "20": "Gaming",
+    "22": "People & Blogs",
+    "23": "Comedy",
+    "24": "Entertainment",
+    "25": "News & Politics",
+    "26": "Howto & Style",
+    "27": "Education",
+    "28": "Science & Technology",
+    "29": "Nonprofits & Activism",
+}
+
+
+def _normalize_youtube_category(value: str) -> str:
+    text = str(value or "").strip().lower()
+    text = text.replace("&", "and")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def _resolve_youtube_category(raw: str | None) -> str:
+    value = str(raw or _DEFAULT_YOUTUBE_CATEGORY).strip()
+    normalized = _normalize_youtube_category(value)
+    if normalized in {"", "all", "all categories", "any"}:
+        return ""
+    if value.isdigit():
+        return _YOUTUBE_CATEGORY_NAME_BY_ID.get(value, value)
+    return value
+
+
+def _candidate_matches_youtube_category(candidate: dict, requested_norm: str) -> bool:
+    if not requested_norm:
+        return True
+
+    candidate_names = []
+
+    categories = candidate.get("categories")
+    if isinstance(categories, list):
+        for item in categories:
+            text = str(item or "").strip()
+            if text:
+                candidate_names.append(text)
+
+    single_category = candidate.get("category")
+    if single_category is not None:
+        text = str(single_category).strip()
+        if text:
+            if text.isdigit():
+                candidate_names.append(_YOUTUBE_CATEGORY_NAME_BY_ID.get(text, text))
+            else:
+                candidate_names.append(text)
+
+    category_id = str(candidate.get("category_id") or "").strip()
+    if category_id:
+        candidate_names.append(_YOUTUBE_CATEGORY_NAME_BY_ID.get(category_id, category_id))
+
+    # Flat search entries may not expose category metadata; treat as unknown instead of dropping.
+    if not candidate_names:
+        return True
+
+    normalized_candidates = set()
+    for name in candidate_names:
+        norm = _normalize_youtube_category(name)
+        if norm:
+            normalized_candidates.add(norm)
+
+    return requested_norm in normalized_candidates
+
+
 @activity.defn
 async def search_videos(params: tuple) -> list:
-    if isinstance(params, (tuple, list)) and len(params) >= 4:
-        query, limit, max_duration_minutes, max_age_days = params[0], params[1], params[2], params[3]
-    elif isinstance(params, (tuple, list)) and len(params) >= 3:
-        query, limit, max_duration_minutes = params[0], params[1], params[2]
-        max_age_days = int(os.getenv("YOUTUBE_MAX_AGE_DAYS", "0") or "0")
+    max_duration_minutes = 10
+    max_age_days = int(os.getenv("YOUTUBE_MAX_AGE_DAYS", "0") or "0")
+    youtube_category = _DEFAULT_YOUTUBE_CATEGORY
+
+    if isinstance(params, (tuple, list)):
+        if len(params) < 2:
+            raise ValueError("search_videos requires (query, limit)")
+
+        query, limit = params[0], params[1]
+
+        if len(params) >= 3:
+            max_duration_minutes = params[2]
+
+        # Backward compatible: 4th/5th params may be max_age_days or youtube_category.
+        if len(params) >= 4:
+            fourth = params[3]
+            if isinstance(fourth, str):
+                youtube_category = fourth
+            elif fourth is not None and str(fourth).strip():
+                max_age_days = int(fourth)
+
+        if len(params) >= 5:
+            fifth = params[4]
+            if isinstance(fifth, str):
+                youtube_category = fifth
+            elif fifth is not None and str(fifth).strip():
+                max_age_days = int(fifth)
     else:
         query, limit = params
-        max_duration_minutes = 10
-        max_age_days = int(os.getenv("YOUTUBE_MAX_AGE_DAYS", "0") or "0")
+
+    query = str(query or "").strip()
+    limit = max(1, min(50, int(limit)))
     max_duration_seconds = max(60, int(max_duration_minutes) * 60)
     max_age_days = max(0, int(max_age_days))
+    resolved_category = _resolve_youtube_category(youtube_category)
+    resolved_category_norm = _normalize_youtube_category(resolved_category)
+    category_filter_enabled = bool(resolved_category_norm)
     min_upload_date = None
     if max_age_days > 0:
         min_upload_date = (datetime.utcnow() - timedelta(days=max_age_days)).strftime("%Y%m%d")
     activity.logger.info(
-        f"Searching for videos with query: {query}, limit: {limit}, max_duration_minutes: {max_duration_minutes}, max_age_days: {max_age_days}"
+        f"Searching for videos with query: {query}, limit: {limit}, max_duration_minutes: {max_duration_minutes}, "
+        f"max_age_days: {max_age_days}, youtube_category: {resolved_category or 'all'}"
     )
     
     ydl_opts = {
@@ -783,7 +886,10 @@ async def search_videos(params: tuple) -> list:
     # Over-fetch candidates because duration/live/url-type filters can drop many entries.
     # Cap at 50 to keep search fast enough.
     candidate_count = min(max(limit * 10, limit + 5), 50)
-    search_query = f"ytsearch{candidate_count}:{query}"
+    search_terms = query
+    if category_filter_enabled:
+        search_terms = f"{query} {resolved_category}".strip()
+    search_query = f"ytsearch{candidate_count}:{search_terms}"
     
     def _search():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -856,6 +962,9 @@ async def search_videos(params: tuple) -> list:
             if not url:
                 continue
 
+            if category_filter_enabled and not _candidate_matches_youtube_category(cand, resolved_category_norm):
+                continue
+
             if url in seen_urls:
                 continue
             seen_urls.add(url)
@@ -864,7 +973,9 @@ async def search_videos(params: tuple) -> list:
         except Exception:
             continue
             
-    activity.logger.info(f"Returning {len(valid_urls)} valid URLs for query='{query}' (requested={limit})")
+    activity.logger.info(
+        f"Returning {len(valid_urls)} valid URLs for query='{query}' (requested={limit}, youtube_category={resolved_category or 'all'})"
+    )
     return valid_urls
 
 @activity.defn
