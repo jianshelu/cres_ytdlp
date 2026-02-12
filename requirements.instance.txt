@@ -1,6 +1,7 @@
 yt-dlp
 faster-whisper
-torch --index-url https://download.pytorch.org/whl/cu121
+# torch is expected to be preinstalled in `vastai/base-image:cuda-12.4.1-auto`.
+# Dockerfile.base validates availability via `python3 -c "import torch"`.
 numpy
 requests
 temporalio
