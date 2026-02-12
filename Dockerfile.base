@@ -1,7 +1,7 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
 # Build llama.cpp from source (CUDA) so runtime keeps /app/llama-server.
 FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS llama_cpp_builder
-ARG LLAMA_CPP_REF=master
+ARG LLAMA_CPP_REF=
 ARG LLAMA_CUDA_ARCH=86
 ARG LLAMA_BUILD_JOBS=2
 
@@ -13,22 +13,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/llama.cpp
-RUN git clone --depth 1 --branch "${LLAMA_CPP_REF}" https://github.com/ggml-org/llama.cpp.git . \
- && cmake -S . -B build \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CUDA_ARCHITECTURES="${LLAMA_CUDA_ARCH}" \
-    -DGGML_CUDA=ON \
-    -DGGML_NATIVE=OFF \
-    -DBUILD_SHARED_LIBS=ON \
-    -DLLAMA_BUILD_SERVER=ON \
-    -DLLAMA_BUILD_TESTS=OFF \
-    -DLLAMA_BUILD_EXAMPLES=OFF \
- && cmake --build build --config Release --target llama-server -j"${LLAMA_BUILD_JOBS}" \
- && mkdir -p /opt/llama-artifacts \
- && cp -a /opt/llama.cpp/build/bin/llama-server /opt/llama-artifacts/ \
- && cp -a /opt/llama.cpp/build/bin/libllama.so* /opt/llama-artifacts/ \
- && cp -a /opt/llama.cpp/build/bin/libggml*.so* /opt/llama-artifacts/ \
- && (strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* || true)
+RUN set -eux; \
+    git clone --depth 1 https://github.com/ggml-org/llama.cpp.git .; \
+    if [ -n "${LLAMA_CPP_REF}" ]; then \
+      git fetch --depth 1 origin "${LLAMA_CPP_REF}"; \
+      git checkout "${LLAMA_CPP_REF}"; \
+    fi; \
+    cmake -S . -B build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_CUDA_ARCHITECTURES="${LLAMA_CUDA_ARCH}" \
+      -DGGML_CUDA=ON \
+      -DGGML_NATIVE=OFF \
+      -DBUILD_SHARED_LIBS=ON \
+      -DLLAMA_BUILD_SERVER=ON \
+      -DLLAMA_BUILD_TESTS=OFF \
+      -DLLAMA_BUILD_EXAMPLES=OFF; \
+    if ! cmake --build build --config Release --target llama-server -j"${LLAMA_BUILD_JOBS}"; then \
+      echo "llama-server target build failed, retrying with full build"; \
+      cmake --build build --config Release -j"${LLAMA_BUILD_JOBS}"; \
+    fi; \
+    mkdir -p /opt/llama-artifacts; \
+    LLAMA_BIN="$(find /opt/llama.cpp/build -type f -name llama-server | head -n 1)"; \
+    test -n "${LLAMA_BIN}"; \
+    cp -a "${LLAMA_BIN}" /opt/llama-artifacts/llama-server; \
+    find /opt/llama.cpp/build -type f -name 'libllama.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    find /opt/llama.cpp/build -type f -name 'libggml*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* || true
 
 # Use explicit Vast.ai CUDA base tag (auto placeholder format is invalid in Docker FROM).
 FROM vastai/base-image:cuda-12.4.1-auto
