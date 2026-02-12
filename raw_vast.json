@@ -1,0 +1,244 @@
+{
+    "actual_status":  "running",
+    "bundle_id":  null,
+    "bw_nvlink":  0.0,
+    "client_run_time":  1.1,
+    "compute_cap":  860,
+    "country_code":  "KR",
+    "cpu_arch":  "amd64",
+    "cpu_cores":  56,
+    "cpu_cores_effective":  9.333333333333332,
+    "cpu_name":  "Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz",
+    "cpu_ram":  128771,
+    "cpu_util":  0.1017857142857143,
+    "credit_balance":  null,
+    "credit_discount":  null,
+    "credit_discount_max":  0.0,
+    "cuda_max_good":  12.6,
+    "cur_state":  "running",
+    "direct_port_count":  16,
+    "direct_port_end":  50086,
+    "direct_port_start":  50022,
+    "disk_bw":  488.0,
+    "disk_name":  "WDC  WDS200T2B0A",
+    "disk_space":  32.0,
+    "disk_usage":  12.0,
+    "disk_util":  12.0,
+    "dlperf":  null,
+    "dlperf_per_dphtotal":  null,
+    "dph_base":  0.04666666666666667,
+    "dph_total":  0.05555555555555556,
+    "driver_version":  "560.35.03",
+    "duration":  4470426.435553074,
+    "end_date":  1774915969.0,
+    "external":  false,
+    "extra_env":  [
+                      [
+                          "-p 1111:1111",
+                          "1"
+                      ],
+                      [
+                          "-p 6006:6006",
+                          "1"
+                      ],
+                      [
+                          "-p 8080:8080",
+                          "1"
+                      ],
+                      [
+                          "-p 8384:8384",
+                          "1"
+                      ],
+                      [
+                          "-p 72299:72299",
+                          "1"
+                      ],
+                      [
+                          "OPEN_BUTTON_PORT",
+                          "1111"
+                      ],
+                      [
+                          "JUPYTER_DIR",
+                          "/"
+                      ],
+                      [
+                          "DATA_DIRECTORY",
+                          "/workspace/"
+                      ],
+                      [
+                          "PORTAL_CONFIG",
+                          "localhost:1111:11111:/:Instance Portal|localhost:8080:18080:/:Jupyter|localhost:8080:8080:/terminals/1:Jupyter Terminal|localhost:8384:18384:/:Syncthing|localhost:6006:16006:/:Tensorboard"
+                      ],
+                      [
+                          "OPEN_BUTTON_TOKEN",
+                          "1"
+                      ]
+                  ],
+    "flops_per_dphtotal":  219.85689599999998,
+    "geolocation":  "South Korea, KR",
+    "gpu_arch":  "nvidia",
+    "gpu_display_active":  false,
+    "gpu_frac":  0.16666666666666666,
+    "gpu_lanes":  8,
+    "gpu_mem_bw":  317.8,
+    "gpu_name":  "NVIDIA GeForce RTX 3060",
+    "gpu_ram":  12288,
+    "gpu_temp":  31.999969,
+    "gpu_totalram":  12288,
+    "gpu_util":  0.0,
+    "has_avx":  1,
+    "host_id":  159006,
+    "host_run_time":  2592000.0,
+    "hosting_type":  null,
+    "id":  31036534,
+    "image_args":  [
+
+                   ],
+    "image_runtype":  "jupyter_direc ssh_direc ssh_proxy",
+    "image_uuid":  "ghcr.io/jianshelu/cres_ytdlp:latest",
+    "inet_down":  495.6,
+    "inet_down_billed":  121.0,
+    "inet_down_cost":  0.0026041666666666665,
+    "inet_up":  587.5,
+    "inet_up_billed":  213.0,
+    "inet_up_cost":  0.0026041666666666665,
+    "instance":  {
+                     "discountTotalHour":  0,
+                     "discountedTotalPerHour":  0,
+                     "diskHour":  0.008888888888888889,
+                     "gpuCostPerHour":  0.04666666666666667,
+                     "totalHour":  0.05555555555555556
+                 },
+    "intended_status":  "running",
+    "internet_down_cost_per_tb":  2.6666666666666665,
+    "internet_up_cost_per_tb":  2.6666666666666665,
+    "is_bid":  false,
+    "jupyter_token":  "677219c8c4ccca2d79b16ebdfac6aba6a3f644546d069cbcf8a490ae4dd5a3de",
+    "label":  null,
+    "local_ipaddrs":  "192.168.0.26 172.17.0.1 \n",
+    "logo":  "/static/logos/vastai_small2.png",
+    "machine_dir_ssh_port":  50099,
+    "machine_id":  27809,
+    "mem_limit":  25.7949696,
+    "mem_usage":  0.10895360000000001,
+    "min_bid":  0.04,
+    "mobo_name":  "X99-F8D PLUS",
+    "next_state":  "running",
+    "num_gpus":  1,
+    "onstart":  "entrypoint.sh",
+    "os_version":  "22.04.4",
+    "pci_gen":  3.0,
+    "pcie_bw":  5.5,
+    "ports":  {
+                  "1111/tcp":  [
+                                   {
+                                       "HostIp":  "0.0.0.0",
+                                       "HostPort":  "50045"
+                                   },
+                                   {
+                                       "HostIp":  "::",
+                                       "HostPort":  "50045"
+                                   }
+                               ],
+                  "22/tcp":  [
+                                 {
+                                     "HostIp":  "0.0.0.0",
+                                     "HostPort":  "50064"
+                                 },
+                                 {
+                                     "HostIp":  "::",
+                                     "HostPort":  "50064"
+                                 }
+                             ],
+                  "50027/tcp":  [
+                                    {
+                                        "HostIp":  "0.0.0.0",
+                                        "HostPort":  "50027"
+                                    },
+                                    {
+                                        "HostIp":  "::",
+                                        "HostPort":  "50027"
+                                    }
+                                ],
+                  "6006/tcp":  [
+                                   {
+                                       "HostIp":  "0.0.0.0",
+                                       "HostPort":  "50022"
+                                   },
+                                   {
+                                       "HostIp":  "::",
+                                       "HostPort":  "50022"
+                                   }
+                               ],
+                  "8080/tcp":  [
+                                   {
+                                       "HostIp":  "0.0.0.0",
+                                       "HostPort":  "50086"
+                                   },
+                                   {
+                                       "HostIp":  "::",
+                                       "HostPort":  "50086"
+                                   }
+                               ],
+                  "8384/tcp":  [
+                                   {
+                                       "HostIp":  "0.0.0.0",
+                                       "HostPort":  "50048"
+                                   },
+                                   {
+                                       "HostIp":  "::",
+                                       "HostPort":  "50048"
+                                   }
+                               ]
+              },
+    "public_ipaddr":  "220.82.46.3",
+    "reliability2":  0.9944531,
+    "rentable":  true,
+    "score":  null,
+    "search":  {
+                   "discountTotalHour":  0,
+                   "discountedTotalPerHour":  0.05555555555555556,
+                   "diskHour":  0.008888888888888889,
+                   "gpuCostPerHour":  0.04666666666666667,
+                   "totalHour":  0.05555555555555556
+               },
+    "ssh_host":  "ssh6.vast.ai",
+    "ssh_idx":  "3",
+    "ssh_port":  17293,
+    "start_date":  1770444599.5307949,
+    "static_ip":  false,
+    "status_msg":  "Cloud copy operation complete",
+    "storage_cost":  0.19999999999999998,
+    "storage_total_cost":  0.008888888888888889,
+    "template_hash_id":  "db9dfd435eb483d765e2797e34f810ea",
+    "template_id":  339109,
+    "template_name":  "cres",
+    "time_remaining":  "Unlimited",
+    "time_remaining_isbid":  "Unlimited",
+    "total_flops":  12.214272,
+    "uptime_mins":  null,
+    "verification":  "verified",
+    "vmem_usage":  0.360351,
+    "volume_info":  [
+
+                    ],
+    "vram_costperhour":  4.5211226851851858E-06,
+    "webpage":  null,
+    "spec_checked_at_utc":  "2026-02-08T16:29:33Z",
+    "spec_check_method":  "ssh tunnel and remote command checks via ssh -p 17293 root@ssh6.vast.ai -L 8080:localhost:8080",
+    "observed_specs":  {
+                           "hostname":  "90b7fa640f43",
+                           "remote_user":  "root",
+                           "gpu_driver":  "560.35.03",
+                           "cuda_version":  "12.6",
+                           "gpu_ram_mib":  12288,
+                           "cpu_cores_total":  56,
+                           "memory_total_mib":  128771,
+                           "disk_root":  {
+                                             "size_gb":  32,
+                                             "used_gb":  12,
+                                             "avail_gb":  21
+                                         },
+                           "os_pretty_name":  "Ubuntu 22.04.4 LTS"
+                       }
+}

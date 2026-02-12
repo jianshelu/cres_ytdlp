@@ -1,0 +1,36 @@
+# Dockerfile.base (supervisord-enabled, single-container multi-service)
+# Base image includes CUDA-enabled llama-server
+FROM ghcr.io/ggml-org/llama.cpp:server-cuda
+
+WORKDIR /workspace
+
+# Install system dependencies (+ supervisor)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ffmpeg \
+    curl \
+    wget \
+    git \
+    ca-certificates \
+    gnupg \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 (NodeSource)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
+# Default model/cache paths
+ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
+    XDG_CACHE_HOME=/workspace/.cache
+
+RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
+
+# Supervisor config + llama wrapper
+COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf
+COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh
+RUN chmod +x /usr/local/bin/start-llama.sh
