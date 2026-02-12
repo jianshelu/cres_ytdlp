@@ -1,5 +1,37 @@
 # PLAN
 
+## 2026-02-12 - CI Smoke IP Readiness Guard
+
+- Objective: prevent empty smoke endpoint env values (e.g. `TEMPORAL_SMOKE_ADDR=:7233`) caused by transient container network/IP readiness race.
+- Root cause: workflow resolved dependency IP immediately after `docker run`; Temporal occasionally returned empty IP, propagating an invalid endpoint into app container env.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added retry loops (up to 60s) for:
+      - `temporal-ci` IP on `cres-ci`
+      - `minio-ci` IP on `cres-ci`
+    - Added explicit guard: fail step with diagnostics (`docker ps -a`, `docker inspect`) if IP remains empty.
+  - `.github/workflows/deploy.yml`
+    - Applied same readiness guard for:
+      - `temporal-smoke` / `minio-smoke` on `cres-smoke`
+
+### Validation
+
+- Re-run workflows:
+  - `CI Minimal Image Boot`
+  - `Build and Push to GHCR` (smoke stage)
+- Confirm env values in run logs are non-empty:
+  - `TEMPORAL_SMOKE_ADDR=<ip>:7233`
+  - `MINIO_SMOKE_ENDPOINT=<ip>:9000`
+- Confirm smoke passes queue registration and no `invalid target URL: empty host`.
+
+### Rollback
+
+1. Revert retry/guard blocks in:
+   - `.github/workflows/ci-minimal-image.yml`
+   - `.github/workflows/deploy.yml`
+2. Restore immediate IP resolution behavior.
+3. Re-run workflows to confirm previous behavior.
+
 ## 2026-02-12 - CI Smoke Endpoint Resolution Hardening
 
 - Objective: remove Docker DNS flakiness from CI smoke tests where `app-ci` intermittently fails to resolve `temporal-ci`/`temporal-smoke`.

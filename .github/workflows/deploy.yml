@@ -162,8 +162,33 @@ jobs:
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
-          temporal_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' temporal-smoke)"
-          minio_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' minio-smoke)"
+
+          temporal_ip=""
+          for i in $(seq 1 60); do
+            temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "cres-smoke" "IPAddress"}}' temporal-smoke 2>/dev/null || true)"
+            if [ -n "$temporal_ip" ] && [ "$temporal_ip" != "<no value>" ]; then
+              break
+            fi
+            sleep 1
+          done
+
+          minio_ip=""
+          for i in $(seq 1 60); do
+            minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "cres-smoke" "IPAddress"}}' minio-smoke 2>/dev/null || true)"
+            if [ -n "$minio_ip" ] && [ "$minio_ip" != "<no value>" ]; then
+              break
+            fi
+            sleep 1
+          done
+
+          if [ -z "$temporal_ip" ] || [ -z "$minio_ip" ] || [ "$temporal_ip" = "<no value>" ] || [ "$minio_ip" = "<no value>" ]; then
+            echo "Failed to resolve dependency container IPs on cres-smoke"
+            docker ps -a
+            docker inspect temporal-smoke || true
+            docker inspect minio-smoke || true
+            exit 1
+          fi
+
           echo "TEMPORAL_SMOKE_ADDR=${temporal_ip}:7233" >> "$GITHUB_ENV"
           echo "MINIO_SMOKE_ENDPOINT=${minio_ip}:9000" >> "$GITHUB_ENV"
           echo "Resolved smoke endpoints: temporal=${temporal_ip}:7233, minio=${minio_ip}:9000"
