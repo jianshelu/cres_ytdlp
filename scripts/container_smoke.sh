@@ -50,6 +50,7 @@ python3 - <<'PY'
 import asyncio
 import os
 from temporalio.client import Client
+from temporalio.api.enums.v1 import TaskQueueType
 from temporalio.api.workflowservice.v1 import DescribeTaskQueueRequest
 from temporalio.api.taskqueue.v1 import TaskQueue
 
@@ -58,12 +59,20 @@ base = (os.getenv("BASE_TASK_QUEUE", "video-processing") or "video-processing").
 queues = [f"{base}@cpu", f"{base}@gpu"]
 
 async def has_poller(client, q):
-    req = DescribeTaskQueueRequest(
-        namespace="default",
-        task_queue=TaskQueue(name=q),
-    )
-    rsp = await client.workflow_service.describe_task_queue(req)
-    return bool(rsp.pollers)
+    # GPU queue can be activity-only; validate either poller type is present.
+    for queue_type in (
+        TaskQueueType.TASK_QUEUE_TYPE_WORKFLOW,
+        TaskQueueType.TASK_QUEUE_TYPE_ACTIVITY,
+    ):
+        req = DescribeTaskQueueRequest(
+            namespace="default",
+            task_queue=TaskQueue(name=q),
+            task_queue_type=queue_type,
+        )
+        rsp = await client.workflow_service.describe_task_queue(req)
+        if rsp.pollers:
+            return True
+    return False
 
 async def main():
     last_err = None
