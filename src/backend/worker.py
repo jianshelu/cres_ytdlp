@@ -21,7 +21,6 @@ from src.backend.activities import (
     build_batch_combined_output,
 )
 
-import torch
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -54,11 +53,27 @@ async def main():
     # Determine identity
     import socket
     hostname = socket.gethostname()
-    device_type = "gpu" if torch.cuda.is_available() else "cpu"
-    print(f"Worker Identity (auto-detected device): {hostname}@{device_type}")
     worker_mode = os.getenv("WORKER_MODE", "both").strip().lower()
     if worker_mode not in {"cpu", "gpu", "both"}:
         worker_mode = "both"
+    cuda_available = False
+    if worker_mode in {"gpu", "both"}:
+        try:
+            import torch
+            cuda_available = bool(torch.cuda.is_available())
+        except Exception as e:
+            if worker_mode == "gpu":
+                raise RuntimeError("WORKER_MODE=gpu requires torch to be installed.") from e
+            print(f"GPU worker disabled: torch unavailable ({e}); continuing with cpu worker only.")
+            worker_mode = "cpu"
+        else:
+            if worker_mode == "gpu" and not cuda_available:
+                raise RuntimeError("WORKER_MODE=gpu requested but CUDA is not available.")
+            if worker_mode == "both" and not cuda_available:
+                print("GPU worker disabled: CUDA is not available; continuing with cpu worker only.")
+                worker_mode = "cpu"
+    device_type = "gpu" if (worker_mode in {"gpu", "both"} and cuda_available) else "cpu"
+    print(f"Worker Identity (auto-detected device): {hostname}@{device_type}")
     print(f"Worker Mode: {worker_mode}")
 
     cpu_workers = max(1, int(os.getenv("WORKER_CPU_THREADS", "4")))

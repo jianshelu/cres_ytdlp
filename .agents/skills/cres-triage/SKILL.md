@@ -18,7 +18,13 @@ Detailed troubleshooting and extended checks live in `./REFERENCE.md`.
 | Vast.ai GPU | Floating compute | Public worker node | Runs compute worker + llama.cpp + Whisper + Compute API |
 | github | Remote Codebase | Private repo | Project version control and Docker Image Building initializtion |
 
-## 2) Endpoints and NAT Rules
+## 2) SSH Access Model (Authoritative)
+| From | To | Method |
+|---|---|---|
+| Norfolk | huihuang | SSH (`id_ed25519_huihuang`) |
+| huihuang | Vast.ai GPU | SSH (`id_huihuang2vastai`) |
+
+## 3) Endpoints and NAT Rules
 
 | Service | Private endpoint | Public endpoint | Rule |
 |---|---|---|---|
@@ -29,7 +35,7 @@ Detailed troubleshooting and extended checks live in `./REFERENCE.md`.
 
 Router (`192.168.2.1`) forwards only `7233`, `9000`, and `8000` to `192.168.2.130`.
 
-## 3) FastAPI Separation (Hard Constraint)
+## 4) FastAPI Separation (Hard Constraint)
 
 | Host | API role | Port | Exposure |
 |---|---|---|---|
@@ -39,7 +45,7 @@ Router (`192.168.2.1`) forwards only `7233`, `9000`, and `8000` to `192.168.2.13
 Control API handles trigger/management/dispatch.
 Compute API handles inference and GPU compute.
 
-## 4) Worker Routing (Hard Constraint)
+## 5) Worker Routing (Hard Constraint)
 
 | Worker | Queue suffix | Runs on | Must not do |
 |---|---|---|---|
@@ -49,7 +55,7 @@ Compute API handles inference and GPU compute.
 Routing format must be `<base_task>@cpu` or `<base_task>@gpu`.
 Never route GPU tasks to `@cpu`.
 
-## 5) Runtime Limits on GPU Node (Hard Constraint)
+## 6) Runtime Limits on GPU Node (Hard Constraint)
 
 | Resource | Required value | Notes |
 |---|---|---|
@@ -60,7 +66,7 @@ Never route GPU tasks to `@cpu`.
 | LLM model | `/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` | Missing file: skip llama start |
 | Whisper model | `/workspace/packages/models/whisperx` | Missing directory: disable Whisper features |
 
-## 6) Non-Negotiable Rules
+## 7) Non-Negotiable Rules
 
 1. No Docker-in-Docker.
 2. Control plane stays on huihuang only.
@@ -71,7 +77,7 @@ Never route GPU tasks to `@cpu`.
 7. Never commit secrets/tokens.
 8. Use minimal diffs; avoid broad rewrites.
 
-## 7) Required Output Format When Invoked
+## 8) Required Output Format When Invoked
 
 1. Architecture State
 2. Findings
@@ -79,7 +85,7 @@ Never route GPU tasks to `@cpu`.
 4. Patch Plan (minimal diff)
 5. `docs/PLAN.md` update suggestion (only when architecture/ops behavior changes)
 
-## 8) Definition of Done
+## 9) Definition of Done
 
 - Queue routing is correct and enforced.
 - `@gpu` worker runs only on GPU and passes startup checks.
@@ -88,7 +94,7 @@ Never route GPU tasks to `@cpu`.
 - End-to-end smoke checks pass.
 - No secrets exposed and no architectural rule violated.
 
-## 9) Reference
+## 10) Reference
 
 For expanded validation commands, network flow examples, and troubleshooting playbook:
 - `./REFERENCE.md`

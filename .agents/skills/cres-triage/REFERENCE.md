@@ -9,6 +9,13 @@ If there is a conflict, `SKILL.md` remains authoritative.
 
 `Norfolk (LAN) -> SSH -> huihuang (Control Plane) -> NAT (64.229.113.233) -> Vast.ai floating GPU`
 
+### SSH Access Flow
+
+| Step | Description |
+|---|---|
+| 1 | Norfolk connects to huihuang via SSH (`id_id_ed25519_huihuang`) |
+| 2 | huihuang connects to Vast.ai GPU via SSH (`id_huihuang2vastai`) |
+
 ### Remote Repo
 
 `github (Private) : 

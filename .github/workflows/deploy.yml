@@ -45,6 +45,7 @@ jobs:
           filters: |
             base:
               - 'Dockerfile.base'
+              - 'requirements.instance.txt'
 
   build-base:
     needs: filter

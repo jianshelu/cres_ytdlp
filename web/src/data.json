@@ -374,6 +374,16 @@
         "query_updated_at": "2026-02-10T06:25:58.935000+00:00"
     },
     {
+        "title": "ANC singing Oliver Tambo",
+        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.json",
+        "keywords": [],
+        "summary": "Generated automatically",
+        "search_query": "tambo",
+        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+    },
+    {
         "title": "Antigravity + Opencode IS INCREDIBLE! Best AI Coding Workflow Solves EVERYTHING!",
         "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.mp4",
         "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.webp",
@@ -667,6 +677,88 @@
         "summary": "The hosts discuss the stock market performance of various tech companies, including Salesforce, ServiceNow, Oracle, and Monday.com, with analysts from Wedbush and DA Davis providing insights on their potential for growth due to AI adoption.",
         "search_query": "Oracle",
         "query_updated_at": "2026-02-10T16:54:26.183000+00:00"
+    },
+    {
+        "title": "Carrapicho - Chiki Chiki Ta",
+        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.jpg",
+        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.json",
+        "keywords": [
+            {
+                "word": "que",
+                "count": 161,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "chique",
+                "count": 110,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "com",
+                "count": 9,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "bati",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "forte",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Bati Forte o tambor da Lera Bati Forte o tambor Eu quero de que que que que que que tá Bati Forte o tambor Eu quero de que que que que que que que tá É nessa dança que meu boy balan Saiu com p o de tora, vim para brincar É nessa dança que meu boy balan Saiu com p",
+        "search_query": "tambo",
+        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+    },
+    {
+        "title": "Celia Cruz: Elegua Quiere Tambo",
+        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.json",
+        "keywords": [
+            {
+                "word": "tamo",
+                "count": 26,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "agua",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "quiere",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "guete",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "oye",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "No hay orisa como el ecuá, para irles, o que siempre está Oye, oye un tiene siete salas, oye un blanco de guete, y yo como soy su amor",
+        "search_query": "tambo",
+        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
     },
     {
         "title": "Charli xcx - Apple (official lyric video)",
@@ -999,6 +1091,35 @@
         "summary": "大家好這裡是人杜利索就在昨天PIME Nano Banana Pro的開緣版模型Floss 2 0正式免費發布十個一年作為善意的ASM 讀頂流的恨聲音實驗室帶著他們最新最強的Floss系列的開緣模型強勢殺了回來一直作為ASM 產力的標杆最新版本的Floss 2",
         "search_query": "开源模型",
         "query_updated_at": "2026-02-10T07:19:56.188000+00:00"
+    },
+    {
+        "title": "GOLDEN BUZZER - Mitch Tambo Makes AUSTRALIA PROUD | Semi Final | Australia's Got Talent 2019",
+        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.json",
+        "keywords": [
+            {
+                "word": "film",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "folk",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "general",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "ஏயா நேர்கள் போை மூக நியார் நேறேfilm ராஷfolkி",
+        "search_query": "tambo",
+        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
     },
     {
         "title": "Generative vs Agentic AI: Shaping the Future of AI Collaboration",
@@ -2197,6 +2318,47 @@
         "summary": "The transcript discusses the evolving relationship between developers and AI, highlighting the shift from relying solely on AI to a more strategic approach where developers leverage AI tools for assistance at different levels of complexity. The conversation emphasizes the importance of understanding how to effectively use AI as an assistant rather than a replacement.",
         "search_query": "AI programming",
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
+    },
+    {
+        "title": "Tambo",
+        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Tambo_nBoIFynCa50.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Tambo_nBoIFynCa50.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Tambo_nBoIFynCa50.json",
+        "keywords": [
+            {
+                "word": "une",
+                "count": 36,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "y'a",
+                "count": 24,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "sidi",
+                "count": 14,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "ils",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "femme",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "GAMULA DOYOYE GAMULA TAMBO TAMBO COTAIN DANGA NU DOYOYE DANGA NU TAMBO TAMBO DANGA NU DOYOYE Je peux avoir une coco- DM 2 à injured Je peux avoir une coco- DM 3 Je vais pas avoir une coco- DM 3",
+        "search_query": "tambo",
+        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
     },
     {
         "title": "The \"vibe coding\" mind virus explained…",
@@ -4285,5 +4447,46 @@
         "summary": "今年夏天不少自己是帶走出校門但卻發現面對的是比以往更殘酷的現實拉文的處境不是特殊案例這是很多美國大學畢業生的寫照美國應屆畢業生事業綠創下10年新高遠超過疫情前的水準這波距離變化背後的關鍵推動力很可能就是AI技術的全面進查美國使單佛大學的調查就顯示從差GPT橫空出事以來年輕族群的就業率就下滑了13%我認為這就是因為兩種一個是一個是主持人員的大學畢業生事業但同時因為AI的大學畢業生事業大學畢業生事業生事業並不是大學畢業生事業所以我們有一個人在大學畢業生事業大學畢業生事業生事業和AI肯定要更加大更多的工作我希望他們能夠肯定AI的早期效應已經讓零售商預缺不補縮減IT還有克服部門臉準會理事窩樂就警告認為有大學學位的勞工將面臨更明顯的衝擊我覺得AI和 machine learning是全面進行平衡的學生從新的學生從課程中有很多課程你會有一些可以能夠減少我真的不可以能夠做一些工作在我身上能夠減少但我會比較有興趣的因為我看了一段時間我會很快樂所以我會很快樂專家發現無論美國加拿大還是英國大學心資紅利正在快速搜索水在某些領域甚至發現高中畢業生跟大學畢業生的能力差異沒",
         "search_query": "科技新闻",
         "query_updated_at": "2026-02-10T04:42:08.716000+00:00"
+    },
+    {
+        "title": "🧸 Explore Tambo Queensland ~ Things to do in and around Tambo",
+        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.json",
+        "keywords": [
+            {
+                "word": "tambow",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "town",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "chicken",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "crash",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "oldest",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "Welcome to Wonder Explorer's Sculler Today we're going to explore Tambow, the oldest town in Western Queensland",
+        "search_query": "tambo",
+        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
     }
 ]

@@ -27,6 +27,18 @@ If there is any conflict between other files and `$cres-triage`, `$cres-triage` 
 - No Docker-in-Docker.
 - Minimal diffs; no broad rewrites.
 
+## GPU SSH ACCESS MODEL
+- The Vast.ai GPU instance is accessed from huihuang using SSH key: id_huihuang2vastai
+- Connection chain: Norfolk → SSH → huihuang → SSH (id_huihuang2vastai) → Vast.ai GPU
+
+Rules:
+- GPU IP is floating and may change per instance.
+- SSH connection parameters are provided when instance is created.
+- Private keys must never be committed.
+- Do not assume direct SSH from Norfolk to GPU.
+- All GPU management operations originate from huihuang.
+
+
 ## Where the truth lives
 - Skills: `.agents/skills/cres-triage/SKILL.md` (authoritative)
 - Plan: `docs/PLAN.md` (current status)

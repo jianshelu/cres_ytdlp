@@ -1,4 +1,215 @@
 # PLAN
+## 2026-02-12 - Archive Legacy Code-Sync Deploy Scripts and Enforce Immutable Instance Flow
+
+- Objective: retire legacy instance code-sync deployment scripts, clarify `docker run` ownership, and enforce one-way code flow (`huihuang/GitHub -> GHCR -> instance`).
+- Root cause:
+  - `deploy_vast.sh` / `deploy_vast.py` still performed code sync and remote runtime mutation in `/workspace`.
+  - `docker run` ownership was not explicitly documented, causing deployment boundary confusion.
+- Changes:
+  - `deploy_vast.sh`
+    - Replaced with hard deprecation stub (exit 1).
+  - `deploy_vast.py`
+    - Replaced with hard deprecation stub (exit 1).
+  - `scripts/archive/legacy_deploy_vast.sh`
+    - Archived original legacy sync/deploy script.
+  - `scripts/archive/legacy_deploy_vast.py`
+    - Archived original legacy sync/deploy script.
+  - `start_remote.sh`
+    - Removed obsolete normalization reference to `deploy_vast.sh`.
+  - `docs/vast_deployment.md`
+    - Rewritten to define immutable deployment model, explicit `docker run` ownership (Vast runtime vs CI smoke), and manual incident runbook without instance code edits.
+
+### Validation
+
+- Verify legacy scripts are archived and stubs exist:
+  - `Test-Path scripts/archive/legacy_deploy_vast.sh`
+  - `Test-Path scripts/archive/legacy_deploy_vast.py`
+  - `bash ./deploy_vast.sh` returns deprecation + non-zero.
+  - `python ./deploy_vast.py` returns deprecation + non-zero.
+- Verify startup script no longer references archived deploy script:
+  - `rg --line-number "deploy_vast\.sh" start_remote.sh`
+- Verify docs state `docker run` ownership and immutable flow:
+  - `rg --line-number "Where `docker run` Actually Happens|immutable|Single-Flow Incident Handling" docs/vast_deployment.md`
+
+### Rollback
+
+1. Restore `deploy_vast.sh` and `deploy_vast.py` from `scripts/archive/legacy_deploy_vast.sh` and `scripts/archive/legacy_deploy_vast.py`.
+2. Re-add `deploy_vast.sh` reference in `start_remote.sh` normalization line if needed.
+3. Revert `docs/vast_deployment.md` to previous deployment-script-based runbook.
+4. Re-validate operational startup path.
+## 2026-02-12 - GPU Worker Recovery on ssh2 and Remote Runtime Bootstrap
+
+- Objective: restore `video-processing@gpu` polling on Vast.ai (`ssh2.vast.ai:27139`) and clear `No worker available` on GPU queue.
+- Root cause:
+  - Remote instance had models only, but no project code and no Python runtime deps (`torch`, `temporalio`, `faster-whisper`, etc.).
+  - Local `.env` pointed to a non-existent SSH key path, blocking operational SSH actions.
+  - CPU-only worker import path required `torch` at module import time, causing CPU worker startup failure when `torch` is absent.
+- Changes:
+  - `.env`
+    - Updated `VAST_SSH_KEY` to `~/.ssh/id_huihuang2vastai`.
+  - `src/backend/activities.py`
+    - Hardened temp cleanup behavior to avoid deleting active transfer artifacts:
+      - Added minimum-age guard for cleanup candidates.
+      - Stopped cleanup of `.part` / `.part.minio` files.
+  - Remote runtime operations (ssh2 instance):
+    - Synced repo to `/workspace/cres_ytdlp_norfolk`.
+    - Installed runtime dependencies via `requirements.instance.txt`.
+    - Started GPU worker with enforced queue/env:
+      - `WORKER_MODE=gpu`
+      - `BASE_TASK_QUEUE=video-processing`
+      - `TEMPORAL_ADDRESS=64.229.113.233:7233`
+      - `MINIO_ENDPOINT=64.229.113.233:9000`
+
+### Validation
+
+- Verify CPU queue poller:
+  - `temporal.exe task-queue describe --task-queue video-processing@cpu --task-queue-type workflow --address 127.0.0.1:7233`
+  - Expected poller identity includes `huihuang@cpu`.
+- Verify GPU queue poller:
+  - `temporal.exe task-queue describe --task-queue video-processing@gpu --task-queue-type activity --address 64.229.113.233:7233`
+  - Expected poller identity includes `<remote-host>@gpu` (observed: `ccf57720e953@gpu`).
+- Verify remote worker process exists:
+  - `ssh ... "ps -ef | grep backend.worker | grep -v grep"`
+
+### Rollback
+
+1. Revert `.env` SSH key path change if key management policy requires previous path.
+2. Revert `src/backend/activities.py` temp cleanup adjustments.
+3. Stop remote GPU worker:
+   - `ssh ... "pkill -f src.backend.worker"`
+4. Re-run queue describe commands to confirm `@gpu` poller is removed.
+
+## 2026-02-12 - GHCR Base Image Pre-bakes Instance Python Dependencies
+
+- Objective: ensure `requirements.instance.txt` dependencies are baked directly into GHCR build artifacts and avoid duplicate install during app image build.
+- Root cause:
+  - Instance runtime dependencies were installed in `Dockerfile` (app stage), not in `Dockerfile.base`.
+  - `deploy.yml` base rebuild filter did not watch `requirements.instance.txt`.
+- Changes:
+  - `Dockerfile.base`
+    - Added `COPY requirements.instance.txt /tmp/requirements.instance.txt`.
+    - Added `pip3 install -r /tmp/requirements.instance.txt` and cache cleanup.
+  - `Dockerfile`
+    - Removed duplicate `requirements.instance.txt` installation layer.
+    - Kept app image inheriting Python deps from `BASE_IMAGE`.
+  - `.github/workflows/deploy.yml`
+    - Added `requirements.instance.txt` to `filter.base` paths so base image rebuild triggers on dependency changes.
+
+### Validation
+
+- Verify base image build path includes dependency file:
+  - `rg --line-number "requirements.instance.txt" Dockerfile.base .github/workflows/deploy.yml`
+- Verify app Dockerfile no longer installs Python deps:
+  - `rg --line-number "pip3 install|requirements.instance.txt" Dockerfile`
+- Run GHCR workflow and confirm order:
+  - `build-base` runs when `requirements.instance.txt` changes.
+  - `build-app` uses `BASE_IMAGE=ghcr.io/<repo>-base:latest` and passes smoke.
+
+### Rollback
+
+1. Revert dependency installation block in `Dockerfile.base`.
+2. Restore `requirements.instance.txt` install block in `Dockerfile`.
+3. Remove `requirements.instance.txt` from `.github/workflows/deploy.yml` `filter.base`.
+4. Re-run GHCR workflow to confirm old build behavior.
+
+## 2026-02-12 - Control Plane Boot Unification and CPU Worker Availability
+
+- Objective: eliminate boot-time startup drift and restore `video-processing@cpu` polling reliability on huihuang.
+- Root cause:
+  - CPU worker failed at import time because `src/backend/worker.py` imported `torch` unconditionally.
+  - Existing scheduled tasks referenced missing launcher files (`C:\Users\rama\run_*.cmd`), so startup automation silently failed.
+- Changes:
+  - `src/backend/worker.py`
+    - Switched `torch` import to lazy/conditional behavior.
+    - `WORKER_MODE=cpu` now starts without requiring `torch`.
+    - `WORKER_MODE=gpu` still enforces CUDA/torch prerequisites.
+  - `scripts/start_control_plane_boot.ps1`
+    - Added idempotent startup checks for Temporal (`7233`), MinIO (`9000`), FastAPI (`8000`).
+    - Added idempotent CPU worker startup (`src.backend.worker`) with `.env`-derived settings.
+    - Added readiness waits and startup logging under `.tmp/control-plane/`.
+  - Task Scheduler (runtime ops)
+    - Registered/used unified boot task: `CRES-ControlPlane-Boot`.
+    - Disabled stale split tasks: `CRES-Temporal-8233`, `CRES-MinIO-9000`, `CRES-FastAPI-8000`.
+
+### Validation
+
+- Verify unified boot script exits cleanly:
+  - `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start_control_plane_boot.ps1`
+- Verify listeners:
+  - `7233` (Temporal), `9000` (MinIO), `8000` (FastAPI)
+- Verify CPU worker process exists:
+  - command line contains `-m src.backend.worker`
+- Verify Temporal pollers for CPU queue:
+  - `temporal.exe task-queue describe --task-queue video-processing@cpu --task-queue-type workflow --address 127.0.0.1:7233`
+  - `temporal.exe task-queue describe --task-queue video-processing@cpu --task-queue-type activity --address 127.0.0.1:7233`
+- Verify scheduler task result:
+  - `Get-ScheduledTaskInfo -TaskName CRES-ControlPlane-Boot` returns `LastTaskResult : 0`
+
+### Rollback
+
+1. Revert `src/backend/worker.py` lazy torch import changes.
+2. Revert `scripts/start_control_plane_boot.ps1` worker startup additions.
+3. Disable `CRES-ControlPlane-Boot` and re-enable legacy tasks:
+   - `CRES-Temporal-8233`
+   - `CRES-MinIO-9000`
+   - `CRES-FastAPI-8000`
+4. Restart services manually and re-check queue pollers.
+
+## 2026-02-12 - Vast Instance SSH Endpoint Rotation (ssh2)
+
+- Objective: move instance access to the more stable Vast.ai endpoint provided by operations.
+- Changes:
+  - `.env`
+    - Updated `VAST_HOST` to `ssh2.vast.ai`.
+    - Updated `VAST_PORT` to `27139`.
+  - `.env.example`
+    - Updated `VAST_HOST` to `ssh2.vast.ai`.
+    - Updated `VAST_PORT` to `27139`.
+  - `docs/Perimeter.md`
+    - Updated compute-plane host references from `ssh7.vast.ai` to `ssh2.vast.ai`.
+    - Updated Norfolk tunnel command to:
+      - `ssh -p 27139 root@ssh2.vast.ai -L 8080:localhost:8080`
+
+### Validation
+
+- Verify no stale host/port references remain in active docs/config:
+  - `rg --line-number "ssh7\.vast\.ai|26311" docs/Perimeter.md .env .env.example`
+- Verify SSH tunnel connectivity:
+  - `ssh -p 27139 root@ssh2.vast.ai -L 8080:localhost:8080`
+
+### Rollback
+
+1. Revert host/port values in `.env` and `.env.example` to prior instance values.
+2. Revert compute-plane host and tunnel command lines in `docs/Perimeter.md`.
+3. Re-run the validation grep and SSH tunnel command.
+
+## 2026-02-12 - Vast Instance SSH Endpoint Rotation
+
+- Objective: align active SSH tunnel configuration and runbook entries with the new Vast.ai instance endpoint.
+- Changes:
+  - `.env`
+    - Updated `VAST_HOST` to `ssh7.vast.ai`.
+    - Updated `VAST_PORT` to `26311`.
+  - `.env.example`
+    - Updated `VAST_HOST` to `ssh7.vast.ai`.
+    - Updated `VAST_PORT` to `26311`.
+  - `docs/Perimeter.md`
+    - Updated compute-plane host references from `ssh5.vast.ai` to `ssh7.vast.ai`.
+    - Updated Norfolk tunnel command to:
+      - `ssh -p 26311 root@ssh7.vast.ai -L 8080:localhost:8080`
+
+### Validation
+
+- Verify no stale host/port references remain in active docs/config:
+  - `rg --line-number "ssh5\.vast\.ai|11319|ssh6\.vast\.ai|17293" docs/Perimeter.md .env .env.example`
+- Verify SSH tunnel connectivity:
+  - `ssh -p 26311 root@ssh7.vast.ai -L 8080:localhost:8080`
+
+### Rollback
+
+1. Revert host/port values in `.env` and `.env.example` to previous instance values.
+2. Revert compute-plane host and tunnel command lines in `docs/Perimeter.md`.
+3. Re-run the validation grep and SSH tunnel command.
 
 ## 2026-02-12 - CI Smoke IP Readiness Guard
 
@@ -196,4 +407,6 @@
 4. Re-run launchers:
    - `C:\Users\rama\start_web_huihuang.ps1`
    - `C:\Users\rama\run_fastapi_norfolk.cmd`
+
+
 

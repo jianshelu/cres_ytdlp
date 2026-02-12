@@ -25,7 +25,7 @@ load_workspace_env() {
 load_workspace_env
 
 # Normalize line endings to avoid Windows CRLF startup issues.
-sed -i 's/\r$//' "$WORKSPACE_ROOT/start_remote.sh" "$WORKSPACE_ROOT/entrypoint.sh" "$WORKSPACE_ROOT/deploy_vast.sh" "$WORKSPACE_ROOT/onstart.sh" 2>/dev/null || true
+sed -i 's/\r$//' "$WORKSPACE_ROOT/start_remote.sh" "$WORKSPACE_ROOT/entrypoint.sh" "$WORKSPACE_ROOT/onstart.sh" 2>/dev/null || true
 
 supervisor_controls_backend() {
     if ! command -v supervisorctl >/dev/null 2>&1; then
@@ -296,3 +296,4 @@ case "${1:-}" in
         exit 1
         ;;
 esac
+

@@ -1,4 +1,4 @@
-﻿# Tasks
+# Tasks
 
 ## 2026-02-12 (Thursday)
 ### Control Plane (Temporal / MinIO / Web / Control API)
@@ -11,6 +11,13 @@
 - [ ] Verify `npm run build` in `web/` passes after adding the new route.
 - [ ] Test `/audio` page manually on `http://127.0.0.1:3000/audio` and confirm links/playback fall back gracefully when media is missing.
 - [ ] Document rollout and rollback steps for the audio page in `docs/PLAN.md` only if API contract or ops behavior changes.
+- [ ] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs.
+- [x] Archive legacy deploy scripts (`deploy_vast.sh`, `deploy_vast.py`) and block invocation from root stubs.
+- [x] Document `docker run` ownership boundaries in `docs/vast_deployment.md` (Vast runtime vs CI smoke only).
+- [x] Document immutable single-flow incident handling for instance operations in `docs/vast_deployment.md`.
+- [x] Configure SSH access for `ssh2.vast.ai:27139` by setting `VAST_SSH_KEY=~/.ssh/id_huihuang2vastai` in `.env`.
+- [x] Implement unified boot script `scripts/start_control_plane_boot.ps1` for Temporal/MinIO/FastAPI startup.
+- [x] Configure Task Scheduler `CRES-ControlPlane-Boot` and disable stale split boot tasks.
 - [x] Fix committed secret exposure in `scripts/supervisord_remote.conf` by switching to runtime env interpolation.
 - [x] Document queue/runtime/security alignment and rollback in `docs/PLAN.md`.
 - [x] Document CI smoke endpoint hardening and rollback in `docs/PLAN.md`.
@@ -20,8 +27,12 @@
 
 ### Workers & Queues (@cpu / @gpu)
 - [x] Fix queue routing names to `<base>@cpu` and `<base>@gpu` in `src/api/main.py`, `src/backend/workflows.py`, and `src/backend/worker.py`.
+- [x] Fix `src/backend/worker.py` to allow `WORKER_MODE=cpu` startup without requiring `torch`.
 - [x] Fix queue references in operational scripts (`scripts/container_smoke.sh`, `scripts/rerun_failed_workflows.py`) to use the new suffix routing.
-- [ ] Verify worker pollers register on `video-processing@cpu` and `video-processing@gpu` after restart.
+- [x] Verify `video-processing@cpu` pollers are registered in Temporal (`huihuang@cpu` workflow/activity).
+- [x] Verify worker pollers register on `video-processing@cpu` and `video-processing@gpu` after restart.
+- [x] Deploy code snapshot and install `requirements.instance.txt` on ssh2 instance for GPU worker runtime.
+- [x] Fix temp cleanup race in `src/backend/activities.py` to avoid deleting active transfer temp files (`.part/.part.minio`).
 - [x] Fix CI smoke dependency endpoint injection to use resolved container IPs in `.github/workflows/ci-minimal-image.yml` and `.github/workflows/deploy.yml`.
 - [x] Fix CI smoke dependency IP readiness race by adding retry/guard checks in `.github/workflows/ci-minimal-image.yml` and `.github/workflows/deploy.yml`.
 
@@ -59,17 +70,19 @@
 - [ ] Configure SSH configs for Vast.ai and huihuang with current host/IP values.
 - [ ] Verify connectivity to both hosts after SSH config updates.
 - [ ] Document latest IP/port mapping in perimeter/runbook docs.
+- [x] Configure Vast SSH endpoint rotation to `ssh2.vast.ai:27139` in `.env`, `.env.example`, and `docs/Perimeter.md`.
+- [ ] Verify public-key authentication for `ssh -p 27139 root@ssh2.vast.ai -L 8080:localhost:8080`.
 
 ### Workers & Queues (@cpu / @gpu)
 - [ ] Verify Temporal monitoring results for 30 workflows (`turbo-all`).
 - [ ] Verify MinIO artifacts exist for newly produced videos (`turbo-all`).
 - [ ] Verify `data.json` refresh on huihuang after workflow completion.
-- [ ] Deploy codebase (including `start_remote.sh`) to Vast.ai instance and verify worker restart behavior.
+- [ ] Deploy GHCR canary image to Vast.ai instance and verify worker restart behavior without code sync scripts.
 
 ## 2026-02-06 (Thursday)
 ### Networking & NAT (64.229.113.233 / Port Forwarding)
 - [ ] Configure SSH tunnel with port `8080` forwarding.
-- [ ] Deploy local codebase sync to remote `/workspace/`.
+- [ ] Deploy GHCR image update to remote runtime and verify immutable rollout.
 - [ ] Verify remote service behavior after sync.
 
 ### GPU Instance (llama / Whisper / Compute API)
@@ -85,3 +98,4 @@
 - [ ] Deploy re-trigger of failed "Oracle" workflows.
 - [ ] Verify successful download and transcription for retried Oracle workflows.
 - [x] Document migration of legacy ledger items into structured Task.md sections.
+

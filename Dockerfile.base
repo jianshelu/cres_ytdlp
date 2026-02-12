@@ -30,6 +30,16 @@ ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
 
 RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
 
+# Install instance runtime Python dependencies in base image
+COPY requirements.instance.txt /tmp/requirements.instance.txt
+RUN pip3 install --upgrade pip \
+ && pip3 install --no-cache-dir -r /tmp/requirements.instance.txt \
+ && rm -f /tmp/requirements.instance.txt \
+ && rm -rf /root/.cache/pip \
+ && (find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true) \
+ && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete 2>/dev/null || true) \
+ && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete 2>/dev/null || true)
+
 # Supervisor config + llama wrapper
 COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf
 COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh

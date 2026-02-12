@@ -1,5 +1,8 @@
 # Vast.ai with External Control Plane (Tailscale)
 
+> Status: Historical reference only. deploy_vast.sh and deploy_vast.py are archived and must not be used for current deployment.
+> Use GHCR immutable flow documented in docs/vast_deployment.md.
+
 ## Goal
 - Run app services on vast.ai (`llama`, `fastapi`, `worker`, `web`).
 - Keep Temporal/MinIO tools in image as backup capability.
@@ -26,7 +29,7 @@
 
 ## Deploy
 1. Copy `.env.example` to `.env` and fill values.
-2. Run `./deploy_vast.sh`.
+2. Trigger GHCR image build/push and deploy by image tag (see `docs/vast_deployment.md`).
 3. Check status on instance: `./start_remote.sh --status`.
 
 ## Rollback strategy (image + mode)
@@ -43,3 +46,4 @@
    - Set `CONTROL_PLANE_MODE=local` and redeploy.
 4. If needed, switch image to backup tag:
    - `ghcr.io/jianshelu/cres_ytdlp:legacy-control-plane-latest`.
+

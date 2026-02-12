@@ -8,6 +8,7 @@ import requests
 import re
 import sys
 import threading
+import time
 from dataclasses import dataclass
 from minio import Minio
 from io import BytesIO
@@ -29,6 +30,7 @@ class VideoInfo:
 _WHISPER_MODEL_CACHE = {}
 _WHISPER_MODEL_LOCK = threading.Lock()
 _LOCAL_DOWNLOAD_ROOT = "web/public/downloads"
+_TEMP_CLEANUP_MIN_AGE_SECONDS = max(60, int(os.getenv("TEMP_CLEANUP_MIN_AGE_SECONDS", "900")))
 
 
 def _cleanup_local_temp_files(root: str = _LOCAL_DOWNLOAD_ROOT) -> int:
@@ -37,15 +39,24 @@ def _cleanup_local_temp_files(root: str = _LOCAL_DOWNLOAD_ROOT) -> int:
     Returns number of removed files.
     """
     removed = 0
-    suffixes = (".part", ".part.minio", ".ytdl", ".tmp")
+    # Do not remove ".part" / ".part.minio" here; those can be active transfer files.
+    suffixes = (".ytdl", ".tmp")
     if not os.path.isdir(root):
         return 0
 
+    now = time.time()
     for dirpath, _, filenames in os.walk(root):
         for name in filenames:
             if not name.endswith(suffixes):
                 continue
             file_path = os.path.join(dirpath, name)
+            try:
+                age_seconds = now - os.path.getmtime(file_path)
+                # Avoid deleting in-flight temp files from active downloads/uploads.
+                if age_seconds < _TEMP_CLEANUP_MIN_AGE_SECONDS:
+                    continue
+            except Exception:
+                continue
             try:
                 os.remove(file_path)
                 removed += 1
