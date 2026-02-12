@@ -30,10 +30,26 @@ BASE_TASK_QUEUE = os.getenv("BASE_TASK_QUEUE", "video-processing").strip() or "v
 CPU_TASK_QUEUE = f"{BASE_TASK_QUEUE}@cpu"
 GPU_TASK_QUEUE = f"{BASE_TASK_QUEUE}@gpu"
 
+
+async def _connect_temporal_with_retry(address: str) -> Client:
+    max_attempts = max(1, int(os.getenv("TEMPORAL_CONNECT_MAX_ATTEMPTS", "90")))
+    delay_seconds = max(1, int(os.getenv("TEMPORAL_CONNECT_RETRY_SECONDS", "2")))
+    last_error: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            client = await Client.connect(address)
+            print(f"Worker connected to Temporal on {address} (attempt {attempt}/{max_attempts})")
+            return client
+        except Exception as e:  # pragma: no cover - runtime network path
+            last_error = e
+            print(f"Temporal connect attempt {attempt}/{max_attempts} failed: {e}")
+            await asyncio.sleep(delay_seconds)
+    raise RuntimeError(f"Failed to connect to Temporal at {address} after {max_attempts} attempts: {last_error}")
+
+
 async def main():
     temporal_address = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
-    client = await Client.connect(temporal_address)
-    print(f"Worker connecting to Temporal server on {temporal_address}...")
+    client = await _connect_temporal_with_retry(temporal_address)
 
     # Determine identity
     import socket

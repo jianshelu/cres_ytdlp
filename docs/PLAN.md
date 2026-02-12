@@ -1,5 +1,35 @@
 # PLAN
 
+## 2026-02-12 - CI Temporal DNS/Worker Spawn Resilience
+
+- Objective: fix CI smoke failures where worker startup reported `spawn error` and queue registration failed with temporary Temporal DNS resolution errors.
+- Root cause:
+  - `src/backend.worker` attempted a single Temporal connect on process start and exited immediately on transient DNS/network readiness issues.
+  - `scripts/container_smoke.sh` also attempted a single Temporal client connect before poller checks.
+  - Supervisor worker commands used a fixed `/usr/bin/python3` path, which is less portable across base images.
+- Changes:
+  - Added Temporal connect retry loop in `src/backend/worker.py` using:
+    - `TEMPORAL_CONNECT_MAX_ATTEMPTS` (default `90`)
+    - `TEMPORAL_CONNECT_RETRY_SECONDS` (default `2`)
+  - Updated `scripts/container_smoke.sh` queue-registration step to retry Temporal connect and include `last_err` in failure output.
+  - Updated worker commands in:
+    - `scripts/supervisord.conf`
+    - `scripts/supervisord_remote.conf`
+    to use `python3 -m src.backend.worker`.
+
+### Validation
+
+- Re-run `CI Minimal Image Boot` workflow.
+- Confirm `worker-cpu` / `worker-gpu` no longer fail immediately with `spawn error` due startup race.
+- Confirm smoke step reaches `queue registration ok` without first-connect DNS failure abort.
+
+### Rollback
+
+1. Revert `src/backend/worker.py` Temporal retry helper and restore single connect behavior.
+2. Revert retry logic in `scripts/container_smoke.sh` to previous implementation.
+3. Revert worker command paths in `scripts/supervisord.conf` and `scripts/supervisord_remote.conf`.
+4. Re-run CI workflow to verify baseline behavior.
+
 ## 2026-02-12 - CI Minimal Image Base Reuse Fix
 
 - Objective: fix CI failure where app build tried to pull `cres-base-ci:<sha>` from Docker Hub instead of reusing the local base image.

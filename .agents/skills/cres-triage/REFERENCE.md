@@ -9,6 +9,12 @@ If there is a conflict, `SKILL.md` remains authoritative.
 
 `Norfolk (LAN) -> SSH -> huihuang (Control Plane) -> NAT (64.229.113.233) -> Vast.ai floating GPU`
 
+### Remote Repo
+
+`github (Private) : 
+- https: 'https://github.com/jianshelu/cres_ytdlp.git'
+- SSH: 'git@github.com:jianshelu/cres_ytdlp.git'
+
 ### Host responsibilities
 
 | Host | Responsibilities |

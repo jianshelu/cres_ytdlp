@@ -66,8 +66,15 @@ async def has_poller(client, q):
     return bool(rsp.pollers)
 
 async def main():
-    client = await Client.connect(addr)
-    for _ in range(40):
+    last_err = None
+    for _ in range(60):
+        try:
+            client = await Client.connect(addr)
+        except Exception as e:
+            last_err = e
+            await asyncio.sleep(1)
+            continue
+
         ok = True
         for q in queues:
             if not await has_poller(client, q):
@@ -77,7 +84,7 @@ async def main():
             print("queue registration ok")
             return
         await asyncio.sleep(1)
-    raise SystemExit(f"queue registration failed for {queues} at {addr}")
+    raise SystemExit(f"queue registration failed for {queues} at {addr}; last_err={last_err}")
 
 asyncio.run(main())
 PY
