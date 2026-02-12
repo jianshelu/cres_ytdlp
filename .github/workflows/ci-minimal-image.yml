@@ -29,6 +29,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Reclaim disk space before build
+        run: |
+          set -euxo pipefail
+          echo "Disk before cleanup:"
+          df -h
+          docker system df || true
+
+          # Self-hosted runners can accumulate old diag logs between runs.
+          if [ -d /home/runner/actions-runner/cached/_diag ]; then
+            find /home/runner/actions-runner/cached/_diag -type f -name "*.log" -mtime +2 -delete || true
+          fi
+
+          docker container prune -f || true
+          docker image prune -af || true
+          docker builder prune -af || true
+          docker volume prune -f || true
+
+          echo "Disk after cleanup:"
+          df -h
+          docker system df || true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -117,5 +138,9 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
+          set -euxo pipefail
           docker rm -f app-ci temporal-ci minio-ci || true
           docker network rm cres-ci || true
+          docker image rm cres-app-ci:${{ github.sha }} cres-base-ci:${{ github.sha }} || true
+          docker builder prune -af || true
+          docker volume prune -f || true
