@@ -39,3 +39,4 @@ When proposing changes:
 - Provide validation steps
 - Provide rollback steps
 - Update `docs/PLAN.md` when changes affect architecture/ops
+- Vivid outputs with emojis.

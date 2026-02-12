@@ -157,7 +157,7 @@ jobs:
         run: |
           set -euxo pipefail
           docker network create cres-smoke || true
-          docker run -d --name temporal-smoke --network cres-smoke temporalio/auto-setup:1.24.2
+          docker run -d --name temporal-smoke --network cres-smoke temporalio/temporal:1.5.1 server start-dev --ip 0.0.0.0
           docker run -d --name minio-smoke --network cres-smoke \
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
@@ -184,6 +184,8 @@ jobs:
           if [ -z "$temporal_ip" ] || [ -z "$minio_ip" ] || [ "$temporal_ip" = "<no value>" ] || [ "$minio_ip" = "<no value>" ]; then
             echo "Failed to resolve dependency container IPs on cres-smoke"
             docker ps -a
+            docker logs temporal-smoke || true
+            docker logs minio-smoke || true
             docker inspect temporal-smoke || true
             docker inspect minio-smoke || true
             exit 1
