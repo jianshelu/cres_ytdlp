@@ -30,8 +30,8 @@ RUN git clone --depth 1 --branch "${LLAMA_CPP_REF}" https://github.com/ggml-org/
  && cp -a /opt/llama.cpp/build/bin/libggml*.so* /opt/llama-artifacts/ \
  && (strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* || true)
 
-# Use Vast.ai auto CUDA base to speed instance-side image loading.
-FROM vastai/base-image:@vastai-automatic-tag
+# Use explicit Vast.ai CUDA base tag (auto placeholder format is invalid in Docker FROM).
+FROM vastai/base-image:cuda-12.4.1-auto
 
 WORKDIR /workspace
 

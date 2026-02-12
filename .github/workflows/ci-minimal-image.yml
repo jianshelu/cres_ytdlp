@@ -37,7 +37,7 @@ jobs:
       - name: Verify Vast.ai base and llama.cpp source build are configured
         run: |
           set -euxo pipefail
-          grep -n "FROM vastai/base-image:@vastai-automatic-tag" Dockerfile.base
+          grep -n "FROM vastai/base-image:cuda-12.4.1-auto" Dockerfile.base
           grep -nE "^FROM nvidia/cuda:.* AS llama_cpp_builder$" Dockerfile.base
           grep -n "cmake --build build --config Release --target llama-server" Dockerfile.base
 

@@ -1,4 +1,60 @@
 # PLAN
+## 2026-02-12 - Fix Invalid Vast.ai Base Image Reference Format
+
+- Objective: make base image build parse correctly by replacing invalid `FROM` reference with a valid, pullable Vast.ai CUDA tag.
+- Root cause:
+  - `FROM vastai/base-image:@vastai-automatic-tag` is not a valid Docker image reference format.
+  - Docker/buildx fails early with `invalid reference format`.
+- Changes:
+  - `Dockerfile.base`
+    - Replaced runtime base with:
+      - `FROM vastai/base-image:cuda-12.4.1-auto`
+  - `.github/workflows/ci-minimal-image.yml`
+    - Updated base-image verification grep to match the new valid tag.
+
+### Validation
+
+- Validate base reference:
+  - `rg --line-number "^FROM vastai/base-image:cuda-12.4.1-auto" Dockerfile.base`
+- Validate CI check matches:
+  - `rg --line-number "FROM vastai/base-image:cuda-12.4.1-auto" .github/workflows/ci-minimal-image.yml`
+- Run build parse check:
+  - `docker build -f Dockerfile.base .`
+  - Expected: no `invalid reference format` error at `FROM`.
+
+### Rollback
+
+1. Revert `Dockerfile.base` and `ci-minimal-image.yml` to previous base reference.
+2. Re-run build to confirm prior behavior is restored.
+
+## 2026-02-12 - Source-of-Truth Order Alignment (AGENTS.md)
+
+- Objective: align planning and task governance with `AGENTS.md` `Where the truth lives`.
+- Root cause:
+  - `AGENTS.md` introduced explicit source precedence, but `docs/PLAN.md` and `docs/Task.md` did not yet record this update as tracked project state.
+- Changes:
+  - `docs/PLAN.md`
+    - Added this governance entry to formalize source precedence:
+      - `.agents/skills/cres-triage/SKILL.md` (authoritative)
+      - `docs/PLAN.md` (current status)
+      - `docs/Task.md` (task execution list)
+      - `docs/DECISIONS.md` (optional tradeoffs)
+  - `docs/Task.md`
+    - Updated today's `Docs & Ops` tasks to mark the source-of-truth alignment work complete.
+
+### Validation
+
+- Verify `PLAN.md` contains this alignment entry:
+  - `rg --line-number "Source-of-Truth Order Alignment|Where the truth lives|cres-triage/SKILL\\.md|docs/Task\\.md|docs/DECISIONS\\.md" docs/PLAN.md`
+- Verify `Task.md` includes today's completed alignment tasks:
+  - `rg --line-number "Document source-of-truth precedence|Update daily task tracking source references" docs/Task.md`
+
+### Rollback
+
+1. Remove this `Source-of-Truth Order Alignment (AGENTS.md)` section from `docs/PLAN.md`.
+2. Remove the two alignment task lines from `docs/Task.md` under `2026-02-12 (Thursday) -> Docs & Ops`.
+3. Re-run the validation `rg` commands and confirm no alignment-entry matches remain.
+
 ## 2026-02-12 - CI Prebuilt Base Dependency Probe Before Reuse
 
 - Objective: prevent smoke failures where app container lacks Python runtime deps after reusing stale GHCR base image.
