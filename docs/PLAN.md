@@ -1,4 +1,25 @@
 # PLAN
+## 2026-02-12 - CI Minimal Boot Disk-Pressure Guardrails
+
+- Objective: prevent `minimal-build-and-boot` from failing with `No space left on device` on persistent/self-hosted runners.
+- Root cause:
+  - The workflow only removed runtime containers/network at the end.
+  - Docker layers/build cache and old runner `_diag` logs could accumulate across runs and exhaust disk.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added pre-build reclaim step to print disk usage, trim old runner `_diag` logs, and run Docker prune commands.
+    - Extended final cleanup to remove CI-tagged images and prune builder/volumes under `if: always()`.
+
+### Validation
+
+- Re-run `CI Minimal Image Boot` and confirm `Reclaim disk space before build` prints disk usage before/after cleanup.
+- Confirm `minimal-build-and-boot` completes without `System.IO.IOException: No space left on device`.
+
+### Rollback
+
+1. Revert `.github/workflows/ci-minimal-image.yml` cleanup additions.
+2. Re-run CI and confirm workflow behavior returns to previous baseline.
+
 ## 2026-02-12 - CI Smoke Queue Check Respects No-GPU Environments
 
 - Objective: stop CI smoke failures where `worker-gpu` cannot start on non-GPU runners but queue registration still hard-requires `video-processing@gpu`.
