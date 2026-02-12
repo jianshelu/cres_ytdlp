@@ -8,6 +8,7 @@ on:
       - "Dockerfile.base"
       - "requirements.instance.txt"
       - "scripts/supervisord.conf"
+      - "scripts/start-llama.sh"
       - "scripts/container_smoke.sh"
       - "src/**"
       - ".github/workflows/ci-minimal-image.yml"
@@ -17,6 +18,7 @@ on:
       - "Dockerfile.base"
       - "requirements.instance.txt"
       - "scripts/supervisord.conf"
+      - "scripts/start-llama.sh"
       - "scripts/container_smoke.sh"
       - "src/**"
       - ".github/workflows/ci-minimal-image.yml"
@@ -25,9 +27,36 @@ on:
 jobs:
   minimal-build-and-boot:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Verify Vast.ai base and llama.cpp source build are configured
+        run: |
+          set -euxo pipefail
+          grep -n "FROM vastai/base-image:@vastai-automatic-tag" Dockerfile.base
+          grep -nE "^FROM nvidia/cuda:.* AS llama_cpp_builder$" Dockerfile.base
+          grep -n "cmake --build build --config Release --target llama-server" Dockerfile.base
+
+      - name: Lowercase image name
+        id: lowercase
+        run: |
+          echo "image_name_lower=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Detect base-image affecting changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            base:
+              - "Dockerfile.base"
+              - "requirements.instance.txt"
+              - "scripts/supervisord.conf"
+              - "scripts/start-llama.sh"
 
       - name: Reclaim disk space before build
         run: |
@@ -57,7 +86,37 @@ jobs:
           # Without this, BuildKit may try to pull `cres-base-ci:*` from Docker Hub.
           driver: docker
 
-      - name: Build base image (local)
+      - name: Log in to GHCR (best effort for base reuse)
+        continue-on-error: true
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve base image strategy
+        id: base_strategy
+        shell: bash
+        run: |
+          set -euxo pipefail
+          if [ "${{ steps.filter.outputs.base }}" = "true" ]; then
+            echo "Base-impacting files changed; build local base image."
+            echo "build_local=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PREBUILT_BASE="ghcr.io/${{ steps.lowercase.outputs.image_name_lower }}-base:latest"
+          if docker pull "$PREBUILT_BASE"; then
+            docker tag "$PREBUILT_BASE" "cres-base-ci:${{ github.sha }}"
+            echo "Using prebuilt GHCR base image: $PREBUILT_BASE"
+            echo "build_local=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "GHCR base pull failed; fallback to local base build."
+            echo "build_local=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build base image (local, when required)
+        if: steps.base_strategy.outputs.build_local == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -65,6 +124,11 @@ jobs:
           push: false
           load: true
           tags: cres-base-ci:${{ github.sha }}
+          cache-from: type=gha,scope=base-ci
+          cache-to: type=gha,scope=base-ci,mode=max
+
+      - name: Show selected base strategy
+        run: echo "build_local=${{ steps.base_strategy.outputs.build_local }}"
 
       - name: Build app image (local)
         uses: docker/build-push-action@v5
@@ -76,6 +140,8 @@ jobs:
           push: false
           load: true
           tags: cres-app-ci:${{ github.sha }}
+          cache-from: type=gha,scope=app-ci
+          cache-to: type=gha,scope=app-ci,mode=max
 
       - name: Start minimal dependencies
         run: |

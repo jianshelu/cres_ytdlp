@@ -1,4 +1,109 @@
 # PLAN
+## 2026-02-12 - GHCR Base Build Guardrails for llama.cpp Source Compile
+
+- Objective: keep `llama.cpp` compiled in-image while reducing GHCR build failures caused by runner disk pressure and compile resource spikes.
+- Root cause:
+  - Source compile in `Dockerfile.base` increased build-time CPU/memory/disk demand.
+  - GHCR workflow `deploy.yml` lacked explicit pre-build disk reclamation.
+  - Base cache export used aggressive `mode=max`, increasing cache upload volume and failure surface.
+- Changes:
+  - `Dockerfile.base`
+    - Added compile guard args:
+      - `LLAMA_BUILD_JOBS=2` (default low parallelism)
+      - `LLAMA_CUDA_ARCH=86` (target RTX 3060 class runtime)
+    - Kept `llama.cpp` source compile with CUDA and limited artifacts copied to runtime:
+      - `/app/llama-server`
+      - `libllama.so*`
+      - `libggml*.so*`
+    - Added `strip --strip-unneeded` to reduce runtime artifact size.
+  - `.github/workflows/deploy.yml`
+    - Added base-impacting filters for `scripts/supervisord.conf` and `scripts/start-llama.sh`.
+    - Added pre-build disk reclamation steps in both `build-base` and `build-app` jobs.
+    - Passed base build args:
+      - `LLAMA_BUILD_JOBS=2`
+      - `LLAMA_CUDA_ARCH=86`
+    - Reduced base cache export pressure:
+      - `cache-to: type=gha,scope=base,mode=min`
+
+### Validation
+
+- Verify compile guard args and reduced runtime copy:
+  - `rg --line-number "ARG LLAMA_CUDA_ARCH|ARG LLAMA_BUILD_JOBS|CMAKE_CUDA_ARCHITECTURES|llama-artifacts|libggml\\*|libllama\\.so\\*" Dockerfile.base`
+- Verify GHCR workflow has disk reclaim + build args:
+  - `rg --line-number "Reclaim disk space before base build|Reclaim disk space before app build|LLAMA_BUILD_JOBS=2|LLAMA_CUDA_ARCH=86|cache-to: type=gha,scope=base,mode=min" .github/workflows/deploy.yml`
+- Trigger `Build and Push to GHCR` and confirm:
+  - Base build starts with disk before/after logs.
+  - No `No space left on device` during base build.
+  - Base image push succeeds with `llama-server` still present at runtime.
+
+### Rollback
+
+1. Revert `Dockerfile.base` compile guard args and artifact-copy narrowing.
+2. Revert `deploy.yml` disk reclaim steps and base build args.
+3. Restore base cache export to `mode=max` if desired.
+4. Re-run GHCR workflow and compare baseline behavior.
+
+## 2026-02-12 - Switch Runtime Base to Vast.ai Auto CUDA Image Tag (Keep llama.cpp Source Build)
+
+- Objective: improve Vast.ai-side image pull/load performance by using `vastai/base-image:@vastai-automatic-tag` as runtime base while preserving `llama-server` via in-image `llama.cpp` source build.
+- Root cause:
+  - Runtime base used `ghcr.io/ggml-org/llama.cpp:server-cuda` directly, which may not benefit from Vast.ai-side base caching behavior.
+  - Previous change only copied prebuilt `llama-server`; it did not keep source-compilation flow in `Dockerfile.base`.
+- Changes:
+  - `Dockerfile.base`
+    - Switched runtime base to `FROM vastai/base-image:@vastai-automatic-tag`.
+    - Added `llama_cpp_builder` stage (`nvidia/cuda:12.4.1-devel-ubuntu22.04`) to build `llama.cpp` from source with `GGML_CUDA=ON`.
+    - Copied compiled artifacts from `/opt/llama.cpp/build/bin/` into `/app/` and linked `/usr/local/bin/llama-server`.
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added positive verification for both:
+      - `FROM vastai/base-image:@vastai-automatic-tag`
+      - presence of `llama_cpp_builder` stage and `cmake --build ... --target llama-server` line.
+
+### Validation
+
+- Verify runtime base image line:
+  - `rg --line-number "^FROM vastai/base-image:@vastai-automatic-tag" Dockerfile.base`
+- Verify llama source compile stage exists:
+  - `rg --line-number "^FROM nvidia/cuda:.* AS llama_cpp_builder|cmake --build build --config Release --target llama-server" Dockerfile.base`
+- Verify CI check enforces base + compile stage:
+  - `rg --line-number "Verify Vast.ai base and llama.cpp source build are configured|FROM vastai/base-image:@vastai-automatic-tag|llama_cpp_builder|cmake --build build --config Release --target llama-server" .github/workflows/ci-minimal-image.yml`
+
+### Rollback
+
+1. Revert `Dockerfile.base` to single-stage `FROM ghcr.io/ggml-org/llama.cpp:server-cuda`.
+2. Remove `llama_cpp_builder` stage and `/app` copy/link lines.
+3. Revert `.github/workflows/ci-minimal-image.yml` verification step accordingly.
+4. Re-run CI to confirm previous behavior.
+
+## 2026-02-12 - CI Minimal Build-and-Boot Base Reuse Optimization
+
+- Objective: reduce unnecessary rebuild cost in `minimal-build-and-boot` while keeping deterministic smoke coverage.
+- Root cause:
+  - `CI Minimal Image Boot` always rebuilt `Dockerfile.base` locally, even when base-impacting files were unchanged.
+  - Base image strategy lacked a deterministic reuse-or-rebuild decision.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added base-impacting change filter (`Dockerfile.base`, `requirements.instance.txt`, `scripts/supervisord.conf`, `scripts/start-llama.sh`).
+    - Added conditional strategy:
+      - Reuse GHCR base image (`ghcr.io/<repo>-base:latest`) when base files are unchanged.
+      - Fallback to local base build when base files changed or pull fails.
+    - Added GHA cache scopes for base/app CI builds (`base-ci`, `app-ci`).
+    - Added `scripts/start-llama.sh` to workflow path triggers.
+
+### Validation
+
+- Verify new strategy steps exist:
+  - `rg --line-number "Detect base-image affecting changes|Resolve base image strategy|Build base image \\(local, when required\\)" .github/workflows/ci-minimal-image.yml`
+- Re-run `CI Minimal Image Boot`:
+  - If base files unchanged: logs show GHCR base pull/tag path.
+  - If base files changed: logs show local base build path.
+
+### Rollback
+
+1. Revert `.github/workflows/ci-minimal-image.yml` strategy/filter/guard additions.
+2. Restore unconditional local base build in `minimal-build-and-boot`.
+3. Re-run CI to confirm previous behavior.
+
 ## 2026-02-12 - CI Minimal Boot Disk-Pressure Guardrails
 
 - Objective: prevent `minimal-build-and-boot` from failing with `No space left on device` on persistent/self-hosted runners.

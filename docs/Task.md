@@ -21,6 +21,8 @@
 - [x] Fix committed secret exposure in `scripts/supervisord_remote.conf` by switching to runtime env interpolation.
 - [x] Document queue/runtime/security alignment and rollback in `docs/PLAN.md`.
 - [x] Document CI smoke endpoint hardening and rollback in `docs/PLAN.md`.
+- [x] Optimize `CI Minimal Image Boot` to reuse GHCR base image when base-impacting files are unchanged.
+- [x] Configure `Dockerfile.base` runtime base to `vastai/base-image:@vastai-automatic-tag` with llama runtime preserved via multi-stage copy.
 - [ ] Verify `CI Minimal Image Boot` and deploy smoke step no longer fail on Temporal DNS resolution.
 - [x] Document CI smoke IP readiness guard and rollback in `docs/PLAN.md`.
 - [ ] Verify CI smoke envs always resolve to non-empty endpoints (`TEMPORAL_SMOKE_ADDR`, `MINIO_SMOKE_ENDPOINT`) before app boot.

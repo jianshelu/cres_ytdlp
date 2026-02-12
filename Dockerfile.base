@@ -1,8 +1,44 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
-# Base image includes CUDA-enabled llama-server
-FROM ghcr.io/ggml-org/llama.cpp:server-cuda
+# Build llama.cpp from source (CUDA) so runtime keeps /app/llama-server.
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS llama_cpp_builder
+ARG LLAMA_CPP_REF=master
+ARG LLAMA_CUDA_ARCH=86
+ARG LLAMA_BUILD_JOBS=2
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/llama.cpp
+RUN git clone --depth 1 --branch "${LLAMA_CPP_REF}" https://github.com/ggml-org/llama.cpp.git . \
+ && cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CUDA_ARCHITECTURES="${LLAMA_CUDA_ARCH}" \
+    -DGGML_CUDA=ON \
+    -DGGML_NATIVE=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DLLAMA_BUILD_SERVER=ON \
+    -DLLAMA_BUILD_TESTS=OFF \
+    -DLLAMA_BUILD_EXAMPLES=OFF \
+ && cmake --build build --config Release --target llama-server -j"${LLAMA_BUILD_JOBS}" \
+ && mkdir -p /opt/llama-artifacts \
+ && cp -a /opt/llama.cpp/build/bin/llama-server /opt/llama-artifacts/ \
+ && cp -a /opt/llama.cpp/build/bin/libllama.so* /opt/llama-artifacts/ \
+ && cp -a /opt/llama.cpp/build/bin/libggml*.so* /opt/llama-artifacts/ \
+ && (strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* || true)
+
+# Use Vast.ai auto CUDA base to speed instance-side image loading.
+FROM vastai/base-image:@vastai-automatic-tag
 
 WORKDIR /workspace
+
+# Keep compiled llama-server available in the runtime image.
+COPY --from=llama_cpp_builder /opt/llama-artifacts/ /app/
+RUN test -x /app/llama-server \
+ && ln -sf /app/llama-server /usr/local/bin/llama-server
 
 # Install system dependencies (+ supervisor)
 RUN apt-get update && apt-get install -y --no-install-recommends \
