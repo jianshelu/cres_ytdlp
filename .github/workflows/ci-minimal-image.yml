@@ -101,32 +101,32 @@ jobs:
           set -euxo pipefail
           verify_base_runtime_deps() {
             local image="$1"
-            docker run --rm "$image" python3 - <<'PY'
-import importlib
-import sys
-
-mods = [
-    "fastapi",
-    "uvicorn",
-    "httpx",
-    "temporalio",
-    "minio",
-    "yt_dlp",
-    "faster_whisper",
-    "torch",
-]
-missing = []
-for m in mods:
-    try:
-        importlib.import_module(m)
-    except Exception as e:
-        missing.append(f"{m}: {e}")
-if missing:
-    print("prebuilt base dependency probe failed:")
-    print("\n".join(missing))
-    sys.exit(1)
-print("prebuilt base dependency probe passed")
-PY
+            printf '%s\n' \
+              'import importlib' \
+              'import sys' \
+              '' \
+              'mods = [' \
+              '    "fastapi",' \
+              '    "uvicorn",' \
+              '    "httpx",' \
+              '    "temporalio",' \
+              '    "minio",' \
+              '    "yt_dlp",' \
+              '    "faster_whisper",' \
+              '    "torch",' \
+              ']' \
+              'missing = []' \
+              'for m in mods:' \
+              '    try:' \
+              '        importlib.import_module(m)' \
+              '    except Exception as e:' \
+              '        missing.append(f"{m}: {e}")' \
+              'if missing:' \
+              '    print("prebuilt base dependency probe failed:")' \
+              '    print("\\n".join(missing))' \
+              '    sys.exit(1)' \
+              'print("prebuilt base dependency probe passed")' \
+            | docker run --rm -i "$image" python3 -
           }
 
           if [ "${{ steps.filter.outputs.base }}" = "true" ]; then
