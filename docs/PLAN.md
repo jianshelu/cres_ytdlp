@@ -1,4 +1,31 @@
 # PLAN
+## 2026-02-12 - CI Smoke Queue Check Respects No-GPU Environments
+
+- Objective: stop CI smoke failures where `worker-gpu` cannot start on non-GPU runners but queue registration still hard-requires `video-processing@gpu`.
+- Root cause:
+  - `scripts/container_smoke.sh` always tried to start `worker-gpu` and always validated both `@cpu` and `@gpu` queues.
+  - On CI runners without CUDA, `worker-gpu` exits with spawn error by design, so hard-checking `@gpu` produced false negatives.
+- Changes:
+  - `scripts/container_smoke.sh`
+    - Added `SMOKE_REQUIRE_GPU_QUEUE` policy (`auto|true|false`, default `auto`).
+    - Auto mode detects CUDA availability via `torch.cuda.is_available()` and sets `SMOKE_EXPECT_GPU_QUEUE`.
+    - Skips `worker-gpu` start when GPU is not expected.
+    - Queue registration check now validates `@gpu` only when `SMOKE_EXPECT_GPU_QUEUE=1`.
+
+### Validation
+
+- Syntax:
+  - `bash -n scripts/container_smoke.sh`
+- Runtime behavior (CI no-GPU expected):
+  - logs show `gpu queue expectation: 0`
+  - `worker-gpu` start is skipped
+  - queue check targets only `video-processing@cpu`
+
+### Rollback
+
+1. Revert `scripts/container_smoke.sh` to previous behavior.
+2. Re-run CI and ensure both `@cpu` and `@gpu` are required again.
+
 ## 2026-02-12 - Transcriptions Hot-Path Optimization (AI programming / limit=30)
 
 - Objective: eliminate repeated high-latency rendering on `/transcriptions` for large result sets by removing redundant recomputation in FastAPI hot path.

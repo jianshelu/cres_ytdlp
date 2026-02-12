@@ -38,9 +38,32 @@ curl -fsS http://127.0.0.1:8000/docs >/dev/null
 echo "fastapi docs ok"
 
 echo "[smoke] start workers on-demand..."
+SMOKE_REQUIRE_GPU_QUEUE="${SMOKE_REQUIRE_GPU_QUEUE:-auto}"
+SMOKE_EXPECT_GPU_QUEUE="0"
+if [[ "${SMOKE_REQUIRE_GPU_QUEUE,,}" == "true" || "${SMOKE_REQUIRE_GPU_QUEUE,,}" == "1" || "${SMOKE_REQUIRE_GPU_QUEUE,,}" == "yes" ]]; then
+  SMOKE_EXPECT_GPU_QUEUE="1"
+elif [[ "${SMOKE_REQUIRE_GPU_QUEUE,,}" == "false" || "${SMOKE_REQUIRE_GPU_QUEUE,,}" == "0" || "${SMOKE_REQUIRE_GPU_QUEUE,,}" == "no" ]]; then
+  SMOKE_EXPECT_GPU_QUEUE="0"
+else
+  SMOKE_EXPECT_GPU_QUEUE="$(python3 - <<'PY'
+try:
+    import torch  # type: ignore
+    print("1" if bool(torch.cuda.is_available()) else "0")
+except Exception:
+    print("0")
+PY
+)"
+fi
+export SMOKE_EXPECT_GPU_QUEUE
+echo "[smoke] gpu queue expectation: ${SMOKE_EXPECT_GPU_QUEUE} (SMOKE_REQUIRE_GPU_QUEUE=${SMOKE_REQUIRE_GPU_QUEUE})"
+
 if command -v supervisorctl >/dev/null 2>&1; then
   supervisorctl -s unix:///tmp/supervisor.sock start worker-cpu || true
-  supervisorctl -s unix:///tmp/supervisor.sock start worker-gpu || true
+  if [[ "${SMOKE_EXPECT_GPU_QUEUE}" == "1" ]]; then
+    supervisorctl -s unix:///tmp/supervisor.sock start worker-gpu || true
+  else
+    echo "[smoke] skip worker-gpu start (no GPU expected in this environment)"
+  fi
 else
   echo "supervisorctl not found; skip explicit worker start"
 fi
@@ -56,7 +79,11 @@ from temporalio.api.taskqueue.v1 import TaskQueue
 
 addr = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
 base = (os.getenv("BASE_TASK_QUEUE", "video-processing") or "video-processing").strip()
-queues = [f"{base}@cpu", f"{base}@gpu"]
+expect_gpu = (os.getenv("SMOKE_EXPECT_GPU_QUEUE", "0").strip() == "1")
+queues = [f"{base}@cpu"]
+if expect_gpu:
+    queues.append(f"{base}@gpu")
+print(f"queue check targets={queues} expect_gpu={expect_gpu}")
 
 async def has_poller(client, q):
     # GPU queue can be activity-only; validate either poller type is present.
