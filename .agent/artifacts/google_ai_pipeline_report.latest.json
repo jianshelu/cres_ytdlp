@@ -1,0 +1,169 @@
+{
+  "started_at_utc": "2026-02-09T00:12:54+00:00",
+  "seed_query": "中国 人工智能 大模型 科技 新闻",
+  "news_count": 40,
+  "keyword_count": 10,
+  "per_keyword_limit": 3,
+  "max_duration_minutes": 10,
+  "api_base": "http://localhost:8000",
+  "dry_run": false,
+  "news_items": [
+    {
+      "title": "Minds at War: China’s Pursuit of Military Advantage through Cognitive Science and Biotechnology",
+      "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPblhQdWNBR2gzd25LeWk1T0pmSzBXX2VqbFQ2ckcwQVhUQ0w5YXFKcTEwSWdUd2VsZFBrMDdsR1Nta0VQVFJHTHkyZGxhQV9iS3lBVnlnRkU5WWNrSHBXRXk4S2l6cldzdTQyLVJmOGJLMC15VUV6RDNDdUszTnRMSEpfaXg1YVdYR2drQW9UQUZyVmpXbDJ3aVZCb1hkcVA1WG44VU1sWjRSOU41bVJVemNDYTR6VUgwcExtZnlFQWQ3OGlVVmcxUEZiaHo1aXhFeTlKeGk2aWdDa0YwUDROTUktTFc?oc=5",
+      "published": "Thu, 09 Jan 2020 08:00:00 GMT"
+    },
+    {
+      "title": "Artificial Intelligence-Generated Content (AIGC) White Paper [Excerpt]",
+      "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNSGQzVVVBbGoxbVlxbzI3UFV2VllVX2x0dnQ4bld5NGp6al9DblduNFdrRTl1QUZMVzQ3blQ0NUcwY3VnMkZsSVJ4dHg1WGZJTTJPalZGa1F1bXFuMDNaQXY5M3BOZTE2UlhBdV83M09ZWXhGQU16NEZVTUZ3QzBkQTVPYTRjYjZITDhGdDU5ekEzbl9DQ1dzMURJR25JZGRmZlR3YzNIdmY4Zms?oc=5",
+      "published": "Tue, 20 Feb 2024 22:05:28 GMT"
+    }
+  ],
+  "keywords": [
+    "人工智能",
+    "大模型",
+    "智能体",
+    "算力",
+    "芯片",
+    "机器学习",
+    "深度学习",
+    "生成式AI",
+    "多模态",
+    "科技新闻"
+  ],
+  "dispatches": [
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "aa237492-9ed7-4db5-91ac-b69df18270ce",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "人工智能"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "6700898e-0224-4452-bc16-5221f1f6c3e3",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "大模型"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "094da324-41a6-445e-86bd-7e16870b19a2",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "智能体"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "1273d751-5924-490e-a4d8-f171afec7572",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "算力"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "fe20943c-42e8-4494-805b-0f573bb7c192",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "芯片"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "b7358f5d-3ad6-47ee-9c4a-85e792076a5c",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "机器学习"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "2fe2d96a-5a9a-46a8-b1f3-d6f812f72e89",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "深度学习"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "a2fb749f-3108-4a0a-9ec3-e072bfa39a82",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "生成式AI"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "ebbd6aaa-2648-4e5a-9285-29d61710b7b3",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "多模态"
+    },
+    {
+      "status_code": 200,
+      "ok": true,
+      "response": {
+        "status": "accepted",
+        "dispatcher_workflow_id": "query-orchestrator",
+        "orchestrator_mode": "inline",
+        "request_id": "2ef02e36-2369-4f68-8bab-0dcfe72eb3f3",
+        "parallelism": 2,
+        "max_duration_minutes": 10
+      },
+      "query": "科技新闻"
+    }
+  ],
+  "accepted_count": 10,
+  "failed_count": 0,
+  "finished_at_utc": "2026-02-09T00:12:59+00:00"
+}
