@@ -1,4 +1,33 @@
 # PLAN
+## 2026-02-12 - Fix CI Base/App Build Cache Backend Mismatch (docker driver)
+
+- Objective: stop `CI Minimal Image Boot` failures caused by Buildx cache backend incompatibility.
+- Root cause:
+  - Workflow uses Buildx `driver: docker` to ensure local image reuse (`cres-base-ci:<sha>` -> app build arg).
+  - Same workflow also configured `cache-from/cache-to: type=gha`, which is unsupported by `docker` driver in current runner configuration.
+  - Failure surfaced as:
+    - `ERROR: failed to build: Cache export is not supported for the docker driver.`
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Removed `cache-from: type=gha,scope=base-ci` and `cache-to: type=gha,scope=base-ci,mode=max` from local base build step.
+    - Removed `cache-from: type=gha,scope=app-ci` and `cache-to: type=gha,scope=app-ci,mode=max` from local app build step.
+    - Kept `driver: docker` unchanged to preserve local base-image reuse behavior.
+
+### Validation
+
+- Verify cache lines are absent in CI minimal workflow:
+  - `rg --line-number "cache-from: type=gha,scope=(base-ci|app-ci)|cache-to: type=gha,scope=(base-ci|app-ci)" .github/workflows/ci-minimal-image.yml`
+  - Expected: no matches.
+- Re-run `CI Minimal Image Boot`:
+  - Confirm no `Cache export is not supported for the docker driver` error.
+  - Confirm app build still resolves `BASE_IMAGE=cres-base-ci:<sha>` successfully.
+
+### Rollback
+
+1. Re-add removed `cache-from/cache-to type=gha` lines in `.github/workflows/ci-minimal-image.yml`.
+2. If cache is required, switch Buildx to a compatible driver/config (for example `docker-container` + cache backend support).
+3. Re-run CI and verify base/app build path behavior.
+
 ## 2026-02-12 - GHCR Base Build Guardrails for llama.cpp Source Compile
 
 - Objective: keep `llama.cpp` compiled in-image while reducing GHCR build failures caused by runner disk pressure and compile resource spikes.

@@ -124,8 +124,6 @@ jobs:
           push: false
           load: true
           tags: cres-base-ci:${{ github.sha }}
-          cache-from: type=gha,scope=base-ci
-          cache-to: type=gha,scope=base-ci,mode=max
 
       - name: Show selected base strategy
         run: echo "build_local=${{ steps.base_strategy.outputs.build_local }}"
@@ -140,8 +138,6 @@ jobs:
           push: false
           load: true
           tags: cres-app-ci:${{ github.sha }}
-          cache-from: type=gha,scope=app-ci
-          cache-to: type=gha,scope=app-ci,mode=max
 
       - name: Start minimal dependencies
         run: |
