@@ -31,6 +31,10 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          # Required for local `load: true` image reuse in subsequent builds.
+          # Without this, BuildKit may try to pull `cres-base-ci:*` from Docker Hub.
+          driver: docker
 
       - name: Build base image (local)
         uses: docker/build-push-action@v5

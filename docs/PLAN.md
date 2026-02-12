@@ -1,5 +1,30 @@
 # PLAN
 
+## 2026-02-12 - CI Minimal Image Base Reuse Fix
+
+- Objective: fix CI failure where app build tried to pull `cres-base-ci:<sha>` from Docker Hub instead of reusing the local base image.
+- Root cause: `buildx` isolated builder could not see the image produced by the prior `load: true` step in `.github/workflows/ci-minimal-image.yml`.
+- Change:
+  - Updated `.github/workflows/ci-minimal-image.yml` Buildx setup to use:
+    - `driver: docker`
+  - This allows local image reuse in the same job for:
+    - base tag: `cres-base-ci:${{ github.sha }}`
+    - app build arg: `BASE_IMAGE=cres-base-ci:${{ github.sha }}`
+
+### Validation
+
+- Trigger `CI Minimal Image Boot` workflow.
+- Confirm app image build no longer errors with:
+  - `failed to resolve source metadata for docker.io/library/cres-base-ci:<sha>`
+- Confirm smoke step still boots and executes:
+  - `docker exec app-ci /bin/bash /workspace/scripts/container_smoke.sh`
+
+### Rollback
+
+1. Revert `.github/workflows/ci-minimal-image.yml` Buildx config to previous state.
+2. Re-run `CI Minimal Image Boot`.
+3. If needed, force base image from GHCR in app build args as an alternate path.
+
 ## 2026-02-12 - Queue Routing, Secret Hygiene, and Active-Instance Scheduling
 
 - Objective: align runtime behavior with `cres-triage` hard constraints for queue routing, secret handling, and GPU-node resource limits.
