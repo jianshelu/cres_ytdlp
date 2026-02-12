@@ -13,11 +13,14 @@
 - [ ] Document rollout and rollback steps for the audio page in `docs/PLAN.md` only if API contract or ops behavior changes.
 - [x] Fix committed secret exposure in `scripts/supervisord_remote.conf` by switching to runtime env interpolation.
 - [x] Document queue/runtime/security alignment and rollback in `docs/PLAN.md`.
+- [x] Document CI smoke endpoint hardening and rollback in `docs/PLAN.md`.
+- [ ] Verify `CI Minimal Image Boot` and deploy smoke step no longer fail on Temporal DNS resolution.
 
 ### Workers & Queues (@cpu / @gpu)
 - [x] Fix queue routing names to `<base>@cpu` and `<base>@gpu` in `src/api/main.py`, `src/backend/workflows.py`, and `src/backend/worker.py`.
 - [x] Fix queue references in operational scripts (`scripts/container_smoke.sh`, `scripts/rerun_failed_workflows.py`) to use the new suffix routing.
 - [ ] Verify worker pollers register on `video-processing@cpu` and `video-processing@gpu` after restart.
+- [x] Fix CI smoke dependency endpoint injection to use resolved container IPs in `.github/workflows/ci-minimal-image.yml` and `.github/workflows/deploy.yml`.
 
 ### Resource & Performance (RAM / VRAM / Batch / Threads)
 - [x] Fix runtime defaults for llama to `-ngl 999 --threads 8 -b 512` in `entrypoint.sh` and `start_llm.sh`.

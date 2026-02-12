@@ -1,5 +1,38 @@
 # PLAN
 
+## 2026-02-12 - CI Smoke Endpoint Resolution Hardening
+
+- Objective: remove Docker DNS flakiness from CI smoke tests where `app-ci` intermittently fails to resolve `temporal-ci`/`temporal-smoke`.
+- Root cause: `TEMPORAL_ADDRESS=temporal-ci:7233` (or `temporal-smoke`) depended on runtime container DNS resolution; failures surfaced as temporary name-resolution errors in queue registration checks.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Resolve `temporal-ci` and `minio-ci` IPs via `docker inspect`.
+    - Export:
+      - `TEMPORAL_SMOKE_ADDR=<temporal_ip>:7233`
+      - `MINIO_SMOKE_ENDPOINT=<minio_ip>:9000`
+    - Start `app-ci` with those explicit endpoints.
+  - `.github/workflows/deploy.yml`
+    - Apply the same IP-resolution pattern for `temporal-smoke` / `minio-smoke`.
+    - Start `app-smoke` with explicit endpoint env values.
+
+### Validation
+
+- Re-run:
+  - `CI Minimal Image Boot`
+  - `Build and Push to GHCR` (smoke section)
+- Confirm smoke output no longer fails with:
+  - `Temporary failure in name resolution` for Temporal address.
+- Confirm queue registration reaches:
+  - `queue registration ok`
+
+### Rollback
+
+1. Revert `.github/workflows/ci-minimal-image.yml` and `.github/workflows/deploy.yml` smoke endpoint changes.
+2. Restore container-name endpoints:
+   - `TEMPORAL_ADDRESS=temporal-ci:7233` / `temporal-smoke:7233`
+   - `MINIO_ENDPOINT=minio-ci:9000` / `minio-smoke:9000`
+3. Re-run workflows to verify previous behavior.
+
 ## 2026-02-12 - CI Temporal DNS/Worker Spawn Resilience
 
 - Objective: fix CI smoke failures where worker startup reported `spawn error` and queue registration failed with temporary Temporal DNS resolution errors.
