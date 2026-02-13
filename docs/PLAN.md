@@ -1,4 +1,35 @@
 # PLAN
+## 2026-02-13 - Stabilize Push Path by Building Prebuilt Base Every Push and Pinning SHA Tag
+
+- Objective: prevent push-triggered `build-app` from resolving stale/invalid base tags.
+- Root cause:
+  - `build-base-llama-prebuilt` previously ran only when base-related files changed.
+  - Push runs without base changes could skip prebuilt build and force app to reuse old tags (`latest`), causing import/runtime mismatches.
+  - Dependency probe used default image entrypoint, which could fail for reasons unrelated to Python deps.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - `build-base-llama-prebuilt` now runs on every `push` (manual prebuilt path unchanged).
+    - `build-app` push path now prefers current-run prebuilt SHA tag:
+      - `llama-prebuilt-<sha_short>`
+    - Dependency probe now runs with:
+      - `docker run --entrypoint python3 ...`
+      - avoids entrypoint side-effects during import validation.
+
+### Validation
+
+- Verify prebuilt job trigger policy:
+  - `rg --line-number "build-base-llama-prebuilt|github.event_name == 'push'" .github/workflows/deploy.yml`
+- Verify push path app base pinning:
+  - `rg --line-number "base_tag=\\\"llama-prebuilt-\\$\\{\\{ needs.filter.outputs.sha_short \\}\\}\\\"" .github/workflows/deploy.yml`
+- Verify probe uses Python entrypoint override:
+  - `rg --line-number \"--entrypoint python3\" .github/workflows/deploy.yml`
+
+### Rollback
+
+1. Restore old prebuilt job condition requiring base-file change on push.
+2. Remove push-time SHA pinning and revert to prior base-tag selection.
+3. Revert dependency probe command to previous invocation.
+
 ## 2026-02-13 - Reject Stale Base Tags Missing Runtime Dependencies in build-app
 
 - Objective: prevent app smoke failures caused by selecting an existing but stale base image tag lacking Python runtime deps.

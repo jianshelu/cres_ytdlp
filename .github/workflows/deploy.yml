@@ -161,7 +161,7 @@ jobs:
   build-base-llama-prebuilt:
     needs: filter
     if: >-
-      (github.event_name == 'push' && needs.filter.outputs.base == 'true') ||
+      (github.event_name == 'push') ||
       (github.event_name == 'workflow_dispatch' && inputs.base_variant == 'llama-prebuilt')
     runs-on: ubuntu-latest
     permissions:
@@ -327,11 +327,14 @@ jobs:
               '    print("\\n".join(missing))' \
               '    sys.exit(1)' \
               'print("base dependency probe passed")' \
-            | docker run --rm -i "$image" python3 -
+            | docker run --rm -i --entrypoint python3 "$image" -
           }
 
           variant="llama-prebuilt"
           base_tag=""
+          if [ "${{ github.event_name }}" = "push" ]; then
+            base_tag="llama-prebuilt-${{ needs.filter.outputs.sha_short }}"
+          fi
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.base_variant }}" ]; then
             variant="${{ inputs.base_variant }}"
             base_tag="${variant}-${{ needs.filter.outputs.sha_short }}"

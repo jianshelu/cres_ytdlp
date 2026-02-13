@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
+import { headers } from 'next/headers';
 import SearchForm from './components/SearchForm';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +32,83 @@ function safelyEncodeURI(uri: string) {
   return uri.split('/').map((part) => encodeURIComponent(part)).join('/');
 }
 
+function minioBaseUrl(requestBase: string = '') {
+  if (requestBase) return requestBase.replace(/\/+$/, '');
+  const endpointRaw = (process.env.MINIO_ENDPOINT || '').trim();
+  const secureRaw = (process.env.MINIO_SECURE || '').trim().toLowerCase();
+  const secure = secureRaw === '1' || secureRaw === 'true' || secureRaw === 'yes';
+  const scheme = secure ? 'https' : 'http';
+
+  if (!endpointRaw) return `${scheme}://127.0.0.1:9000`;
+  if (endpointRaw.startsWith('http://') || endpointRaw.startsWith('https://')) {
+    return endpointRaw.replace(/\/+$/, '');
+  }
+  return `${scheme}://${endpointRaw.replace(/\/+$/, '')}`;
+}
+
+function normalizeAssetUrl(rawUrl: string, requestBase: string = '') {
+  let raw = (rawUrl || '').trim();
+  if (!raw) return '';
+
+  if (raw.startsWith('http:/') && !raw.startsWith('http://')) {
+    raw = raw.replace('http:/', 'http://');
+  } else if (raw.startsWith('https:/') && !raw.startsWith('https://')) {
+    raw = raw.replace('https:/', 'https://');
+  }
+
+  if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+    return safelyEncodeURI(raw);
+  }
+
+  try {
+    const url = new URL(raw);
+    const host = (url.hostname || '').toLowerCase();
+    if (host === 'cres' || host === 'minio' || host === 'minio-ci') {
+      const base = minioBaseUrl(requestBase);
+      let mappedPath = url.pathname || '';
+      if (host === 'cres' && !mappedPath.startsWith('/cres/')) {
+        mappedPath = `/cres${mappedPath.startsWith('/') ? '' : '/'}${mappedPath}`;
+      }
+      raw = `${base}${mappedPath}`;
+    }
+  } catch {
+    // Keep best-effort URL and continue.
+  }
+
+  try {
+    const url = new URL(raw);
+    const encodedPath = url.pathname
+      .split('/')
+      .map((part) => {
+        if (!part) return part;
+        try {
+          return encodeURIComponent(decodeURIComponent(part));
+        } catch {
+          return encodeURIComponent(part);
+        }
+      })
+      .join('/');
+    url.pathname = encodedPath;
+    return url.toString();
+  } catch {
+    return encodeURI(raw);
+  }
+}
+
 export default async function Home() {
+  const hdrs = await headers();
+  const forwardedProto = (hdrs.get('x-forwarded-proto') || 'http').split(',')[0].trim();
+  const hostHeader = (hdrs.get('x-forwarded-host') || hdrs.get('host') || '').split(',')[0].trim();
+  let requestMinioBase = '';
+  if (hostHeader) {
+    try {
+      const parsedHost = new URL(`http://${hostHeader}`);
+      requestMinioBase = `${forwardedProto || 'http'}://${parsedHost.hostname}:9000`;
+    } catch {
+      requestMinioBase = '';
+    }
+  }
+
   const candidateDataPaths = [
     path.join(process.cwd(), 'src', 'data.json'),
     path.join(process.cwd(), 'web', 'src', 'data.json'),
@@ -126,7 +203,7 @@ export default async function Home() {
                     const video = item.video;
                     const thumbSrc = video.thumb_path
                       ? video.thumb_path.startsWith('http')
-                        ? video.thumb_path
+                        ? normalizeAssetUrl(video.thumb_path, requestMinioBase)
                         : safelyEncodeURI(`/${video.thumb_path.replace('test_downloads/', 'downloads/')}`)
                       : null;
                     return (
@@ -156,3 +233,4 @@ export default async function Home() {
     </main>
   );
 }
+
