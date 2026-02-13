@@ -47,9 +47,9 @@ RUN set -eux; \
     LLAMA_BIN="$(find /opt/llama.cpp/build -type f -name llama-server | head -n 1)"; \
     test -n "${LLAMA_BIN}"; \
     cp -a "${LLAMA_BIN}" /opt/llama-artifacts/llama-server; \
-    find /opt/llama.cpp/build -type f -name 'libllama.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
-    find /opt/llama.cpp/build -type f -name 'libggml*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
-    find /opt/llama.cpp/build -type f -name 'libmtmd*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    find /opt/llama.cpp/build \( -type f -o -type l \) -name 'libllama.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    find /opt/llama.cpp/build \( -type f -o -type l \) -name 'libggml*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    find /opt/llama.cpp/build \( -type f -o -type l \) -name 'libmtmd*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
     strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* /opt/llama-artifacts/libmtmd*.so* || true
 
 # Use explicit Vast.ai CUDA base tag (auto placeholder format is invalid in Docker FROM).

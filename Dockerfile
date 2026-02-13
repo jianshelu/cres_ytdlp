@@ -20,6 +20,7 @@ WORKDIR /workspace
 
 # Project code and root scripts
 COPY . ./
+RUN chmod +x /workspace/onstart.sh /workspace/start_remote.sh /workspace/entrypoint.sh
 
 # Frontend runtime assets
 RUN mkdir -p /workspace/web

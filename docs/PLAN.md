@@ -1,4 +1,39 @@
 # PLAN
+## 2026-02-13 - Harden Vast Startup and llama Runtime Lib Packaging for New Instance Boot
+
+- Objective: prevent compute container boot failure on new Vast instances and eliminate missing `llama-server` shared-lib errors.
+- Root cause:
+  - Vast launch script executes `/workspace/onstart.sh` directly; non-executable mode caused `Permission denied` and blocked supervisor startup.
+  - llama artifacts copy in `Dockerfile.base` previously copied only regular files, so SONAME symlinks (`*.so.0`) and some linked libs could be absent in runtime.
+- Changes:
+  - `Dockerfile`
+    - After `COPY . ./`, added:
+      - `RUN chmod +x /workspace/onstart.sh /workspace/start_remote.sh /workspace/entrypoint.sh`
+    - This makes startup robust even when Vast on-start uses direct script execution.
+  - `Dockerfile.base`
+    - Updated llama artifact copy discovery from `-type f` to `\( -type f -o -type l \)` for:
+      - `libllama.so*`
+      - `libggml*.so*`
+      - `libmtmd*.so*`
+    - This preserves required runtime symlinks used by dynamic loader resolution.
+
+### Validation
+
+- Verify startup script hardening:
+  - `rg --line-number "chmod \\+x /workspace/onstart\\.sh /workspace/start_remote\\.sh /workspace/entrypoint\\.sh" Dockerfile`
+- Verify symlink-aware llama lib packaging:
+  - `rg --line-number "\\( -type f -o -type l \\).*lib(llama|ggml|mtmd)" Dockerfile.base`
+- Post-build instance checks (read-only):
+  - `ls -l /workspace/onstart.sh`
+  - `ldd /app/llama-server | grep -E "not found|libmtmd|libllama|libggml"`
+  - `supervisorctl status`
+
+### Rollback
+
+1. Remove the `chmod +x` line from `Dockerfile`.
+2. Revert the three `find` expressions in `Dockerfile.base` from `\( -type f -o -type l \)` back to `-type f`.
+3. Rebuild and redeploy previous image tags.
+
 ## 2026-02-13 - Keep Compute Env Wrapper Coherent with Docker Base/App Build Triggers
 
 - Objective: ensure new compute env wrapper changes are always reflected in published images and base runtime files.
