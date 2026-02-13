@@ -1,5 +1,5 @@
 ---
-name: docker-build-guarantee
+name: 🐳docker-build-guarantee
 description: Guarantee deterministic Docker build outcomes for this repo by enforcing preflight checks, CI buildx compatibility, llama.cpp CUDA link gates, and disk-safe dependency install policy.
 ---
 
