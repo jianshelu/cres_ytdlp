@@ -1,4 +1,33 @@
 # PLAN
+## 2026-02-13 - Fix build-app Base Tag Bootstrap Failure on Push
+
+- Objective: prevent `build-app` failure when `llama-prebuilt-latest` does not exist yet in GHCR.
+- Root cause:
+  - Push path defaulted app base to `...-base:llama-prebuilt-latest`.
+  - When this tag was missing (first bootstrap / publish lag), app build failed before fallback.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - Updated `Select app base image route`:
+      - resolve candidate base tags by availability using `docker buildx imagetools inspect`.
+      - push + prebuilt route candidate order:
+        1) `llama-prebuilt-latest`
+        2) `latest`
+        3) `llama-src-latest`
+      - manual route still prefers variant-specific `-<sha>` tag first, then falls back.
+    - `APP_BASE_IMAGE` now always uses resolved existing image tag.
+
+### Validation
+
+- Verify fallback resolver exists in app route step:
+  - `rg --line-number "candidates=\\(\\)|imagetools inspect|llama-prebuilt-latest|llama-src-latest|APP_BASE_IMAGE=\\$resolved" .github/workflows/deploy.yml`
+- Re-run push-triggered deploy workflow:
+  - Expected: `build-app` no longer fails with `llama-prebuilt-latest: not found`.
+
+### Rollback
+
+1. Revert resolver block in `Select app base image route`.
+2. Restore previous fixed-tag assignment for `APP_BASE_IMAGE`.
+
 ## 2026-02-13 - Fix Dual-Route Failures (Runner Disk + Missing llama-src-latest)
 
 - Objective: stabilize both routes after observed failures:

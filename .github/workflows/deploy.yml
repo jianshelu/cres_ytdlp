@@ -301,7 +301,7 @@ jobs:
         run: |
           set -euxo pipefail
           variant="llama-prebuilt"
-          base_tag="llama-prebuilt-latest"
+          base_tag=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.base_variant }}" ]; then
             variant="${{ inputs.base_variant }}"
             base_tag="${variant}-${{ needs.filter.outputs.sha_short }}"
@@ -313,8 +313,36 @@ jobs:
               exit 1
               ;;
           esac
-          echo "APP_BASE_IMAGE=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base:${base_tag}" >> "$GITHUB_ENV"
-          echo "Using APP_BASE_IMAGE=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base:${base_tag}"
+
+          repo="${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base"
+          candidates=()
+          if [ -n "$base_tag" ]; then
+            candidates+=("${repo}:${base_tag}")
+          fi
+
+          # Push path defaults to prebuilt, but fallback for first-time bootstrap.
+          if [ "$variant" = "llama-prebuilt" ]; then
+            candidates+=("${repo}:llama-prebuilt-latest" "${repo}:latest" "${repo}:llama-src-latest")
+          else
+            candidates+=("${repo}:llama-src-latest" "${repo}:latest")
+          fi
+
+          resolved=""
+          for image in "${candidates[@]}"; do
+            if docker buildx imagetools inspect "$image" >/dev/null 2>&1; then
+              resolved="$image"
+              break
+            fi
+          done
+
+          if [ -z "$resolved" ]; then
+            echo "No usable base image found. Candidates:"
+            printf ' - %s\n' "${candidates[@]}"
+            exit 1
+          fi
+
+          echo "APP_BASE_IMAGE=$resolved" >> "$GITHUB_ENV"
+          echo "Using APP_BASE_IMAGE=$resolved"
 
       - name: Build App image (smoke, no push)
         uses: docker/build-push-action@v5
