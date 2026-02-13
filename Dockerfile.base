@@ -53,6 +53,8 @@ RUN set -eux; \
 
 # Use explicit Vast.ai CUDA base tag (auto placeholder format is invalid in Docker FROM).
 FROM vastai/base-image:cuda-12.4.1-auto
+ARG TORCH_VERSION=2.6.0+cu124
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 
 WORKDIR /workspace
 
@@ -94,7 +96,10 @@ RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
 COPY requirements.instance.txt /tmp/requirements.instance.txt
 RUN pip3 install --upgrade pip \
  && pip3 install --no-cache-dir -r /tmp/requirements.instance.txt \
- && python3 -c "import torch; print('torch preinstalled:', torch.__version__)" \
+ && if ! python3 -c "import torch" >/dev/null 2>&1; then \
+      pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
+    fi \
+ && python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)" \
  && rm -f /tmp/requirements.instance.txt \
  && rm -rf /root/.cache/pip \
  && (find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true) \
