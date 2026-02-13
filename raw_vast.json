@@ -28,7 +28,7 @@
     "dlperf_per_dphtotal":  null,
     "dph_base":  0.04666666666666667,
     "dph_total":  0.05555555555555556,
-    "driver_version":  "560.35.03",
+    "driver_version":  "570.158.01",
     "duration":  4470426.435553074,
     "end_date":  1774915969.0,
     "external":  false,
@@ -125,8 +125,8 @@
     "mobo_name":  "X99-F8D PLUS",
     "next_state":  "running",
     "num_gpus":  1,
-    "onstart":  "entrypoint.sh",
-    "os_version":  "22.04.4",
+    "onstart":  "bash /workspace/onstart.sh",
+    "os_version":  "22.04.5",
     "pci_gen":  3.0,
     "pcie_bw":  5.5,
     "ports":  {
@@ -202,9 +202,9 @@
                    "gpuCostPerHour":  0.04666666666666667,
                    "totalHour":  0.05555555555555556
                },
-    "ssh_host":  "ssh6.vast.ai",
+    "ssh_host":  "ssh3.vast.ai",
     "ssh_idx":  "3",
-    "ssh_port":  17293,
+    "ssh_port":  15307,
     "start_date":  1770444599.5307949,
     "static_ip":  false,
     "status_msg":  "Cloud copy operation complete",
@@ -224,21 +224,21 @@
                     ],
     "vram_costperhour":  4.5211226851851858E-06,
     "webpage":  null,
-    "spec_checked_at_utc":  "2026-02-08T16:29:33Z",
-    "spec_check_method":  "ssh tunnel and remote command checks via ssh -p 17293 root@ssh6.vast.ai -L 8080:localhost:8080",
+    "spec_checked_at_utc":  "2026-02-13T15:10:51Z",
+    "spec_check_method":  "ssh tunnel and remote command checks via ssh -p 15307 root@ssh3.vast.ai -L 8080:localhost:8080",
     "observed_specs":  {
-                           "hostname":  "90b7fa640f43",
+                           "hostname":  "bd88674f4417",
                            "remote_user":  "root",
-                           "gpu_driver":  "560.35.03",
-                           "cuda_version":  "12.6",
+                           "gpu_driver":  "570.158.01",
+                           "cuda_version":  "12.8",
                            "gpu_ram_mib":  12288,
                            "cpu_cores_total":  56,
-                           "memory_total_mib":  128771,
+                           "memory_total_mib":  64284,
                            "disk_root":  {
                                              "size_gb":  32,
-                                             "used_gb":  12,
-                                             "avail_gb":  21
+                                             "used_gb":  1,
+                                             "avail_gb":  32
                                          },
-                           "os_pretty_name":  "Ubuntu 22.04.4 LTS"
+                           "os_pretty_name":  "Ubuntu 22.04.5 LTS"
                        }
 }
