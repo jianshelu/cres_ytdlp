@@ -1,4 +1,110 @@
 # PLAN
+## 2026-02-13 - Keep Compute Env Wrapper Coherent with Docker Base/App Build Triggers
+
+- Objective: ensure new compute env wrapper changes are always reflected in published images and base runtime files.
+- Root cause:
+  - `scripts/supervisord.conf` now invokes `scripts/with_compute_env.sh`, but base Dockerfiles did not copy that script.
+  - Build workflow path filters did not include `scripts/with_compute_env.sh`, so wrapper-only changes could skip image rebuild.
+- Changes:
+  - `Dockerfile.base`
+    - Copy `scripts/with_compute_env.sh` into `/workspace/scripts/with_compute_env.sh`.
+    - Mark wrapper executable together with `start-llama.sh`.
+  - `Dockerfile.base.prebuilt`
+    - Copy `scripts/with_compute_env.sh` into `/workspace/scripts/with_compute_env.sh`.
+    - Mark wrapper executable together with `start-llama.sh`.
+  - `.github/workflows/deploy.yml`
+    - Added `scripts/with_compute_env.sh` to `on.push.paths`.
+    - Added `scripts/with_compute_env.sh` to base-impact path filter.
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added `scripts/with_compute_env.sh` to base-impact path filter.
+
+### Validation
+
+- Verify wrapper is copied by both base routes:
+  - `rg --line-number "with_compute_env\\.sh" Dockerfile.base Dockerfile.base.prebuilt`
+- Verify deploy workflow trigger/filter include wrapper:
+  - `rg --line-number "scripts/with_compute_env\\.sh" .github/workflows/deploy.yml`
+- Verify CI minimal base-impact filter includes wrapper:
+  - `rg --line-number "scripts/with_compute_env\\.sh" .github/workflows/ci-minimal-image.yml`
+
+### Rollback
+
+1. Revert wrapper copy/chmod lines in `Dockerfile.base` and `Dockerfile.base.prebuilt`.
+2. Remove `scripts/with_compute_env.sh` from workflow path/filter lists.
+3. Re-run workflow and confirm previous trigger behavior is restored.
+
+## 2026-02-13 - Persist GPU Worker Endpoint Defaults and Autostart in Local Codebase
+
+- Objective: remove instance-only drift by persisting the queue-unblock fix into repo-managed runtime config.
+- Root cause:
+  - Runtime recovery on instance used manual worker launch and was not durable across container restarts.
+  - Image runtime uses `scripts/supervisord.conf` (from `Dockerfile.base`), where workers inherited localhost defaults and `worker-gpu` was not autostarted.
+- Changes:
+  - `scripts/with_compute_env.sh` (new)
+    - Added split-host-safe defaults for compute runtime env:
+      - `TEMPORAL_ADDRESS=64.229.113.233:7233`
+      - `MINIO_ENDPOINT=64.229.113.233:9000`
+      - `MINIO_SECURE=false`
+    - Added MinIO/AWS credential alias normalization so worker/activity code sees consistent variables.
+  - `scripts/supervisord.conf`
+    - Updated `fastapi`, `worker-cpu`, and `worker-gpu` commands to execute through `scripts/with_compute_env.sh`.
+    - Enabled `worker-gpu` autostart (`autostart=true`) to avoid `@gpu` queue stall on fresh boot.
+  - `onstart.sh`
+    - Updated stale endpoint defaults (`100.121.250.72`) to current public control-plane defaults (`64.229.113.233`).
+
+### Validation
+
+- Verify config wiring:
+  - `rg --line-number "with_compute_env\\.sh|worker-gpu]|autostart=true|TEMPORAL_ADDRESS|MINIO_ENDPOINT" scripts/supervisord.conf scripts/with_compute_env.sh onstart.sh`
+- Verify shell syntax:
+  - `bash -n scripts/with_compute_env.sh`
+- Verify image build path still uses expected supervisor config:
+  - `rg --line-number "COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf" Dockerfile.base`
+
+### Rollback
+
+1. Revert `scripts/supervisord.conf` commands back to direct `uvicorn` / `python3 -m src.backend.worker` invocation.
+2. Revert `worker-gpu` `autostart=true` to `autostart=false`.
+3. Revert `onstart.sh` endpoint defaults to previous values.
+4. Remove `scripts/with_compute_env.sh`.
+
+## 2026-02-13 - Rotate Vast SSH Endpoint to `ssh3.vast.ai:15307` and Refresh Live Specs
+
+- Objective: align compute-plane SSH access and spec records with the newly running Vast.ai instance.
+- Root cause:
+  - Previous endpoint values (`ssh2.vast.ai:27139`) were no longer reachable.
+  - `raw_vast.json` still reflected older instance metadata (`ssh6.vast.ai:17293`, stale observed specs).
+- Changes:
+  - `.env`
+    - Updated `VAST_HOST` to `ssh3.vast.ai`.
+    - Updated `VAST_PORT` to `15307`.
+  - `.env.example`
+    - Updated `VAST_HOST` to `ssh3.vast.ai`.
+    - Updated `VAST_PORT` to `15307`.
+  - `docs/Perimeter.md`
+    - Updated compute-plane host references from `ssh2.vast.ai` to `ssh3.vast.ai`.
+    - Updated Norfolk tunnel command to:
+      - `ssh -p 15307 root@ssh3.vast.ai -L 8080:localhost:8080`
+  - `raw_vast.json`
+    - Updated SSH endpoint fields (`ssh_host`, `ssh_port`).
+    - Refreshed `spec_checked_at_utc`, `spec_check_method`, and `observed_specs` from live SSH checks.
+
+### Validation
+
+- Verify endpoint rotation in config/docs:
+  - `rg --line-number "VAST_HOST=|VAST_PORT=|ssh3\.vast\.ai|15307" .env .env.example docs/Perimeter.md raw_vast.json`
+- Verify SSH authentication:
+  - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang2vastai -p 15307 root@ssh3.vast.ai "hostname; whoami"`
+- Verify refreshed runtime specs:
+  - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang2vastai -p 15307 root@ssh3.vast.ai "nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader; nproc; free -m | sed -n '2p'; df -BG / | tail -n 1; grep PRETTY_NAME /etc/os-release"`
+
+### Rollback
+
+1. Revert host/port values in `.env` and `.env.example` to the previous endpoint.
+2. Revert compute-plane host and tunnel command lines in `docs/Perimeter.md`.
+3. Restore previous SSH/spec fields in `raw_vast.json`.
+4. Re-run SSH validation against the rolled-back endpoint.
+
 ## 2026-02-13 - Fix build-app Disk Exhaustion in BuildKit Snapshot Stage
 
 - Objective: prevent `build-app` failures like `ResourceExhausted ... /var/lib/buildkit/... no space left on device` during app smoke image build.
