@@ -1,4 +1,254 @@
 # PLAN
+## 2026-02-13 - Split Trigger Policy by Base Route (Prebuilt Auto on Push, Source Compile Manual)
+
+- Objective: enforce mixed trigger policy:
+  - `llama-prebuilt` route: keep auto image build on `push`.
+  - `llama-src` route (compile llama.cpp): manual `workflow_dispatch` only.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - Added `push` trigger for main branch with image-relevant paths.
+    - Restricted `build-base-llama-src` to:
+      - `github.event_name == 'workflow_dispatch'`
+      - `inputs.base_variant == 'llama-src'`
+    - Restricted `build-base-llama-prebuilt` to:
+      - push with base-impacting changes, or
+      - manual run with `base_variant == 'llama-prebuilt'`
+    - `llama-prebuilt` build now imports llama artifacts from:
+      - `...-base:llama-src-latest`
+    - App base selection now routes:
+      - `push` -> `llama-prebuilt-latest`
+      - `workflow_dispatch` -> `llama-src-<sha>` or `llama-prebuilt-<sha>` by input.
+
+### Validation
+
+- Verify triggers:
+  - `rg --line-number "^on:|push:|workflow_dispatch:" .github/workflows/deploy.yml`
+- Verify compile route is manual-only:
+  - `rg --line-number "build-base-llama-src|inputs.base_variant == 'llama-src'|github.event_name == 'workflow_dispatch'" .github/workflows/deploy.yml`
+- Verify prebuilt route supports push:
+  - `rg --line-number "build-base-llama-prebuilt|github.event_name == 'push'|llama-src-latest" .github/workflows/deploy.yml`
+- Verify app route selection:
+  - `rg --line-number "variant=\"llama-prebuilt\"|base_tag=\"llama-prebuilt-latest\"|base_tag=\\\"\\$\\{variant\\}-\\$\\{\\{ needs.filter.outputs.sha_short \\}\\}\\\"" .github/workflows/deploy.yml`
+
+### Rollback
+
+1. Remove `push` trigger block from `.github/workflows/deploy.yml`.
+2. Restore old job conditions where both base routes were manual-only.
+3. Revert app base selection logic to fixed `:llama-src-latest` or previous behavior.
+
+## 2026-02-13 - Make Compiled-Image Build Manual-Only and Disable Push-Triggered Image Builds
+
+- Objective: ensure image build jobs (especially llama.cpp compile route) are manually triggered only, and stop push-triggered image build executions.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Removed `push` trigger.
+    - Removed `pull_request` trigger.
+    - Kept `workflow_dispatch` only.
+  - `.github/workflows/deploy.yml`
+    - No trigger change needed (already `workflow_dispatch` only).
+
+### Validation
+
+- Verify manual-only trigger in CI minimal workflow:
+  - `rg --line-number "^on:|workflow_dispatch:|push:|pull_request:" .github/workflows/ci-minimal-image.yml`
+  - Expected: only `on:` and `workflow_dispatch:` appear.
+- Verify deploy workflow is still manual-only:
+  - `rg --line-number "^on:|workflow_dispatch:|push:|pull_request:" .github/workflows/deploy.yml`
+  - Expected: only `on:` and `workflow_dispatch:` appear.
+
+### Rollback
+
+1. Restore removed `push` and `pull_request` blocks in `.github/workflows/ci-minimal-image.yml`.
+2. Re-run a commit on `main` to confirm automatic workflow triggering resumes.
+
+## 2026-02-13 - Dual Base Build Routes on Vast.ai Base (llama-src vs llama-prebuilt)
+
+- Objective: provide two GHCR base-image routes with explicit tags:
+  - `llama-src-*`: compile `llama.cpp` during build.
+  - `llama-prebuilt-*`: do not compile; reuse llama artifacts from prebuilt image.
+- Changes:
+  - Added `Dockerfile.base.prebuilt`:
+    - `FROM vastai/base-image:cuda-12.4.1-auto` as runtime base.
+    - imports `/app/llama-server` and related libraries from `LLAMA_ARTIFACT_IMAGE`.
+    - keeps runtime dependency installation aligned with `Dockerfile.base`.
+  - Updated `.github/workflows/deploy.yml`:
+    - Added `workflow_dispatch` input `base_variant` (`llama-src` / `llama-prebuilt`).
+    - `build-base-llama-src` publishes:
+      - `-base:llama-src-latest`
+      - `-base:llama-src-<shortsha>`
+      - backward-compatible `-base:latest` and `-base:<shortsha>`
+    - Added `build-base-llama-prebuilt` publishing:
+      - `-base:llama-prebuilt-latest`
+      - `-base:llama-prebuilt-<shortsha>`
+    - App build route now selects base tag via `base_variant`.
+  - Updated `Dockerfile` default base image tag:
+    - `ghcr.io/jianshelu/cres_ytdlp-base:llama-src-latest`
+
+### Validation
+
+- Verify new base Dockerfile exists:
+  - `rg --line-number "Dockerfile.base.prebuilt|LLAMA_ARTIFACT_IMAGE|COPY --from=llama_artifacts /app/" Dockerfile.base.prebuilt`
+- Verify deploy workflow has dual routes and tags:
+  - `rg --line-number "build-base-llama-src|build-base-llama-prebuilt|llama-src-latest|llama-prebuilt-latest|base_variant" .github/workflows/deploy.yml`
+- Verify app build uses selected base image:
+  - `rg --line-number "APP_BASE_IMAGE|BASE_IMAGE=\\$\\{\\{ env.APP_BASE_IMAGE \\}\\}" .github/workflows/deploy.yml`
+  - `rg --line-number "^ARG BASE_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:llama-src-latest" Dockerfile`
+
+### Rollback
+
+1. Remove `Dockerfile.base.prebuilt`.
+2. Revert `.github/workflows/deploy.yml` to single `build-base` job and fixed `-base:latest` app base arg.
+3. Revert `Dockerfile` base default tag to previous `-base:latest`.
+
+## 2026-02-13 - Correct Torch Availability Assumption and Install from PyTorch cu124 Index
+
+- Objective: fix base-image build failure where `python3 -c "import torch"` fails because `torch` is not present in runtime Python environment.
+- Root cause:
+  - `requirements.instance.txt` removed `torch` under the assumption that `vastai/base-image:cuda-12.4.1-auto` preinstalls it for `python3`.
+  - In CI build context, `python3` environment used by `pip3` does not contain `torch`, causing hard failure at validation line.
+- Changes:
+  - `Dockerfile.base`
+    - Added torch install args:
+      - `TORCH_VERSION=2.6.0+cu124`
+      - `TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124`
+    - Updated Python dependency layer:
+      - keep `pip3 install -r /tmp/requirements.instance.txt`
+      - if `torch` import fails, install `torch==2.6.0+cu124` from PyTorch cu124 index
+      - keep final `python3` import validation with version/cuda print.
+  - `requirements.instance.txt`
+    - Updated comment to reflect Dockerfile-managed torch install strategy.
+
+### Validation
+
+- Verify Dockerfile fallback install logic:
+  - `rg --line-number "TORCH_VERSION|TORCH_INDEX_URL|if ! python3 -c \"import torch\"|torch==\\$\\{TORCH_VERSION\\}" Dockerfile.base`
+- Verify requirements note:
+  - `rg --line-number "torch is installed in Dockerfile.base|PyTorch cu124 index" requirements.instance.txt`
+- Re-run base build:
+  - `docker build --progress=plain -f Dockerfile.base .`
+  - Expected:
+    - no `ModuleNotFoundError: No module named 'torch'`
+    - log contains `torch available: ... cuda: ...`
+
+### Rollback
+
+1. Remove `TORCH_VERSION` and `TORCH_INDEX_URL` args in `Dockerfile.base`.
+2. Remove the conditional torch install block and restore previous validation flow.
+3. Revert comments in `requirements.instance.txt` to previous wording.
+
+## 2026-02-12 - Prevent Disk Exhaustion During Python Dependency Layer
+
+- Objective: avoid `No space left on device` during base-image `pip install` while preserving GPU runtime compatibility.
+- Root cause:
+  - `requirements.instance.txt` attempted to install `torch`, triggering large CUDA dependency wheel downloads (e.g. `nvidia_cudnn_cu12` ~700MB) on top of existing build layers.
+  - CI runner disk could exhaust in this layer before install completed.
+- Changes:
+  - `requirements.instance.txt`
+    - Removed direct `torch` install line.
+    - Added note that `torch` is expected from `vastai/base-image:cuda-12.4.1-auto`.
+  - `Dockerfile.base`
+    - Added explicit runtime validation after pip dependencies:
+      - `python3 -c "import torch; ..."`
+    - Build now fails fast if base image unexpectedly lacks `torch`, without downloading huge wheel stacks.
+
+### Validation
+
+- Verify `torch` is no longer in requirements:
+  - `rg --line-number "^torch|torch is expected to be preinstalled" requirements.instance.txt`
+- Verify Dockerfile checks torch availability:
+  - `rg --line-number "import torch; print\\('torch preinstalled:'" Dockerfile.base`
+- Re-run base build:
+  - `docker build --progress=plain -f Dockerfile.base .`
+  - Expected:
+    - No large `nvidia_cudnn_cu12` wheel download in pip step.
+    - `torch preinstalled: <version>` output appears.
+
+### Rollback
+
+1. Restore `torch` line in `requirements.instance.txt`.
+2. Remove the `python3 -c "import torch; ..."` validation line from `Dockerfile.base`.
+3. Re-run build and confirm old behavior.
+
+## 2026-02-12 - Fix Non-Interactive Supervisor Install in Dockerfile.base
+
+- Objective: prevent CI/docker build failure caused by interactive `dpkg` conffile prompt when installing `supervisor`.
+- Root cause:
+  - `vastai/base-image:cuda-12.4.1-auto` may already include `/etc/supervisor/supervisord.conf`.
+  - `apt-get install supervisor` prompted for conffile conflict resolution; CI has no stdin, so `dpkg` exited with code `1`.
+- Changes:
+  - `Dockerfile.base`
+    - Updated system dependency install step to force non-interactive conffile behavior:
+      - `DEBIAN_FRONTEND=noninteractive`
+      - `-o Dpkg::Options::="--force-confdef"`
+      - `-o Dpkg::Options::="--force-confold"`
+- Validation:
+  - `rg --line-number "DEBIAN_FRONTEND=noninteractive|force-confdef|force-confold|supervisor" Dockerfile.base`
+  - Re-run base build and confirm no prompt:
+    - `docker build --progress=plain -f Dockerfile.base .`
+- Rollback:
+1. Revert the `DEBIAN_FRONTEND` and `Dpkg::Options` additions in `Dockerfile.base`.
+2. Re-run build to confirm previous prompt behavior returns.
+
+## 2026-02-12 - Fix CUDA Driver Stub Link for llama.cpp Build
+
+- Objective: resolve `libcuda.so.1 not found` and `undefined reference to cuMem*` linker failures in `Dockerfile.base` llama.cpp build stage.
+- Root cause:
+  - CUDA driver API symbols are provided by `libcuda.so.1` (driver/runtime side), but CI build environment only has CUDA toolkit stubs.
+  - Linker did not consistently resolve stub path during server/tool linking.
+- Changes:
+  - `Dockerfile.base`
+    - Added CUDA stub prep before CMake configure:
+      - ensure stub symlink `libcuda.so.1 -> libcuda.so` in known stub directories.
+      - export `LIBRARY_PATH` and `LD_LIBRARY_PATH` with stub directories.
+    - Added CMake linker flags:
+      - `-DCMAKE_EXE_LINKER_FLAGS="${CUDA_STUB_FLAGS}"`
+      - `-DCMAKE_SHARED_LINKER_FLAGS="${CUDA_STUB_FLAGS}"`
+      - where `CUDA_STUB_FLAGS` includes `-Wl,-rpath-link,<stub_dir>` for discovered stub dirs.
+
+### Validation
+
+- Verify stub-link setup exists:
+  - `rg --line-number "CUDA_STUB_FLAGS|libcuda\\.so\\.1|LIBRARY_PATH|CMAKE_EXE_LINKER_FLAGS|CMAKE_SHARED_LINKER_FLAGS" Dockerfile.base`
+- Re-run base build:
+  - `docker build --progress=plain -f Dockerfile.base .`
+  - Expected: no linker errors for `libggml-cuda.so` unresolved `cuMem*`/`cuDevice*`.
+
+### Rollback
+
+1. Remove stub-symlink/linker-flag block from `Dockerfile.base`.
+2. Revert CMake flag additions for `CMAKE_EXE_LINKER_FLAGS` and `CMAKE_SHARED_LINKER_FLAGS`.
+3. Re-run build and confirm behavior returns to previous baseline.
+
+## 2026-02-12 - Harden llama.cpp Build Step for CI Target Drift
+
+- Objective: reduce `Dockerfile.base` build failures in `llama.cpp` compile stage (`exit code 2`) when upstream target layout changes.
+- Root cause:
+  - Build step relied on a single target command (`--target llama-server`) and fixed artifact paths under `build/bin`.
+  - If upstream CMake target/path behavior changes, the step can fail even when source and toolchain are otherwise healthy.
+- Changes:
+  - `Dockerfile.base`
+    - Changed `LLAMA_CPP_REF` default to empty so clone uses upstream default branch unless explicitly pinned.
+    - Added fallback logic:
+      - first try `cmake --build ... --target llama-server`
+      - if that fails, retry with full `cmake --build ...` to tolerate target-name drift.
+    - Switched artifact collection to dynamic discovery:
+      - find `llama-server` binary in `build/`
+      - find/copy `libllama.so*` and `libggml*.so*` wherever generated.
+
+### Validation
+
+- Verify fallback logic exists:
+  - `rg --line-number "llama-server target build failed, retrying with full build|--target llama-server|cmake --build build --config Release -j" Dockerfile.base`
+- Verify dynamic artifact copy exists:
+  - `rg --line-number "find /opt/llama.cpp/build -type f -name llama-server|find /opt/llama.cpp/build -type f -name 'libllama.so\\*'|find /opt/llama.cpp/build -type f -name 'libggml\\*.so\\*'" Dockerfile.base`
+- Re-run CI base build:
+  - expected: no immediate failure at `Dockerfile.base` line 16 due target/path mismatch.
+
+### Rollback
+
+1. Revert `Dockerfile.base` build step to single target build and fixed `build/bin` copy paths.
+2. Re-run CI and confirm previous behavior.
+
 ## 2026-02-12 - Fix Invalid Vast.ai Base Image Reference Format
 
 - Objective: make base image build parse correctly by replacing invalid `FROM` reference with a valid, pullable Vast.ai CUDA tag.
@@ -29,9 +279,11 @@
 
 ## 2026-02-12 - Source-of-Truth Order Alignment (AGENTS.md)
 
-- Objective: align planning and task governance with `AGENTS.md` `Where the truth lives`.
+- Objective: align planning and task governance with `AGENTS.md` `Where the truth lives vividly`.
 - Root cause:
-  - `AGENTS.md` introduced explicit source precedence, but `docs/PLAN.md` and `docs/Task.md` did not yet record this update as tracked project state.
+  - `AGENTS.md` introduced explicit source precedence and later renamed the section to `Where the truth lives vividly`.
+  - `docs/PLAN.md` and `docs/Task.md` needed wording alignment plus explicit vivid marker examples for human-computer interaction.
+  - `AGENTS.md` now explicitly requires `PLAN.md` and `Task.md` to conform to the vivid formatting standard and be updated when inconsistent.
 - Changes:
   - `docs/PLAN.md`
     - Added this governance entry to formalize source precedence:
@@ -39,20 +291,29 @@
       - `docs/PLAN.md` (current status)
       - `docs/Task.md` (task execution list)
       - `docs/DECISIONS.md` (optional tradeoffs)
+    - Preserved existing source-of-truth hierarchy content while aligning wording to `Where the truth lives vividly`.
+    - Added `Where the truth lives vividly` formatting note for updates:
+      - `&#128994;&#128736; Skills` -> `.agents/skills/cres-triage/SKILL.md` (Rule Source)
+      - `&#128309;&#128214; Plan` -> `docs/PLAN.md` (Live Progress)
+      - `&#128992;&#128450; Task List` -> `docs/Task.md` (Actionable Items)
+      - `&#128995;&#9888; Decisions` -> `docs/DECISIONS.md` (Tradeoff Records)
+      - use color+emoji markers in update summaries (`&#128309;` files, `&#128994;` validation, `&#128992;` rollback).
+      - keep vivid content scoped to human-computer interaction documentation only.
+      - keep `PLAN.md` and `Task.md` formatting consistent with the vivid standard and update mismatches.
   - `docs/Task.md`
-    - Updated today's `Docs & Ops` tasks to mark the source-of-truth alignment work complete.
+    - Updated today's `Docs & Ops` tasks to mark source-of-truth, vivid-format conformance, and consistency checks complete.
 
 ### Validation
 
 - Verify `PLAN.md` contains this alignment entry:
-  - `rg --line-number "Source-of-Truth Order Alignment|Where the truth lives|cres-triage/SKILL\\.md|docs/Task\\.md|docs/DECISIONS\\.md" docs/PLAN.md`
+  - `rg --line-number "Source-of-Truth Order Alignment|Where the truth lives vividly|vivid formatting standard|updated when inconsistent|cres-triage/SKILL\.md|docs/Task\.md|docs/DECISIONS\.md|Rule Source|Live Progress|Actionable Items|Tradeoff Records" docs/PLAN.md`
 - Verify `Task.md` includes today's completed alignment tasks:
-  - `rg --line-number "Document source-of-truth precedence|Update daily task tracking source references" docs/Task.md`
+  - `rg --line-number "Where the truth lives vividly|Update daily task tracking source references|vivid color\\+emoji interaction requirement|vivid formatting standard" docs/Task.md`
 
 ### Rollback
 
 1. Remove this `Source-of-Truth Order Alignment (AGENTS.md)` section from `docs/PLAN.md`.
-2. Remove the two alignment task lines from `docs/Task.md` under `2026-02-12 (Thursday) -> Docs & Ops`.
+2. Remove the four alignment task lines from `docs/Task.md` under `2026-02-12 (Thursday) -> Docs & Ops`.
 3. Re-run the validation `rg` commands and confirm no alignment-entry matches remain.
 
 ## 2026-02-12 - CI Prebuilt Base Dependency Probe Before Reuse
@@ -716,6 +977,7 @@
 4. Re-run launchers:
    - `C:\Users\rama\start_web_huihuang.ps1`
    - `C:\Users\rama\run_fastapi_norfolk.cmd`
+
 
 
 
