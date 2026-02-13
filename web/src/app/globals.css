@@ -53,6 +53,226 @@ a {
   font-size: 1.1rem;
 }
 
+.home-nav-links {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.home-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #dbeafe;
+  padding: 0.48rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.home-nav-link:hover {
+  background: rgba(59, 130, 246, 0.26);
+  border-color: rgba(96, 165, 250, 0.75);
+  transform: translateY(-1px);
+}
+
+/* Audio Page */
+.audio-page {
+  max-width: 1400px;
+}
+
+.audio-back-link {
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.audio-header {
+  margin-bottom: 1.6rem;
+}
+
+.audio-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.45rem;
+  color: var(--foreground);
+}
+
+.audio-header p {
+  color: var(--muted);
+  max-width: 780px;
+}
+
+.audio-controls {
+  margin-bottom: 0.9rem;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 220px;
+  gap: 0.7rem;
+}
+
+.audio-search-input,
+.audio-query-select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--foreground);
+  padding: 0.58rem 0.72rem;
+  font-size: 0.9rem;
+}
+
+.audio-query-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.audio-query-chip {
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.audio-query-chip.active,
+.audio-query-chip:hover {
+  border-color: rgba(59, 130, 246, 0.55);
+  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.14);
+}
+
+.audio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.audio-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  padding: 0.85rem;
+}
+
+.audio-thumb-wrap {
+  width: 100%;
+}
+
+.audio-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: #000;
+}
+
+.audio-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.audio-meta h2 {
+  font-size: 1rem;
+  line-height: 1.42;
+  margin-bottom: 0.45rem;
+  color: var(--foreground);
+}
+
+.audio-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.audio-query-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.14);
+  color: #bfdbfe;
+  font-weight: 700;
+  padding: 0.14rem 0.54rem;
+}
+
+.audio-summary {
+  color: var(--foreground);
+  font-size: 0.84rem;
+  line-height: 1.52;
+  margin-bottom: 0.7rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.audio-player-wrap audio {
+  width: 100%;
+}
+
+.audio-source-note {
+  margin-top: 0.28rem;
+  color: #cbd5e1;
+  font-size: 0.75rem;
+}
+
+.audio-fallback {
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.audio-fallback a {
+  color: #93c5fd;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.audio-links {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.audio-links a {
+  color: #93c5fd;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.audio-empty-state {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 1.8rem;
+  text-align: center;
+  color: var(--muted);
+}
+
 /* Home Waterfall Marquee */
 .waterfall-marquee {
   display: flex;
@@ -244,6 +464,10 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .audio-grid {
+    grid-template-columns: 1fr;
+  }
+
   .marquee-card {
     width: 220px;
     min-width: 220px;
@@ -252,6 +476,14 @@ a {
 
 @media (max-width: 700px) {
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .audio-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .audio-card {
     grid-template-columns: 1fr;
   }
 

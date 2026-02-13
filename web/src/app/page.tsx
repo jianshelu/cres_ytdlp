@@ -150,6 +150,11 @@ export default async function Home() {
       <header className="header">
         <h1>Video Review</h1>
         <p>Browse and review your downloaded videos and transcriptions.</p>
+        <div className="home-nav-links">
+          <Link href="/audio" className="home-nav-link">
+            Open Audio Browser
+          </Link>
+        </div>
       </header>
 
       <section
