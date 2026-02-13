@@ -1,4 +1,38 @@
 # PLAN
+## 2026-02-13 - Align CI Minimal GHCR Base Selection with Prebuilt Tags
+
+- Objective: reduce unnecessary local base rebuilds in `CI Minimal Image Boot` and harden GHCR build-cache compatibility in deploy jobs.
+- Root cause:
+  - CI minimal flow probed only `ghcr.io/<repo>-base:latest`, while push-path base publishing now centers on `llama-prebuilt-*` tags.
+  - Deploy jobs using `type=gha` cache depended on implicit Buildx driver defaults instead of explicit driver selection.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Updated `Resolve base image strategy` to evaluate prebuilt candidates in order:
+      - `llama-prebuilt-latest`
+      - `latest`
+      - `llama-src-latest`
+    - Candidate is accepted only when pull + dependency probe pass; otherwise falls back to local base build.
+  - `.github/workflows/deploy.yml`
+    - Added explicit Buildx driver in GHCR jobs:
+      - `driver: docker-container`
+    - Kept `driver-opts: network=host` unchanged.
+
+### Validation
+
+- Verify CI minimal candidate order and fallback:
+  - `rg --line-number "PREBUILT_CANDIDATES|llama-prebuilt-latest|llama-src-latest|No usable prebuilt GHCR base image found" .github/workflows/ci-minimal-image.yml`
+- Verify deploy Buildx driver explicitness:
+  - `rg --line-number "Set up Docker Buildx|driver: docker-container|driver-opts: network=host" .github/workflows/deploy.yml`
+- Re-run workflows:
+  - `CI Minimal Image Boot`
+  - `Build and Push to GHCR`
+
+### Rollback
+
+1. In `.github/workflows/ci-minimal-image.yml`, revert prebuilt candidate loop to single-image probe (`...-base:latest`).
+2. In `.github/workflows/deploy.yml`, remove `driver: docker-container` lines from Buildx setup steps.
+3. Re-run both workflows and confirm behavior matches previous baseline.
+
 ## 2026-02-13 - Reduce build-app Disk Pressure on Runner
 
 - Objective: avoid `No space left on device` failures during `build-app` on self-hosted runner.

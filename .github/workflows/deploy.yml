@@ -111,6 +111,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          driver: docker-container
           driver-opts: network=host # Faster builds
 
       - name: Log in to GHCR (secure OIDC auth)
@@ -191,6 +192,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          driver: docker-container
           driver-opts: network=host
 
       - name: Log in to GHCR
@@ -296,6 +298,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          driver: docker-container
           driver-opts: network=host
 
       - name: Log in to GHCR

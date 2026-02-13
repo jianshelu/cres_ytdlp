@@ -1,5 +1,12 @@
 # Tasks
 
+## 2026-02-13 (Friday)
+### Docs & Ops (Runbook / Validation / Architecture)
+- [x] Fix `CI Minimal Image Boot` prebuilt-base resolution to prefer `llama-prebuilt-latest` and fall back through valid GHCR tags before local build.
+- [x] Configure explicit Buildx `driver: docker-container` in GHCR deploy workflow jobs that use `type=gha` cache.
+- [x] Document GHCR base-selection and Buildx-driver hardening with validation/rollback steps in `docs/PLAN.md`.
+- [ ] Verify `CI Minimal Image Boot` and `Build and Push to GHCR` pass after GHCR base-selection and Buildx-driver updates.
+
 ## 2026-02-12 (Thursday)
 ### Control Plane (Temporal / MinIO / Web / Control API)
 - [ ] Implement `web/src/app/audio/page.tsx` to add `/audio` route with server-side data loading from existing `data.json` source.
