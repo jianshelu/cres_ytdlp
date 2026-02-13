@@ -1,4 +1,32 @@
 # PLAN
+## 2026-02-13 - Reject Stale Base Tags Missing Runtime Dependencies in build-app
+
+- Objective: prevent app smoke failures caused by selecting an existing but stale base image tag lacking Python runtime deps.
+- Root cause:
+  - `build-app` base selection previously checked only tag existence.
+  - Fallback could pick `...-base:latest` even when it lacked required deps (`fastapi`, `uvicorn`, `httpx`, `temporalio`, `minio`, `yt_dlp`, `faster_whisper`, `torch`).
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - In `Select app base image route`, added `verify_base_runtime_deps()` probe using containerized Python imports.
+    - Candidate base image is accepted only when:
+      - metadata exists (`imagetools inspect`) and
+      - dependency probe passes.
+    - Keeps previous candidate fallback order but blocks stale images from being selected.
+
+### Validation
+
+- Verify probe function and gating logic exist:
+  - `rg --line-number "verify_base_runtime_deps|base dependency probe failed|imagetools inspect .*verify_base_runtime_deps|fastapi|torch" .github/workflows/deploy.yml`
+- Re-run push-triggered deploy workflow:
+  - Expected:
+    - `build-app` does not select base tags with missing imports.
+    - `container_smoke.sh` import check no longer fails for missing core modules.
+
+### Rollback
+
+1. Remove `verify_base_runtime_deps()` from `Select app base image route`.
+2. Restore existence-only selection condition in candidate loop.
+
 ## 2026-02-13 - Fix build-app Base Tag Bootstrap Failure on Push
 
 - Objective: prevent `build-app` failure when `llama-prebuilt-latest` does not exist yet in GHCR.

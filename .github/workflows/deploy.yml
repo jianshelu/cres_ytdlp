@@ -300,6 +300,36 @@ jobs:
       - name: Select app base image route
         run: |
           set -euxo pipefail
+          verify_base_runtime_deps() {
+            local image="$1"
+            printf '%s\n' \
+              'import importlib' \
+              'import sys' \
+              '' \
+              'mods = [' \
+              '    "fastapi",' \
+              '    "uvicorn",' \
+              '    "httpx",' \
+              '    "temporalio",' \
+              '    "minio",' \
+              '    "yt_dlp",' \
+              '    "faster_whisper",' \
+              '    "torch",' \
+              ']' \
+              'missing = []' \
+              'for m in mods:' \
+              '    try:' \
+              '        importlib.import_module(m)' \
+              '    except Exception as e:' \
+              '        missing.append(f"{m}: {e}")' \
+              'if missing:' \
+              '    print("base dependency probe failed:")' \
+              '    print("\\n".join(missing))' \
+              '    sys.exit(1)' \
+              'print("base dependency probe passed")' \
+            | docker run --rm -i "$image" python3 -
+          }
+
           variant="llama-prebuilt"
           base_tag=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.base_variant }}" ]; then
@@ -329,7 +359,7 @@ jobs:
 
           resolved=""
           for image in "${candidates[@]}"; do
-            if docker buildx imagetools inspect "$image" >/dev/null 2>&1; then
+            if docker buildx imagetools inspect "$image" >/dev/null 2>&1 && verify_base_runtime_deps "$image"; then
               resolved="$image"
               break
             fi
