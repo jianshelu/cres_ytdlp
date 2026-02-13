@@ -47,6 +47,7 @@ class MinioTranscriptionsCache:
 
         self.bucket = os.getenv("MINIO_CACHE_BUCKET", "cres")
         self.prefix = os.getenv("MINIO_CACHE_PREFIX", "cache/transcriptions")
+        self.version = os.getenv("TRANSCRIPTIONS_CACHE_SCHEMA_VERSION", "v3")
 
         self.client = Minio(
             endpoint,
@@ -61,7 +62,7 @@ class MinioTranscriptionsCache:
 
     def _build_key(self, query: str, limit: int, source_hash: str) -> str:
         norm_q = _normalize_query(query)
-        return f"{self.prefix}/v2/{norm_q}/limit-{limit}/{source_hash}.json"
+        return f"{self.prefix}/{self.version}/{norm_q}/limit-{limit}/{source_hash}.json"
 
     def get(self, query: str, limit: int, source_hash: str) -> Optional[Dict[str, Any]]:
         key = self._build_key(query, limit, source_hash)

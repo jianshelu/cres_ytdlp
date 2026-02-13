@@ -17,6 +17,7 @@ from typing import List, Optional, Literal
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 from pathlib import Path
+from urllib.parse import urlparse
 from minio.error import S3Error
 
 from src.backend.services.llm_llamacpp import LlamaCppClient
@@ -42,10 +43,12 @@ TRANSCRIPT_FETCH_TIMEOUT_SECONDS = float(os.getenv("TRANSCRIPT_FETCH_TIMEOUT_SEC
 TRANSCRIPT_FETCH_CONCURRENCY = max(1, int(os.getenv("TRANSCRIPT_FETCH_CONCURRENCY", "12")))
 TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS = max(0, int(os.getenv("TRANSCRIPTIONS_MEMORY_CACHE_TTL_SECONDS", "600")))
 TRANSCRIPTIONS_MEMORY_CACHE_MAX_ITEMS = max(1, int(os.getenv("TRANSCRIPTIONS_MEMORY_CACHE_MAX_ITEMS", "128")))
+TRANSCRIPTIONS_CACHE_SCHEMA_VERSION = os.getenv("TRANSCRIPTIONS_CACHE_SCHEMA_VERSION", "v3")
 
 _memory_cache_lock = asyncio.Lock()
 _memory_cache: OrderedDict[str, dict] = OrderedDict()
 _memory_cache_expiry: dict[str, float] = {}
+_dotenv_cache: dict[str, str] | None = None
 
 # Models
 class VideoTranscription(BaseModel):
@@ -101,18 +104,22 @@ async def fetch_transcript(json_path: str, http_client: Optional[httpx.AsyncClie
         return None
     
     try:
-        # Handle MinIO URLs (http://...)
+        # Handle MinIO URLs (http://...) with legacy/alias normalization.
         if json_path.startswith('http'):
-            if http_client is not None:
-                response = await http_client.get(json_path)
-                response.raise_for_status()
-                data = response.json()
-                return data.get('text', '')
-            async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS) as client:
-                response = await client.get(json_path)
-                response.raise_for_status()
-                data = response.json()
-                return data.get('text', '')
+            for candidate in _candidate_http_transcript_urls(json_path):
+                try:
+                    if http_client is not None:
+                        response = await http_client.get(candidate)
+                        response.raise_for_status()
+                        data = response.json()
+                        return data.get('text', '')
+                    async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS) as client:
+                        response = await client.get(candidate)
+                        response.raise_for_status()
+                        data = response.json()
+                        return data.get('text', '')
+                except Exception:
+                    continue
         
         # Handle local files
         json_path = json_path.replace('test_downloads/', 'downloads/')
@@ -140,26 +147,27 @@ async def fetch_transcript_payload(
         return {"text": "", "keywords": [], "segments": []}
 
     try:
-        # Handle MinIO/public HTTP URLs
+        # Handle MinIO/public HTTP URLs with legacy/alias normalization.
         if json_path.startswith("http"):
-            if http_client is not None:
-                response = await http_client.get(json_path)
-                response.raise_for_status()
-                data = response.json()
-                return {
-                    "text": data.get("text", "") or "",
-                    "keywords": data.get("keywords", []) or [],
-                    "segments": data.get("segments", []) or [],
-                }
-            async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS) as client:
-                response = await client.get(json_path)
-                response.raise_for_status()
-                data = response.json()
-                return {
-                    "text": data.get("text", "") or "",
-                    "keywords": data.get("keywords", []) or [],
-                    "segments": data.get("segments", []) or [],
-                }
+            last_error: Exception | None = None
+            for candidate in _candidate_http_transcript_urls(json_path):
+                try:
+                    if http_client is not None:
+                        response = await http_client.get(candidate)
+                    else:
+                        async with httpx.AsyncClient(timeout=TRANSCRIPT_FETCH_TIMEOUT_SECONDS) as client:
+                            response = await client.get(candidate)
+                    response.raise_for_status()
+                    data = response.json()
+                    return {
+                        "text": data.get("text", "") or "",
+                        "keywords": data.get("keywords", []) or [],
+                        "segments": data.get("segments", []) or [],
+                    }
+                except Exception as e:
+                    last_error = e
+            if last_error is not None:
+                raise last_error
 
         # Handle local files
         json_path = json_path.replace('test_downloads/', 'downloads/')
@@ -178,6 +186,88 @@ async def fetch_transcript_payload(
     except Exception as e:
         logger.error(f"Failed to fetch transcript payload from {json_path}: {e}")
         return {"text": "", "keywords": [], "segments": []}
+
+
+def _minio_base_url() -> str:
+    endpoint = (os.getenv("MINIO_ENDPOINT", "") or "").strip()
+    if not endpoint:
+        endpoint = _get_dotenv_value("MINIO_ENDPOINT")
+
+    secure_raw = (os.getenv("MINIO_SECURE", "") or "").strip()
+    if not secure_raw:
+        secure_raw = _get_dotenv_value("MINIO_SECURE")
+    secure = (secure_raw or "false").lower() in {"1", "true", "yes"}
+
+    if endpoint.startswith("http://") or endpoint.startswith("https://"):
+        return endpoint.rstrip("/")
+    if not endpoint:
+        endpoint = "localhost:9000"
+    scheme = "https" if secure else "http"
+    return f"{scheme}://{endpoint.rstrip('/')}"
+
+
+def _get_dotenv_value(key: str) -> str:
+    global _dotenv_cache
+    if _dotenv_cache is None:
+        _dotenv_cache = {}
+        env_path = Path(__file__).resolve().parents[3] / ".env"
+        if env_path.exists():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    text = line.strip()
+                    if not text or text.startswith("#") or "=" not in text:
+                        continue
+                    k, v = text.split("=", 1)
+                    k = k.strip().lstrip("\ufeff")
+                    _dotenv_cache[k] = v.strip().strip("'\"")
+            except Exception:
+                # Dotenv is a convenience fallback only.
+                _dotenv_cache = {}
+    return (_dotenv_cache or {}).get(key, "")
+
+
+def _candidate_http_transcript_urls(raw_path: str) -> List[str]:
+    raw = (raw_path or "").strip()
+    if not raw:
+        return []
+
+    # Recover malformed single-slash schemes like `http:/cres/...`.
+    if raw.startswith("http:/") and not raw.startswith("http://"):
+        raw = raw.replace("http:/", "http://", 1)
+    if raw.startswith("https:/") and not raw.startswith("https://"):
+        raw = raw.replace("https:/", "https://", 1)
+
+    candidates: List[str] = []
+
+    def add(url: str) -> None:
+        url = (url or "").strip()
+        if url and url not in candidates:
+            candidates.append(url)
+
+    add(raw)
+
+    parsed = urlparse(raw)
+    if parsed.scheme not in {"http", "https"}:
+        return candidates
+
+    host = (parsed.netloc or "").strip().lower()
+    path = parsed.path or ""
+    minio_base = _minio_base_url()
+
+    # Alias host used by data snapshots; map to runtime MINIO endpoint.
+    if host == "cres" and path:
+        if path.startswith("/cres/"):
+            add(f"{minio_base}{path}")
+        else:
+            add(f"{minio_base}/cres{path if path.startswith('/') else '/' + path}")
+    elif host in {"minio", "minio-ci"} and path:
+        add(f"{minio_base}{path}")
+
+    # Malformed URLs may parse with empty host but bucket path preserved.
+    if not host and path.startswith("/cres/"):
+        add(f"{minio_base}{path}")
+
+    return candidates
 
 
 def _query_slug(query: str) -> str:
@@ -313,7 +403,7 @@ def _load_batch_combined_output(query: str) -> Optional[dict]:
 
 
 def _memory_cache_key(query: str, limit: int, source_hash: str) -> str:
-    return f"{query.strip().lower()}|{limit}|{source_hash}"
+    return f"{TRANSCRIPTIONS_CACHE_SCHEMA_VERSION}|{query.strip().lower()}|{limit}|{source_hash}"
 
 
 async def _memory_cache_get(key: str) -> Optional[dict]:

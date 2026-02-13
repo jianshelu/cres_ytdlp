@@ -39,11 +39,59 @@ Rules:
 - All GPU management operations originate from huihuang.
 
 
-## Where the truth lives
+## Where the truth lives vividly
 - Skills: `.agents/skills/cres-triage/SKILL.md` (authoritative)
 - Plan: `docs/PLAN.md` (current status)
 - Task List: `docs/Task.md`
 - Decisions: `docs/DECISIONS.md` (tradeoffs; optional)
+- Vivid content with with colors and emojis, for example:
+   - 📋 Plan: `docs/PLAN.md` (current status) <span style="color:#3498db">🔄 Live Progress</span>
+   - 📌 Task List: `docs/Task.md` <span style="color:#f39c12">🎯 Actionable Items</span>
+   - ⚖️ Decisions: `docs/DECISIONS.md` (tradeoffs; optional) <span style="color:#9b59b6">📝 Tradeoff Records</span>
+   - Vivid contents only for human-computer interaction documentation.
+- `PLAN.md` and `Task.md` must conform to the vivid formatting standard.
+- If formatting is inconsistent, update the file.
+
+## Skill Roadmap (Domain-Based)
+
+This repository progressively builds domain skills through iterative chat-driven refinement.
+Domains:
+
+1) `frontend`  — UI and web integration  
+2) `backend`   — APIs, workflows, control-plane services  
+3) `compute`   — GPU runtime, llama.cpp, Whisper, performance/resource constraints  
+4) `cres`      — Project brainstorm, architecture options, roadmap planning  
+
+### Domain Skill Usage Rule
+
+When handling a task, select and apply the relevant domain skill:
+
+- Frontend-related tasks → apply `$frontend`
+- Backend-related tasks  → apply `$backend`
+- Compute-related tasks  → apply `$compute`
+- Brainstorm/roadmap tasks → apply `$cres`
+
+Always apply `$cres-triage` first for architecture constraints and hard limits.
+
+If a required domain skill does not exist, create it under: `.agents/skills/DOMAIN/SKILL.md`, using the exact domain names above.
+
+### Skill Generation Rule
+
+When creating or expanding a domain skill:
+
+- Keep `SKILL.md` compact and constraint-first.
+- Place extended procedures and troubleshooting in `REFERENCE.md` within the same skill folder.
+- Do not duplicate `$cres-triage` constraints.
+- Add only stable, reusable rules.
+- Do not record one-off chat artifacts as permanent constraints.
+
+Planned paths:
+
+- `.agents/skills/frontend/SKILL.md`
+- `.agents/skills/backend/SKILL.md`
+- `.agents/skills/compute/SKILL.md`
+- `.agents/skills/cres/SKILL.md`
+
 
 ## Output expectations
 When proposing changes:
@@ -51,4 +99,3 @@ When proposing changes:
 - Provide validation steps
 - Provide rollback steps
 - Update `docs/PLAN.md` when changes affect architecture/ops
-- Vivid outputs with emojis.

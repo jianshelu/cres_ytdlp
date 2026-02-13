@@ -12,8 +12,10 @@
 - [ ] Test `/audio` page manually on `http://127.0.0.1:3000/audio` and confirm links/playback fall back gracefully when media is missing.
 - [ ] Document rollout and rollback steps for the audio page in `docs/PLAN.md` only if API contract or ops behavior changes.
 - [ ] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs.
-- [x] Document source-of-truth precedence from `AGENTS.md` `Where the truth lives` in `docs/PLAN.md`.
+- [x] Document source-of-truth precedence from `AGENTS.md` `Where the truth lives vividly` in `docs/PLAN.md`.
 - [x] Update daily task tracking source references to follow `.agents/skills/cres-triage/SKILL.md` -> `docs/PLAN.md` -> `docs/Task.md` -> `docs/DECISIONS.md`.
+- [x] Document Where the truth lives vividly color+emoji interaction requirement for `docs/PLAN.md` and `docs/Task.md` updates (HCI docs scope only).
+- [x] Verify `docs/PLAN.md` and `docs/Task.md` vivid formatting standard conformance and update inconsistent wording.
 - [x] Archive legacy deploy scripts (`deploy_vast.sh`, `deploy_vast.py`) and block invocation from root stubs.
 - [x] Document `docker run` ownership boundaries in `docs/vast_deployment.md` (Vast runtime vs CI smoke only).
 - [x] Document immutable single-flow incident handling for instance operations in `docs/vast_deployment.md`.
@@ -25,6 +27,9 @@
 - [x] Document CI smoke endpoint hardening and rollback in `docs/PLAN.md`.
 - [x] Optimize `CI Minimal Image Boot` to reuse GHCR base image when base-impacting files are unchanged.
 - [x] Configure `Dockerfile.base` runtime base to `vastai/base-image:cuda-12.4.1-auto` with llama runtime preserved via multi-stage copy.
+- [x] Fix CUDA stub linker setup in `Dockerfile.base` (`libcuda.so.1` + `rpath-link`) to resolve `cuMem*` undefined-reference build failures.
+- [x] Fix `supervisor` install prompt in `Dockerfile.base` with non-interactive `dpkg` options (`--force-confdef --force-confold`) for CI builds.
+- [x] Fix base-image pip disk exhaustion by removing `torch` wheel install from `requirements.instance.txt` and validating preinstalled `torch` in `Dockerfile.base`.
 - [ ] Verify `CI Minimal Image Boot` and deploy smoke step no longer fail on Temporal DNS resolution.
 - [x] Document CI smoke IP readiness guard and rollback in `docs/PLAN.md`.
 - [ ] Verify CI smoke envs always resolve to non-empty endpoints (`TEMPORAL_SMOKE_ADDR`, `MINIO_SMOKE_ENDPOINT`) before app boot.

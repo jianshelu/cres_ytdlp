@@ -106,8 +106,34 @@ export default function TranscriptionsClient({ data, query }: Props) {
     };
 
     const resolveVideoSrc = (videoPath: string) => {
-        const raw = (videoPath || '').trim();
+        let raw = (videoPath || '').trim();
         if (!raw) return '';
+
+        if (raw.startsWith('http:/') && !raw.startsWith('http://')) {
+            raw = raw.replace('http:/', 'http://');
+        } else if (raw.startsWith('https:/') && !raw.startsWith('https://')) {
+            raw = raw.replace('https:/', 'https://');
+        }
+
+        if (raw.startsWith('http://') || raw.startsWith('https://')) {
+            try {
+                const url = new URL(raw);
+                const host = (url.hostname || '').toLowerCase();
+                if (host === 'cres' || host === 'minio' || host === 'minio-ci') {
+                    const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'https:' : url.protocol;
+                    const originHost = (typeof window !== 'undefined' && window.location.hostname) ? window.location.hostname : '127.0.0.1';
+                    const mappedBase = `${protocol}//${originHost}:9000`;
+                    let mappedPath = url.pathname || '';
+                    if (host === 'cres' && !mappedPath.startsWith('/cres/')) {
+                        mappedPath = `/cres${mappedPath.startsWith('/') ? '' : '/'}${mappedPath}`;
+                    }
+                    raw = `${mappedBase}${mappedPath}`;
+                }
+            } catch {
+                // Keep best-effort raw URL and continue.
+            }
+        }
+
         if (raw.startsWith('http://') || raw.startsWith('https://')) {
             try {
                 const url = new URL(raw);

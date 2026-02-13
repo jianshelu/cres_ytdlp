@@ -1,9 +1,9 @@
 [
     {
         "title": "\"鈣鈦礦\"扮算力能源關鍵！馬斯克擘劃太空AI帝國拚3年圓夢　傳團隊密訪台太陽能廠...\"避談單一客戶\"產線布局、專利申請早已卡位｜非凡財經新聞｜20260209",
-        "video_path": "http://192.168.2.130:9000/cres/queries/suanli/videos/AI_3_..._20260209_7HD3sTXeDqg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/suanli/thumbnails/AI_3_..._20260209_7HD3sTXeDqg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/suanli/transcripts/AI_3_..._20260209_7HD3sTXeDqg.json",
+        "video_path": "http:/cres/queries/suanli/videos/AI_3_..._20260209_7HD3sTXeDqg.mp4",
+        "thumb_path": "http:/cres/queries/suanli/thumbnails/AI_3_..._20260209_7HD3sTXeDqg.webp",
+        "json_path": "http:/cres/queries/suanli/transcripts/AI_3_..._20260209_7HD3sTXeDqg.json",
         "keywords": [
             {
                 "word": "馬斯克",
@@ -35,10 +35,51 @@
         "query_updated_at": "2026-02-10T04:48:19.774000+00:00"
     },
     {
+        "title": "#candygrandpre Wants Society to FUND HER VACATION ON THE TRAIN😡😡",
+        "video_path": "http:/cres/queries/cinny/videos/candygrandpre_Wants_Society_to_FUND_HER_VACATION_ON_THE_TRAIN_b2t2i_euo9g.mp4",
+        "thumb_path": "http:/cres/queries/cinny/thumbnails/candygrandpre_Wants_Society_to_FUND_HER_VACATION_ON_THE_TRAIN_b2t2i_euo9g.webp",
+        "json_path": "http:/cres/queries/cinny/transcripts/candygrandpre_Wants_Society_to_FUND_HER_VACATION_ON_THE_TRAIN_b2t2i_euo9g.json",
+        "keywords": [
+            {
+                "word": "she",
+                "count": 30,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "ever",
+                "count": 23,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "you're",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "she's",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "there's",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Candy, this is what people talk about It is your immaturity, your arrogance, your entitlement",
+        "search_query": "cinny",
+        "query_updated_at": "2026-02-12T18:43:33.557000+00:00"
+    },
+    {
         "title": "10分钟弄懂 什么是大模型Skill",
-        "video_path": "http://192.168.2.130:9000/cres/queries/damoxing/videos/10_Skill_lnneAfJqd9M.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/damoxing/thumbnails/10_Skill_lnneAfJqd9M.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/damoxing/transcripts/10_Skill_lnneAfJqd9M.json",
+        "video_path": "http:/cres/queries/damoxing/videos/10_Skill_lnneAfJqd9M.mp4",
+        "thumb_path": "http:/cres/queries/damoxing/thumbnails/10_Skill_lnneAfJqd9M.webp",
+        "json_path": "http:/cres/queries/damoxing/transcripts/10_Skill_lnneAfJqd9M.json",
         "keywords": [
             {
                 "word": "全都发给",
@@ -77,9 +118,9 @@
     },
     {
         "title": "2023|👍机器学习萌新必看👍4分钟让你明白线性回归的本质，还怕不会机器学习？|机器学习算法通俗理解| 连小学生都能看懂的算法科普|Shady的混乱空间",
-        "video_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/videos/2023_4_Shady_xwMi9mSxfIs.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/thumbnails/2023_4_Shady_xwMi9mSxfIs.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/transcripts/2023_4_Shady_xwMi9mSxfIs.json",
+        "video_path": "http:/cres/queries/jiqixuexi/videos/2023_4_Shady_xwMi9mSxfIs.mp4",
+        "thumb_path": "http:/cres/queries/jiqixuexi/thumbnails/2023_4_Shady_xwMi9mSxfIs.webp",
+        "json_path": "http:/cres/queries/jiqixuexi/transcripts/2023_4_Shady_xwMi9mSxfIs.json",
         "keywords": [
             {
                 "word": "一個而已既然",
@@ -117,10 +158,51 @@
         "query_updated_at": "2026-02-10T04:41:06.875000+00:00"
     },
     {
+        "title": "5 Mind-Blowing Use Cases of Claude Skills",
+        "video_path": "http:/cres/queries/claude-skills/videos/5_Mind-Blowing_Use_Cases_of_Claude_Skills_HCwfRe5EHGQ.mp4",
+        "thumb_path": "http:/cres/queries/claude-skills/thumbnails/5_Mind-Blowing_Use_Cases_of_Claude_Skills_HCwfRe5EHGQ.webp",
+        "json_path": "http:/cres/queries/claude-skills/transcripts/5_Mind-Blowing_Use_Cases_of_Claude_Skills_HCwfRe5EHGQ.json",
+        "keywords": [
+            {
+                "word": "skill",
+                "count": 94,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "here",
+                "count": 39,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "going",
+                "count": 38,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "clawed",
+                "count": 34,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "skills",
+                "count": 27,
+                "score": 5,
+                "start_time": 0
+            }
+        ],
+        "summary": "If you've ever noticed that no matter how much context that you give your LLM, the outputs are never truly the same and in fact They can tend to get worse the longer that you chat with it and then throp it because just release clawed skills Which is designed to solve just that in this video I'm going to explain to you what clawed skills are in a non-technical way so you can actually understand them the crucial difference between Skills and clawed projects that'll save you tho",
+        "search_query": "claude-skills",
+        "query_updated_at": "2026-02-12T18:43:49.286000+00:00"
+    },
+    {
         "title": "5分钟搞懂深度学习的基础原理",
-        "video_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/videos/5_0jCpCSTWlYo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/thumbnails/5_0jCpCSTWlYo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/transcripts/5_0jCpCSTWlYo.json",
+        "video_path": "http:/cres/queries/shenduxuexi/videos/5_0jCpCSTWlYo.mp4",
+        "thumb_path": "http:/cres/queries/shenduxuexi/thumbnails/5_0jCpCSTWlYo.webp",
+        "json_path": "http:/cres/queries/shenduxuexi/transcripts/5_0jCpCSTWlYo.json",
         "keywords": [
             {
                 "word": "一下一些内容",
@@ -159,9 +241,9 @@
     },
     {
         "title": "99% of Beginners Don't Know the Basics of AI",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/99%25_of_Beginners_Don_t_Know_the_Basics_of_AI_nVyD6THcvDQ.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/99%25_of_Beginners_Don_t_Know_the_Basics_of_AI_nVyD6THcvDQ.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/99%25_of_Beginners_Don_t_Know_the_Basics_of_AI_nVyD6THcvDQ.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/99%25_of_Beginners_Don_t_Know_the_Basics_of_AI_nVyD6THcvDQ.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/99%25_of_Beginners_Don_t_Know_the_Basics_of_AI_nVyD6THcvDQ.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/99%25_of_Beginners_Don_t_Know_the_Basics_of_AI_nVyD6THcvDQ.json",
         "keywords": [
             {
                 "word": "chain of thought prompting",
@@ -200,9 +282,9 @@
     },
     {
         "title": "A1 x J1 - Latest Trends (Official Video)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/trends/videos/A1_x_J1_-_Latest_Trends_Official_Video_7zbt4zliK4c.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/trends/thumbnails/A1_x_J1_-_Latest_Trends_Official_Video_7zbt4zliK4c.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/trends/transcripts/A1_x_J1_-_Latest_Trends_Official_Video_7zbt4zliK4c.json",
+        "video_path": "http:/cres/queries/trends/videos/A1_x_J1_-_Latest_Trends_Official_Video_7zbt4zliK4c.mp4",
+        "thumb_path": "http:/cres/queries/trends/thumbnails/A1_x_J1_-_Latest_Trends_Official_Video_7zbt4zliK4c.webp",
+        "json_path": "http:/cres/queries/trends/transcripts/A1_x_J1_-_Latest_Trends_Official_Video_7zbt4zliK4c.json",
         "keywords": [
             {
                 "word": "i'm",
@@ -241,9 +323,9 @@
     },
     {
         "title": "AI 2027: 人工智能會令人類滅亡嗎？－ BBC News 中文",
-        "video_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/videos/AI_2027_-_-_BBC_News_WsPZO5uq3nY.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/thumbnails/AI_2027_-_-_BBC_News_WsPZO5uq3nY.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/transcripts/AI_2027_-_-_BBC_News_WsPZO5uq3nY.json",
+        "video_path": "http:/cres/queries/rengongzhineng/videos/AI_2027_-_-_BBC_News_WsPZO5uq3nY.mp4",
+        "thumb_path": "http:/cres/queries/rengongzhineng/thumbnails/AI_2027_-_-_BBC_News_WsPZO5uq3nY.webp",
+        "json_path": "http:/cres/queries/rengongzhineng/transcripts/AI_2027_-_-_BBC_News_WsPZO5uq3nY.json",
         "keywords": [
             {
                 "word": "AI",
@@ -270,9 +352,9 @@
     },
     {
         "title": "AI Makes Programming 100x More Fun",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/AI_Makes_Programming_100x_More_Fun_V1EeXcqnGec.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/AI_Makes_Programming_100x_More_Fun_V1EeXcqnGec.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/AI_Makes_Programming_100x_More_Fun_V1EeXcqnGec.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/AI_Makes_Programming_100x_More_Fun_V1EeXcqnGec.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/AI_Makes_Programming_100x_More_Fun_V1EeXcqnGec.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/AI_Makes_Programming_100x_More_Fun_V1EeXcqnGec.json",
         "keywords": [
             {
                 "word": "AI",
@@ -305,9 +387,9 @@
     },
     {
         "title": "AI Was Supposed to Replace Developers... Until It Couldn't",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/AI_Was_Supposed_to_Replace_Developers..._Until_It_Couldn_t_MjSUCg2NN4g.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/AI_Was_Supposed_to_Replace_Developers..._Until_It_Couldn_t_MjSUCg2NN4g.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/AI_Was_Supposed_to_Replace_Developers..._Until_It_Couldn_t_MjSUCg2NN4g.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/AI_Was_Supposed_to_Replace_Developers..._Until_It_Couldn_t_MjSUCg2NN4g.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/AI_Was_Supposed_to_Replace_Developers..._Until_It_Couldn_t_MjSUCg2NN4g.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/AI_Was_Supposed_to_Replace_Developers..._Until_It_Couldn_t_MjSUCg2NN4g.json",
         "keywords": [
             {
                 "word": "AI",
@@ -334,9 +416,9 @@
     },
     {
         "title": "AI2027: Is this how AI might destroy humanity? - BBC World Service",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-related/videos/AI2027_-_Is_this_how_AI_might_destroy_humanity_-_BBC_World_Service_1UufaK3pQMg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-related/thumbnails/AI2027_-_Is_this_how_AI_might_destroy_humanity_-_BBC_World_Service_1UufaK3pQMg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-related/transcripts/AI2027_-_Is_this_how_AI_might_destroy_humanity_-_BBC_World_Service_1UufaK3pQMg.json",
+        "video_path": "http:/cres/queries/ai-related/videos/AI2027_-_Is_this_how_AI_might_destroy_humanity_-_BBC_World_Service_1UufaK3pQMg.mp4",
+        "thumb_path": "http:/cres/queries/ai-related/thumbnails/AI2027_-_Is_this_how_AI_might_destroy_humanity_-_BBC_World_Service_1UufaK3pQMg.webp",
+        "json_path": "http:/cres/queries/ai-related/transcripts/AI2027_-_Is_this_how_AI_might_destroy_humanity_-_BBC_World_Service_1UufaK3pQMg.json",
         "keywords": [
             {
                 "word": "agent",
@@ -375,19 +457,243 @@
     },
     {
         "title": "ANC singing Oliver Tambo",
-        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.json",
-        "keywords": [],
-        "summary": "Generated automatically",
+        "video_path": "http:/cres/queries/tambo/videos/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.mp4",
+        "thumb_path": "http:/cres/queries/tambo/thumbnails/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.webp",
+        "json_path": "http:/cres/queries/tambo/transcripts/ANC_singing_Oliver_Tambo_PeVnxIzKGoE.json",
+        "keywords": [
+            {
+                "word": "ya'",
+                "count": 18,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "thanh",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "thy",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "far",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "allah",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "To Thy birth, thy worthy sin We lived our own lives O Th Thanh它是 O Th Thanh Allah, O Th Thanh O Th Thanh, O Th Thanh, O Th Thanh Tears are flying far, far away, you are forgetting and looming And the time goes by, ya, I am 여기서, ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya' ya, sooo the world's where yo are goin'",
         "search_query": "tambo",
-        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+        "query_updated_at": "2026-02-12T18:26:59.174000+00:00"
+    },
+    {
+        "title": "Aion Ui Tutorial",
+        "video_path": "http:/cres/queries/aionui/videos/Aion_Ui_Tutorial_S7eLtH26GUM.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/Aion_Ui_Tutorial_S7eLtH26GUM.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/Aion_Ui_Tutorial_S7eLtH26GUM.json",
+        "keywords": [
+            {
+                "word": "here",
+                "count": 13,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "need",
+                "count": 12,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "it's",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "that's",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "i'm",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "well first of all hello guys some of you have been asking me to make a new tutorial so I thought I'm gonna show you how to do it first things first the programs you need either iron encoder or iron extractor but I prefer iron encoder because it's smoother and that it doesn't give me any error messages and paint net or Photoshop or any other editor program but I've been using paint",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
+        "title": "AionUi Installation",
+        "video_path": "http:/cres/queries/aionui/videos/AionUi_Installation_Jx-sc3fYZS0.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/AionUi_Installation_Jx-sc3fYZS0.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/AionUi_Installation_Jx-sc3fYZS0.json",
+        "keywords": [
+            {
+                "word": "general",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "overview",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "topic",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": ".",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
+        "title": "AionUi Review: How to Run Gemini, Claude, and Qwen in One Local GUI",
+        "video_path": "http:/cres/queries/aionui/videos/AionUi_Review_-_How_to_Run_Gemini_Claude_and_Qwen_in_One_Local_GUI_fGQn63b_4UU.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/AionUi_Review_-_How_to_Run_Gemini_Claude_and_Qwen_in_One_Local_GUI_fGQn63b_4UU.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/AionUi_Review_-_How_to_Run_Gemini_Claude_and_Qwen_in_One_Local_GUI_fGQn63b_4UU.json",
+        "keywords": [
+            {
+                "word": "ion",
+                "count": 50,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "wee",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "local",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "data",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "aon",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Every developer knows the frustration of building an AI interface from scratch You spend dozens of hours fighting with CSS layouts and managing complex streaming states just to get a simple chat bubble to look right",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
+        "title": "AionUi: El \"Cowork\" Open Source que unifica Gemini, Claude y tus modelos locales 📂🔥",
+        "video_path": "http:/cres/queries/aionui/videos/AionUi_-_El_Cowork_Open_Source_que_unifica_Gemini_Claude_y_tus_modelos_locales_SXedIuwmQKg.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/AionUi_-_El_Cowork_Open_Source_que_unifica_Gemini_Claude_y_tus_modelos_locales_SXedIuwmQKg.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/AionUi_-_El_Cowork_Open_Source_que_unifica_Gemini_Claude_y_tus_modelos_locales_SXedIuwmQKg.json",
+        "keywords": [
+            {
+                "word": "que",
+                "count": 35,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "ion",
+                "count": 22,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "con",
+                "count": 21,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "para",
+                "count": 14,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "una",
+                "count": 13,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "Para quienes desarrollan software o usan la inteligencia artificial a tope, seguro les va a interesar conocer a IUN UI Es una herramienta que de verdad busca cambiar por completo cómo interactuamos con la IA desde la línea de comandos",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
+        "title": "Anthropic's Claude Just DESTROYED Every AI Workflow Tool (Claude Skills Mastery)",
+        "video_path": "http:/cres/queries/claude-skills/videos/Anthropic_s_Claude_Just_DESTROYED_Every_AI_Workflow_Tool_Claude_Skills_Mastery_hqiStqp6FL4.mp4",
+        "thumb_path": "http:/cres/queries/claude-skills/thumbnails/Anthropic_s_Claude_Just_DESTROYED_Every_AI_Workflow_Tool_Claude_Skills_Mastery_hqiStqp6FL4.webp",
+        "json_path": "http:/cres/queries/claude-skills/transcripts/Anthropic_s_Claude_Just_DESTROYED_Every_AI_Workflow_Tool_Claude_Skills_Mastery_hqiStqp6FL4.json",
+        "keywords": [
+            {
+                "word": "skill",
+                "count": 44,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "it's",
+                "count": 21,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "claude",
+                "count": 20,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "use",
+                "count": 20,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "skills",
+                "count": 18,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "There is one feature in AI right now that will save you more time than anything else, it's not prompting, it's not agents, and 99% of people have never even heard of it Think about it, every time you open chat GPT or Claude, you start from zero",
+        "search_query": "claude-skills",
+        "query_updated_at": "2026-02-12T18:43:49.286000+00:00"
     },
     {
         "title": "Antigravity + Opencode IS INCREDIBLE! Best AI Coding Workflow Solves EVERYTHING!",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.json",
         "keywords": [
             {
                 "word": "open code",
@@ -425,10 +731,20 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "Antigravity + Opencode IS INCREDIBLE! Best AI Coding Workflow Solves EVERYTHING!",
+        "video_path": "http:/cres/queries/aionui/videos/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/Antigravity_%2B_Opencode_IS_INCREDIBLE_Best_AI_Coding_Workflow_Solves_EVERYTHING_dzDVt3-MTRk.json",
+        "keywords": [],
+        "summary": "Generated automatically",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
         "title": "Are Programmers Obsolete?  Will AI Replace Them?",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Are_Programmers_Obsolete_Will_AI_Replace_Them_TANCHT6uht0.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Are_Programmers_Obsolete_Will_AI_Replace_Them_TANCHT6uht0.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Are_Programmers_Obsolete_Will_AI_Replace_Them_TANCHT6uht0.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Are_Programmers_Obsolete_Will_AI_Replace_Them_TANCHT6uht0.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Are_Programmers_Obsolete_Will_AI_Replace_Them_TANCHT6uht0.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Are_Programmers_Obsolete_Will_AI_Replace_Them_TANCHT6uht0.json",
         "keywords": [
             {
                 "word": "AI",
@@ -466,10 +782,51 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "BIG BACK GOT GER MONEY TO FEED HER GUT!!!!!",
+        "video_path": "http:/cres/queries/cinny/videos/BIG_BACK_GOT_GER_MONEY_TO_FEED_HER_GUT_oBdMTYmqpbU.mp4",
+        "thumb_path": "http:/cres/queries/cinny/thumbnails/BIG_BACK_GOT_GER_MONEY_TO_FEED_HER_GUT_oBdMTYmqpbU.webp",
+        "json_path": "http:/cres/queries/cinny/transcripts/BIG_BACK_GOT_GER_MONEY_TO_FEED_HER_GUT_oBdMTYmqpbU.json",
+        "keywords": [
+            {
+                "word": "she",
+                "count": 36,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "her",
+                "count": 25,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "she's",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "money",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "warn",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "I know I know",
+        "search_query": "cinny",
+        "query_updated_at": "2026-02-12T18:43:33.557000+00:00"
+    },
+    {
         "title": "Best AI Coding Tools for Developers in 2025",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Best_AI_Coding_Tools_for_Developers_in_2025_rM0xpwENa8I.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Best_AI_Coding_Tools_for_Developers_in_2025_rM0xpwENa8I.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Best_AI_Coding_Tools_for_Developers_in_2025_rM0xpwENa8I.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Best_AI_Coding_Tools_for_Developers_in_2025_rM0xpwENa8I.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Best_AI_Coding_Tools_for_Developers_in_2025_rM0xpwENa8I.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Best_AI_Coding_Tools_for_Developers_in_2025_rM0xpwENa8I.json",
         "keywords": [
             {
                 "word": "AI tools",
@@ -508,9 +865,9 @@
     },
     {
         "title": "Best AI Coding Tools for Developers in 2026",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Best_AI_Coding_Tools_for_Developers_in_2026_pvMGRSZJ4Jw.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Best_AI_Coding_Tools_for_Developers_in_2026_pvMGRSZJ4Jw.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Best_AI_Coding_Tools_for_Developers_in_2026_pvMGRSZJ4Jw.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Best_AI_Coding_Tools_for_Developers_in_2026_pvMGRSZJ4Jw.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Best_AI_Coding_Tools_for_Developers_in_2026_pvMGRSZJ4Jw.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Best_AI_Coding_Tools_for_Developers_in_2026_pvMGRSZJ4Jw.json",
         "keywords": [
             {
                 "word": "AI",
@@ -549,9 +906,9 @@
     },
     {
         "title": "Best AI Tools for Programming in 2025",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Best_AI_Tools_for_Programming_in_2025_uxrSyA-VxWs.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Best_AI_Tools_for_Programming_in_2025_uxrSyA-VxWs.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Best_AI_Tools_for_Programming_in_2025_uxrSyA-VxWs.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Best_AI_Tools_for_Programming_in_2025_uxrSyA-VxWs.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Best_AI_Tools_for_Programming_in_2025_uxrSyA-VxWs.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Best_AI_Tools_for_Programming_in_2025_uxrSyA-VxWs.json",
         "keywords": [
             {
                 "word": "Tab9",
@@ -590,9 +947,9 @@
     },
     {
         "title": "Build an AI-Powered Interview Question Generator using Gemini | 1st on youtube #qwiklabsarcade2026",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-powered/videos/Build_an_AI-Powered_Interview_Question_Generator_using_Gemini_1st_on_youtube_qwiklabsarcade2026_OwugcUJAk60.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-powered/thumbnails/Build_an_AI-Powered_Interview_Question_Generator_using_Gemini_1st_on_youtube_qwiklabsarcade2026_OwugcUJAk60.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-powered/transcripts/Build_an_AI-Powered_Interview_Question_Generator_using_Gemini_1st_on_youtube_qwiklabsarcade2026_OwugcUJAk60.json",
+        "video_path": "http:/cres/queries/ai-powered/videos/Build_an_AI-Powered_Interview_Question_Generator_using_Gemini_1st_on_youtube_qwiklabsarcade2026_OwugcUJAk60.mp4",
+        "thumb_path": "http:/cres/queries/ai-powered/thumbnails/Build_an_AI-Powered_Interview_Question_Generator_using_Gemini_1st_on_youtube_qwiklabsarcade2026_OwugcUJAk60.webp",
+        "json_path": "http:/cres/queries/ai-powered/transcripts/Build_an_AI-Powered_Interview_Question_Generator_using_Gemini_1st_on_youtube_qwiklabsarcade2026_OwugcUJAk60.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "ai-powered",
@@ -600,19 +957,101 @@
     },
     {
         "title": "CHIP - 4 RAWS (VISUALISER)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/chip/videos/CHIP_-_4_RAWS_VISUALISER_4lyac5Db9RM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/chip/thumbnails/CHIP_-_4_RAWS_VISUALISER_4lyac5Db9RM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/chip/transcripts/CHIP_-_4_RAWS_VISUALISER_4lyac5Db9RM.json",
+        "video_path": "http:/cres/queries/chip/videos/CHIP_-_4_RAWS_VISUALISER_4lyac5Db9RM.mp4",
+        "thumb_path": "http:/cres/queries/chip/thumbnails/CHIP_-_4_RAWS_VISUALISER_4lyac5Db9RM.webp",
+        "json_path": "http:/cres/queries/chip/transcripts/CHIP_-_4_RAWS_VISUALISER_4lyac5Db9RM.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "chip",
         "query_updated_at": "2026-02-10T16:39:33.932000+00:00"
     },
     {
+        "title": "CHS x CINNYEBK - Feel My Rage #LLD",
+        "video_path": "http:/cres/queries/cinny/videos/CHS_x_CINNYEBK_-_Feel_My_Rage_LLD_9R8iWqO1Rh4.mp4",
+        "thumb_path": "http:/cres/queries/cinny/thumbnails/CHS_x_CINNYEBK_-_Feel_My_Rage_LLD_9R8iWqO1Rh4.webp",
+        "json_path": "http:/cres/queries/cinny/transcripts/CHS_x_CINNYEBK_-_Feel_My_Rage_LLD_9R8iWqO1Rh4.json",
+        "keywords": [
+            {
+                "word": "niggas",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "bitch",
+                "count": 14,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "ain't",
+                "count": 13,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "i'm",
+                "count": 12,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "don't",
+                "count": 9,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Oh No And he's gonna hate me Young nigga front of trenches hooping on the crates I'm pulling up contested shooting all the em face I brought my lab with me",
+        "search_query": "cinny",
+        "query_updated_at": "2026-02-12T18:43:33.557000+00:00"
+    },
+    {
+        "title": "CINNY -  TPM (Official Audio)",
+        "video_path": "http:/cres/queries/cinny/videos/CINNY_-_TPM_Official_Audio_NblYN6O4uNQ.mp4",
+        "thumb_path": "http:/cres/queries/cinny/thumbnails/CINNY_-_TPM_Official_Audio_NblYN6O4uNQ.webp",
+        "json_path": "http:/cres/queries/cinny/transcripts/CINNY_-_TPM_Official_Audio_NblYN6O4uNQ.json",
+        "keywords": [
+            {
+                "word": "que",
+                "count": 17,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "quero",
+                "count": 9,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "tudo",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "com",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "nasce",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "Nois vê tudo bem Tudo pronto",
+        "search_query": "cinny",
+        "query_updated_at": "2026-02-12T18:43:33.557000+00:00"
+    },
+    {
         "title": "CIO predicts Microsoft will become an AI winner in the long term",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/CIO_predicts_Microsoft_will_become_an_AI_winner_in_the_long_term_t1VgC2XWJyg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/CIO_predicts_Microsoft_will_become_an_AI_winner_in_the_long_term_t1VgC2XWJyg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/CIO_predicts_Microsoft_will_become_an_AI_winner_in_the_long_term_t1VgC2XWJyg.json",
+        "video_path": "http:/cres/queries/microsoft/videos/CIO_predicts_Microsoft_will_become_an_AI_winner_in_the_long_term_t1VgC2XWJyg.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/CIO_predicts_Microsoft_will_become_an_AI_winner_in_the_long_term_t1VgC2XWJyg.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/CIO_predicts_Microsoft_will_become_an_AI_winner_in_the_long_term_t1VgC2XWJyg.json",
         "keywords": [
             {
                 "word": "Amazon",
@@ -639,9 +1078,9 @@
     },
     {
         "title": "CRM & NOW Added to IVES ETF, ORCL Upgrade, Bad Monday for MNDY",
-        "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/CRM_NOW_Added_to_IVES_ETF_ORCL_Upgrade_Bad_Monday_for_MNDY_cABSQ673kxc.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/CRM_NOW_Added_to_IVES_ETF_ORCL_Upgrade_Bad_Monday_for_MNDY_cABSQ673kxc.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/oracle/transcripts/CRM_NOW_Added_to_IVES_ETF_ORCL_Upgrade_Bad_Monday_for_MNDY_cABSQ673kxc.json",
+        "video_path": "http:/cres/queries/oracle/videos/CRM_NOW_Added_to_IVES_ETF_ORCL_Upgrade_Bad_Monday_for_MNDY_cABSQ673kxc.mp4",
+        "thumb_path": "http:/cres/queries/oracle/thumbnails/CRM_NOW_Added_to_IVES_ETF_ORCL_Upgrade_Bad_Monday_for_MNDY_cABSQ673kxc.webp",
+        "json_path": "http:/cres/queries/oracle/transcripts/CRM_NOW_Added_to_IVES_ETF_ORCL_Upgrade_Bad_Monday_for_MNDY_cABSQ673kxc.json",
         "keywords": [
             {
                 "word": "AI",
@@ -680,20 +1119,20 @@
     },
     {
         "title": "Carrapicho - Chiki Chiki Ta",
-        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.jpg",
-        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.json",
+        "video_path": "http:/cres/queries/tambo/videos/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.mp4",
+        "thumb_path": "http:/cres/queries/tambo/thumbnails/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.jpg",
+        "json_path": "http:/cres/queries/tambo/transcripts/Carrapicho_-_Chiki_Chiki_Ta_hh8y5rdJ3-s.json",
         "keywords": [
             {
                 "word": "que",
-                "count": 161,
+                "count": 55,
                 "score": 5,
                 "start_time": 0
             },
             {
-                "word": "chique",
-                "count": 110,
-                "score": 5,
+                "word": "para",
+                "count": 10,
+                "score": 4,
                 "start_time": 0
             },
             {
@@ -703,8 +1142,8 @@
                 "start_time": 0
             },
             {
-                "word": "bati",
-                "count": 8,
+                "word": "meu",
+                "count": 9,
                 "score": 3,
                 "start_time": 0
             },
@@ -717,13 +1156,13 @@
         ],
         "summary": "Bati Forte o tambor da Lera Bati Forte o tambor Eu quero de que que que que que que tá Bati Forte o tambor Eu quero de que que que que que que que tá É nessa dança que meu boy balan Saiu com p o de tora, vim para brincar É nessa dança que meu boy balan Saiu com p",
         "search_query": "tambo",
-        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+        "query_updated_at": "2026-02-12T18:26:59.174000+00:00"
     },
     {
         "title": "Celia Cruz: Elegua Quiere Tambo",
-        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.json",
+        "video_path": "http:/cres/queries/tambo/videos/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.mp4",
+        "thumb_path": "http:/cres/queries/tambo/thumbnails/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.webp",
+        "json_path": "http:/cres/queries/tambo/transcripts/Celia_Cruz_-_Elegua_Quiere_Tambo_jIdHdA8MlIc.json",
         "keywords": [
             {
                 "word": "tamo",
@@ -758,13 +1197,13 @@
         ],
         "summary": "No hay orisa como el ecuá, para irles, o que siempre está Oye, oye un tiene siete salas, oye un blanco de guete, y yo como soy su amor",
         "search_query": "tambo",
-        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+        "query_updated_at": "2026-02-12T18:26:59.174000+00:00"
     },
     {
         "title": "Charli xcx - Apple (official lyric video)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/apple/videos/Charli_xcx_-_Apple_official_lyric_video_CPWxExGk7PM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/apple/thumbnails/Charli_xcx_-_Apple_official_lyric_video_CPWxExGk7PM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/apple/transcripts/Charli_xcx_-_Apple_official_lyric_video_CPWxExGk7PM.json",
+        "video_path": "http:/cres/queries/apple/videos/Charli_xcx_-_Apple_official_lyric_video_CPWxExGk7PM.mp4",
+        "thumb_path": "http:/cres/queries/apple/thumbnails/Charli_xcx_-_Apple_official_lyric_video_CPWxExGk7PM.webp",
+        "json_path": "http:/cres/queries/apple/transcripts/Charli_xcx_-_Apple_official_lyric_video_CPWxExGk7PM.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "apple",
@@ -772,9 +1211,9 @@
     },
     {
         "title": "ChatGPT為何聽得懂人話？生成式AI是什麼酷東西？它是怎麼訓練的？｜#X分鐘看新聞｜公視P# 新聞實驗室",
-        "video_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/videos/ChatGPT_AI_X_P_WsGBzhxNr38.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/thumbnails/ChatGPT_AI_X_P_WsGBzhxNr38.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/transcripts/ChatGPT_AI_X_P_WsGBzhxNr38.json",
+        "video_path": "http:/cres/queries/shengchengshiai/videos/ChatGPT_AI_X_P_WsGBzhxNr38.mp4",
+        "thumb_path": "http:/cres/queries/shengchengshiai/thumbnails/ChatGPT_AI_X_P_WsGBzhxNr38.webp",
+        "json_path": "http:/cres/queries/shengchengshiai/transcripts/ChatGPT_AI_X_P_WsGBzhxNr38.json",
         "keywords": [
             {
                 "word": "一個是他根本",
@@ -813,19 +1252,224 @@
     },
     {
         "title": "Chip",
-        "video_path": "http://192.168.2.130:9000/cres/queries/chip/videos/Chip_Z4ipWm0alBU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/chip/thumbnails/Chip_Z4ipWm0alBU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/chip/transcripts/Chip_Z4ipWm0alBU.json",
+        "video_path": "http:/cres/queries/chip/videos/Chip_Z4ipWm0alBU.mp4",
+        "thumb_path": "http:/cres/queries/chip/thumbnails/Chip_Z4ipWm0alBU.webp",
+        "json_path": "http:/cres/queries/chip/transcripts/Chip_Z4ipWm0alBU.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "chip",
         "query_updated_at": "2026-02-10T16:39:33.932000+00:00"
     },
     {
+        "title": "Cinny - I Love You",
+        "video_path": "http:/cres/queries/cinny/videos/Cinny_-_I_Love_You_bnt5YbwK7ps.mp4",
+        "thumb_path": "http:/cres/queries/cinny/thumbnails/Cinny_-_I_Love_You_bnt5YbwK7ps.webp",
+        "json_path": "http:/cres/queries/cinny/transcripts/Cinny_-_I_Love_You_bnt5YbwK7ps.json",
+        "keywords": [
+            {
+                "word": "love",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "baby",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "quando",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "que",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "clich",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "Hey baby, me ligar, temos muita coisa para conversar, n o, n",
+        "search_query": "cinny",
+        "query_updated_at": "2026-02-12T18:43:33.557000+00:00"
+    },
+    {
+        "title": "Claude Agent Skills Explained",
+        "video_path": "http:/cres/queries/claude-skills/videos/Claude_Agent_Skills_Explained_fOxC44g8vig.mp4",
+        "thumb_path": "http:/cres/queries/claude-skills/thumbnails/Claude_Agent_Skills_Explained_fOxC44g8vig.webp",
+        "json_path": "http:/cres/queries/claude-skills/transcripts/Claude_Agent_Skills_Explained_fOxC44g8vig.json",
+        "keywords": [
+            {
+                "word": "skill",
+                "count": 25,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "claude",
+                "count": 18,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "skills",
+                "count": 16,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "other",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "expertise",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Hi, my name is Otto, and in this video, we're going to discuss agent skills Agents today are pretty intelligent, but they don't always have the main expertise you need for real work",
+        "search_query": "claude-skills",
+        "query_updated_at": "2026-02-12T18:43:49.286000+00:00"
+    },
+    {
+        "title": "Claude Skills Explained - Step-by-Step Tutorial for Beginners",
+        "video_path": "http:/cres/queries/claude-skills/videos/Claude_Skills_Explained_-_Step-by-Step_Tutorial_for_Beginners_wO8EboopboU.mp4",
+        "thumb_path": "http:/cres/queries/claude-skills/thumbnails/Claude_Skills_Explained_-_Step-by-Step_Tutorial_for_Beginners_wO8EboopboU.webp",
+        "json_path": "http:/cres/queries/claude-skills/transcripts/Claude_Skills_Explained_-_Step-by-Step_Tutorial_for_Beginners_wO8EboopboU.json",
+        "keywords": [
+            {
+                "word": "skill",
+                "count": 66,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "claude",
+                "count": 38,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "now",
+                "count": 29,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "let's",
+                "count": 19,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "skills",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "Move over chat GPT Claude just released agent skills That means you can add custom abilities to Claude, Claude desktop and Claude code",
+        "search_query": "claude-skills",
+        "query_updated_at": "2026-02-12T18:43:49.286000+00:00"
+    },
+    {
+        "title": "Claude Skills, Clearly Explained in 15 Minutes",
+        "video_path": "http:/cres/queries/claude-skills/videos/Claude_Skills_Clearly_Explained_in_15_Minutes_loz60mALXxA.mp4",
+        "thumb_path": "http:/cres/queries/claude-skills/thumbnails/Claude_Skills_Clearly_Explained_in_15_Minutes_loz60mALXxA.webp",
+        "json_path": "http:/cres/queries/claude-skills/transcripts/Claude_Skills_Clearly_Explained_in_15_Minutes_loz60mALXxA.json",
+        "keywords": [
+            {
+                "word": "skill",
+                "count": 61,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "right",
+                "count": 32,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "let's",
+                "count": 25,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "writing",
+                "count": 22,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "skills",
+                "count": 20,
+                "score": 5,
+                "start_time": 0
+            }
+        ],
+        "summary": "Hey everyone, so today I want to show you how to build a class skill to write better and avoid AI Slop writing permanently, you know, skills to the potential to be the biggest AI productivity unlock since project Think of a skill as a specific expertise or template that AI can trigger from any conversation",
+        "search_query": "claude-skills",
+        "query_updated_at": "2026-02-12T18:43:49.286000+00:00"
+    },
+    {
+        "title": "Craft Agents (Claude Code UI): This OPENSOURCE Claude Code GUI is THE BEST!",
+        "video_path": "http:/cres/queries/aionui/videos/Craft_Agents_Claude_Code_UI_-_This_OPENSOURCE_Claude_Code_GUI_is_THE_BEST_3Oc9W37-qAM.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/Craft_Agents_Claude_Code_UI_-_This_OPENSOURCE_Claude_Code_GUI_is_THE_BEST_3Oc9W37-qAM.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/Craft_Agents_Claude_Code_UI_-_This_OPENSOURCE_Claude_Code_GUI_is_THE_BEST_3Oc9W37-qAM.json",
+        "keywords": [
+            {
+                "word": "agent",
+                "count": 14,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "craft",
+                "count": 12,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "code",
+                "count": 9,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "really",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "you're",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Hi, welcome to another video So today we're talking about craft agents",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
         "title": "Cramer's Mad Dash: Oracle",
-        "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/Cramer_s_Mad_Dash_-_Oracle_VS3OkVon59k.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/Cramer_s_Mad_Dash_-_Oracle_VS3OkVon59k.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/oracle/transcripts/Cramer_s_Mad_Dash_-_Oracle_VS3OkVon59k.json",
+        "video_path": "http:/cres/queries/oracle/videos/Cramer_s_Mad_Dash_-_Oracle_VS3OkVon59k.mp4",
+        "thumb_path": "http:/cres/queries/oracle/thumbnails/Cramer_s_Mad_Dash_-_Oracle_VS3OkVon59k.webp",
+        "json_path": "http:/cres/queries/oracle/transcripts/Cramer_s_Mad_Dash_-_Oracle_VS3OkVon59k.json",
         "keywords": [
             {
                 "word": "oracle",
@@ -858,19 +1502,80 @@
     },
     {
         "title": "Daughtry - Artificial (Official Music Video)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/artificial/videos/Daughtry_-_Artificial_Official_Music_Video_zSmySDrz9ko.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/artificial/thumbnails/Daughtry_-_Artificial_Official_Music_Video_zSmySDrz9ko.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/artificial/transcripts/Daughtry_-_Artificial_Official_Music_Video_zSmySDrz9ko.json",
+        "video_path": "http:/cres/queries/artificial/videos/Daughtry_-_Artificial_Official_Music_Video_zSmySDrz9ko.mp4",
+        "thumb_path": "http:/cres/queries/artificial/thumbnails/Daughtry_-_Artificial_Official_Music_Video_zSmySDrz9ko.webp",
+        "json_path": "http:/cres/queries/artificial/transcripts/Daughtry_-_Artificial_Official_Music_Video_zSmySDrz9ko.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "artificial",
         "query_updated_at": "2026-02-10T16:47:01.910000+00:00"
     },
     {
+        "title": "EASIEST Way to Fine-Tune a LLM and Use It With Ollama",
+        "video_path": "http:/cres/queries/unsloth/videos/EASIEST_Way_to_Fine-Tune_a_LLM_and_Use_It_With_Ollama_pTaSDVz0gok.mp4",
+        "thumb_path": "http:/cres/queries/unsloth/thumbnails/EASIEST_Way_to_Fine-Tune_a_LLM_and_Use_It_With_Ollama_pTaSDVz0gok.webp",
+        "json_path": "http:/cres/queries/unsloth/transcripts/EASIEST_Way_to_Fine-Tune_a_LLM_and_Use_It_With_Ollama_pTaSDVz0gok.json",
+        "keywords": [
+            {
+                "word": "going",
+                "count": 97,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "model",
+                "count": 84,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "here",
+                "count": 81,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "now",
+                "count": 67,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "i'm",
+                "count": 54,
+                "score": 5,
+                "start_time": 0
+            }
+        ],
+        "summary": "Today, you'll learn how to fine-tune LLMs in Python for use in Olamma I'll walk you through its step-by-step, give you all the code, and show you how to test it out",
+        "search_query": "unsloth",
+        "query_updated_at": "2026-02-12T18:42:56.953000+00:00"
+    },
+    {
+        "title": "EASIEST Way to Train LLM Train w/ unsloth (2x faster with 70% less GPU memory required)",
+        "video_path": "http:/cres/queries/unsloth/videos/EASIEST_Way_to_Train_LLM_Train_w_unsloth_2x_faster_with_70%25_less_GPU_memory_required_jFl5Fewrieo.mp4",
+        "thumb_path": "http:/cres/queries/unsloth/thumbnails/EASIEST_Way_to_Train_LLM_Train_w_unsloth_2x_faster_with_70%25_less_GPU_memory_required_jFl5Fewrieo.webp",
+        "json_path": "http:/cres/queries/unsloth/transcripts/EASIEST_Way_to_Train_LLM_Train_w_unsloth_2x_faster_with_70%25_less_GPU_memory_required_jFl5Fewrieo.json",
+        "keywords": [],
+        "summary": "Generated automatically",
+        "search_query": "unsloth",
+        "query_updated_at": "2026-02-12T18:42:56.953000+00:00"
+    },
+    {
+        "title": "End broken CLIs! AionUi turns Gemini/Claude into your desktop super teammate—no more one-off chats",
+        "video_path": "http:/cres/queries/aionui/videos/End_broken_CLIs_AionUi_turns_Gemini_Claude_into_your_desktop_super_teammate_no_more_one-off_chats_Q3XyJAlpFVU.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/End_broken_CLIs_AionUi_turns_Gemini_Claude_into_your_desktop_super_teammate_no_more_one-off_chats_Q3XyJAlpFVU.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/End_broken_CLIs_AionUi_turns_Gemini_Claude_into_your_desktop_super_teammate_no_more_one-off_chats_Q3XyJAlpFVU.json",
+        "keywords": [],
+        "summary": "Generated automatically",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
         "title": "Essential AI prompts for developers",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Essential_AI_prompts_for_developers_H3M95i4iS5c.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Essential_AI_prompts_for_developers_H3M95i4iS5c.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Essential_AI_prompts_for_developers_H3M95i4iS5c.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Essential_AI_prompts_for_developers_H3M95i4iS5c.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Essential_AI_prompts_for_developers_H3M95i4iS5c.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Essential_AI_prompts_for_developers_H3M95i4iS5c.json",
         "keywords": [
             {
                 "word": "Pros and Cons",
@@ -909,9 +1614,9 @@
     },
     {
         "title": "Everybody Hates the New Microsoft Office",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/Everybody_Hates_the_New_Microsoft_Office_BuUDhHuc7Rg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/Everybody_Hates_the_New_Microsoft_Office_BuUDhHuc7Rg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/Everybody_Hates_the_New_Microsoft_Office_BuUDhHuc7Rg.json",
+        "video_path": "http:/cres/queries/microsoft/videos/Everybody_Hates_the_New_Microsoft_Office_BuUDhHuc7Rg.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/Everybody_Hates_the_New_Microsoft_Office_BuUDhHuc7Rg.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/Everybody_Hates_the_New_Microsoft_Office_BuUDhHuc7Rg.json",
         "keywords": [
             {
                 "word": "AI",
@@ -944,9 +1649,9 @@
     },
     {
         "title": "Everything You Need to Know About Coding with AI // NOT vibe coding",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Everything_You_Need_to_Know_About_Coding_with_AI_NOT_vibe_coding_5fhcklZe-qE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Everything_You_Need_to_Know_About_Coding_with_AI_NOT_vibe_coding_5fhcklZe-qE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Everything_You_Need_to_Know_About_Coding_with_AI_NOT_vibe_coding_5fhcklZe-qE.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Everything_You_Need_to_Know_About_Coding_with_AI_NOT_vibe_coding_5fhcklZe-qE.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Everything_You_Need_to_Know_About_Coding_with_AI_NOT_vibe_coding_5fhcklZe-qE.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Everything_You_Need_to_Know_About_Coding_with_AI_NOT_vibe_coding_5fhcklZe-qE.json",
         "keywords": [
             {
                 "word": "AI",
@@ -985,9 +1690,9 @@
     },
     {
         "title": "Ex-Google Recruiter Explains: How to Answer “Tell Me About Yourself” (Step-by-Step)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ex-google/videos/Ex-Google_Recruiter_Explains_-_How_to_Answer_Tell_Me_About_Yourself_Step-by-Step_XNAIDss2Slc.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ex-google/thumbnails/Ex-Google_Recruiter_Explains_-_How_to_Answer_Tell_Me_About_Yourself_Step-by-Step_XNAIDss2Slc.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ex-google/transcripts/Ex-Google_Recruiter_Explains_-_How_to_Answer_Tell_Me_About_Yourself_Step-by-Step_XNAIDss2Slc.json",
+        "video_path": "http:/cres/queries/ex-google/videos/Ex-Google_Recruiter_Explains_-_How_to_Answer_Tell_Me_About_Yourself_Step-by-Step_XNAIDss2Slc.mp4",
+        "thumb_path": "http:/cres/queries/ex-google/thumbnails/Ex-Google_Recruiter_Explains_-_How_to_Answer_Tell_Me_About_Yourself_Step-by-Step_XNAIDss2Slc.webp",
+        "json_path": "http:/cres/queries/ex-google/transcripts/Ex-Google_Recruiter_Explains_-_How_to_Answer_Tell_Me_About_Yourself_Step-by-Step_XNAIDss2Slc.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "ex-google",
@@ -995,9 +1700,9 @@
     },
     {
         "title": "Ex-Google Recruiter Reveals: The REAL Purpose of Performance Improvement Plans",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ex-google/videos/Ex-Google_Recruiter_Reveals_-_The_REAL_Purpose_of_Performance_Improvement_Plans_Rf-D34MAE5k.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ex-google/thumbnails/Ex-Google_Recruiter_Reveals_-_The_REAL_Purpose_of_Performance_Improvement_Plans_Rf-D34MAE5k.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ex-google/transcripts/Ex-Google_Recruiter_Reveals_-_The_REAL_Purpose_of_Performance_Improvement_Plans_Rf-D34MAE5k.json",
+        "video_path": "http:/cres/queries/ex-google/videos/Ex-Google_Recruiter_Reveals_-_The_REAL_Purpose_of_Performance_Improvement_Plans_Rf-D34MAE5k.mp4",
+        "thumb_path": "http:/cres/queries/ex-google/thumbnails/Ex-Google_Recruiter_Reveals_-_The_REAL_Purpose_of_Performance_Improvement_Plans_Rf-D34MAE5k.webp",
+        "json_path": "http:/cres/queries/ex-google/transcripts/Ex-Google_Recruiter_Reveals_-_The_REAL_Purpose_of_Performance_Improvement_Plans_Rf-D34MAE5k.json",
         "keywords": [
             {
                 "word": "PIP",
@@ -1024,9 +1729,9 @@
     },
     {
         "title": "F*** you Microsoft",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/F_you_Microsoft_d8WEzjDx4-E.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/F_you_Microsoft_d8WEzjDx4-E.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/F_you_Microsoft_d8WEzjDx4-E.json",
+        "video_path": "http:/cres/queries/microsoft/videos/F_you_Microsoft_d8WEzjDx4-E.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/F_you_Microsoft_d8WEzjDx4-E.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/F_you_Microsoft_d8WEzjDx4-E.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1052,10 +1757,51 @@
         "query_updated_at": "2026-02-10T16:46:29.218000+00:00"
     },
     {
+        "title": "Fast Fine Tuning with Unsloth",
+        "video_path": "http:/cres/queries/unsloth/videos/Fast_Fine_Tuning_with_Unsloth_dMY3dBLojTk.mp4",
+        "thumb_path": "http:/cres/queries/unsloth/thumbnails/Fast_Fine_Tuning_with_Unsloth_dMY3dBLojTk.webp",
+        "json_path": "http:/cres/queries/unsloth/transcripts/Fast_Fine_Tuning_with_Unsloth_dMY3dBLojTk.json",
+        "keywords": [
+            {
+                "word": "model",
+                "count": 42,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "fine",
+                "count": 31,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "unsloth",
+                "count": 22,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "it's",
+                "count": 22,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "block",
+                "count": 13,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "After our MLX video, many of you asked, what about Windows or Linux users Well, today I'm excited to show you Unsloth, a blazing fast, fine-tuning solution that brings MLX-like speed to Windows and Linux",
+        "search_query": "unsloth",
+        "query_updated_at": "2026-02-12T18:42:56.953000+00:00"
+    },
+    {
         "title": "Flux 2.0 突然发布！最强开源、媲美 Nano Banana Pro 模型，在线免费实测及本地部署教程！ | 零度解说",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/Flux_2.0_Nano_Banana_Pro_Oykfok0WM6E.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/Flux_2.0_Nano_Banana_Pro_Oykfok0WM6E.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/Flux_2.0_Nano_Banana_Pro_Oykfok0WM6E.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/Flux_2.0_Nano_Banana_Pro_Oykfok0WM6E.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/Flux_2.0_Nano_Banana_Pro_Oykfok0WM6E.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/Flux_2.0_Nano_Banana_Pro_Oykfok0WM6E.json",
         "keywords": [
             {
                 "word": "本的",
@@ -1093,10 +1839,92 @@
         "query_updated_at": "2026-02-10T07:19:56.188000+00:00"
     },
     {
+        "title": "GH Law Enforcement Appreciation Event",
+        "video_path": "http:/cres/queries/gh-aw/videos/GH_Law_Enforcement_Appreciation_Event_7S61Op3BXsw.mp4",
+        "thumb_path": "http:/cres/queries/gh-aw/thumbnails/GH_Law_Enforcement_Appreciation_Event_7S61Op3BXsw.webp",
+        "json_path": "http:/cres/queries/gh-aw/transcripts/GH_Law_Enforcement_Appreciation_Event_7S61Op3BXsw.json",
+        "keywords": [
+            {
+                "word": "american",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "may",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "here",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "americans",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "goes",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "This is literally that tangible piece of freedom This is liberty in our hands",
+        "search_query": "gh-aw",
+        "query_updated_at": "2026-02-12T18:38:21.059000+00:00"
+    },
+    {
+        "title": "GHAW HRIDAI KO || LB BARAILY || NEW NEPALI CHRISTIAN SONG 2025",
+        "video_path": "http:/cres/queries/gh-aw/videos/GHAW_HRIDAI_KO_LB_BARAILY_NEW_NEPALI_CHRISTIAN_SONG_2025_vbQgyq8zqms.mp4",
+        "thumb_path": "http:/cres/queries/gh-aw/thumbnails/GHAW_HRIDAI_KO_LB_BARAILY_NEW_NEPALI_CHRISTIAN_SONG_2025_vbQgyq8zqms.webp",
+        "json_path": "http:/cres/queries/gh-aw/transcripts/GHAW_HRIDAI_KO_LB_BARAILY_NEW_NEPALI_CHRISTIAN_SONG_2025_vbQgyq8zqms.json",
+        "keywords": [
+            {
+                "word": "meiro",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "mero",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "boznu",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "huncha",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "sara",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "Ghauri Deiko Boznu Huncha Mero Asgupta Ko Boznu Huncha Mero Ghauri Deiko Boznu Huncha Mero Asgupta Ko Boznu Huncha Mero Sun Nu Oh Hunchha Chittkar Mero Sun Nu Oh Hunchha Chittkar Mero Sun Nu Oh Hunchha Chittkar Mero Sun, we'll search for the sky I can't live without you I can't live without you Meiro Sara, Meiro Sara, Meiro Raja, Meiro Pinta, Meiro Sara, Meiro Sara, Meiro I looked by at the morning heat from mid-nummer tree I looked at at the morning heat from mid-nummer tree",
+        "search_query": "gh-aw",
+        "query_updated_at": "2026-02-12T18:38:21.059000+00:00"
+    },
+    {
         "title": "GOLDEN BUZZER - Mitch Tambo Makes AUSTRALIA PROUD | Semi Final | Australia's Got Talent 2019",
-        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.json",
+        "video_path": "http:/cres/queries/tambo/videos/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.mp4",
+        "thumb_path": "http:/cres/queries/tambo/thumbnails/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.webp",
+        "json_path": "http:/cres/queries/tambo/transcripts/GOLDEN_BUZZER_-_Mitch_Tambo_Makes_AUSTRALIA_PROUD_Semi_Final_Australia_s_Got_Talent_2019_4vOlnmTcCzE.json",
         "keywords": [
             {
                 "word": "film",
@@ -1119,13 +1947,54 @@
         ],
         "summary": "ஏயா நேர்கள் போை மூக நியார் நேறேfilm ராஷfolkி",
         "search_query": "tambo",
-        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+        "query_updated_at": "2026-02-12T18:26:59.174000+00:00"
+    },
+    {
+        "title": "Gemini CLI-UI: Powerful Web UI That SuperCHARGES Gemini CLI!",
+        "video_path": "http:/cres/queries/aionui/videos/Gemini_CLI-UI_-_Powerful_Web_UI_That_SuperCHARGES_Gemini_CLI_mxPWtujDDLA.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/Gemini_CLI-UI_-_Powerful_Web_UI_That_SuperCHARGES_Gemini_CLI_mxPWtujDDLA.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/Gemini_CLI-UI_-_Powerful_Web_UI_That_SuperCHARGES_Gemini_CLI_mxPWtujDDLA.json",
+        "keywords": [
+            {
+                "word": "here",
+                "count": 37,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "gemini",
+                "count": 30,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "cli",
+                "count": 23,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "now",
+                "count": 19,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "project",
+                "count": 18,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "Hey everyone, what's going on Welcome back with me, Nathan",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
     },
     {
         "title": "Generative vs Agentic AI: Shaping the Future of AI Collaboration",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Generative_vs_Agentic_AI_-_Shaping_the_Future_of_AI_Collaboration_EDb37y_MhRw.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Generative_vs_Agentic_AI_-_Shaping_the_Future_of_AI_Collaboration_EDb37y_MhRw.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Generative_vs_Agentic_AI_-_Shaping_the_Future_of_AI_Collaboration_EDb37y_MhRw.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Generative_vs_Agentic_AI_-_Shaping_the_Future_of_AI_Collaboration_EDb37y_MhRw.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Generative_vs_Agentic_AI_-_Shaping_the_Future_of_AI_Collaboration_EDb37y_MhRw.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Generative_vs_Agentic_AI_-_Shaping_the_Future_of_AI_Collaboration_EDb37y_MhRw.json",
         "keywords": [
             {
                 "word": "generative AI",
@@ -1163,20 +2032,131 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "Gh aw",
+        "video_path": "http:/cres/queries/gh-aw/videos/Gh_aw_1KZxAqb833E.mp4",
+        "thumb_path": "http:/cres/queries/gh-aw/thumbnails/Gh_aw_1KZxAqb833E.webp",
+        "json_path": "http:/cres/queries/gh-aw/transcripts/Gh_aw_1KZxAqb833E.json",
+        "keywords": [
+            {
+                "word": "rock",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "general",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "overview",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "Rock it like rock it Rock it like rock it",
+        "search_query": "gh-aw",
+        "query_updated_at": "2026-02-12T18:38:21.059000+00:00"
+    },
+    {
+        "title": "GitHub - github/gh-aw: GitHub Agentic Workflows",
+        "video_path": "http:/cres/queries/gh-aw/videos/GitHub_-_github_gh-aw_-_GitHub_Agentic_Workflows_HOWTp96zQ0M.mp4",
+        "thumb_path": "http:/cres/queries/gh-aw/thumbnails/GitHub_-_github_gh-aw_-_GitHub_Agentic_Workflows_HOWTp96zQ0M.webp",
+        "json_path": "http:/cres/queries/gh-aw/transcripts/GitHub_-_github_gh-aw_-_GitHub_Agentic_Workflows_HOWTp96zQ0M.json",
+        "keywords": [
+            {
+                "word": "it's",
+                "count": 14,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "that's",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "still",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "workflows",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "exactly",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Okay, so I just read about GitHub's agentic workflows, and the idea of writing workflows in natural language markdown blew my mind Wait, really",
+        "search_query": "gh-aw",
+        "query_updated_at": "2026-02-12T18:38:21.059000+00:00"
+    },
+    {
         "title": "Godrej Washing Machines with AI Powered Turbidity Sensing | Golf | | English",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-powered/videos/Godrej_Washing_Machines_with_AI_Powered_Turbidity_Sensing_Golf_English_EOvPO2Zvr3Y.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-powered/thumbnails/Godrej_Washing_Machines_with_AI_Powered_Turbidity_Sensing_Golf_English_EOvPO2Zvr3Y.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-powered/transcripts/Godrej_Washing_Machines_with_AI_Powered_Turbidity_Sensing_Golf_English_EOvPO2Zvr3Y.json",
+        "video_path": "http:/cres/queries/ai-powered/videos/Godrej_Washing_Machines_with_AI_Powered_Turbidity_Sensing_Golf_English_EOvPO2Zvr3Y.mp4",
+        "thumb_path": "http:/cres/queries/ai-powered/thumbnails/Godrej_Washing_Machines_with_AI_Powered_Turbidity_Sensing_Golf_English_EOvPO2Zvr3Y.webp",
+        "json_path": "http:/cres/queries/ai-powered/transcripts/Godrej_Washing_Machines_with_AI_Powered_Turbidity_Sensing_Golf_English_EOvPO2Zvr3Y.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "ai-powered",
         "query_updated_at": "2026-02-10T16:46:05.976000+00:00"
     },
     {
+        "title": "Google A2UI: Agent-to-User Interface - Build AI Generated Apps EASILY! (CopilotKit AG-UI) Opensource",
+        "video_path": "http:/cres/queries/aionui/videos/Google_A2UI_-_Agent-to-User_Interface_-_Build_AI_Generated_Apps_EASILY_CopilotKit_AG-UI_Opensource_FTtmZQBX-fk.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/Google_A2UI_-_Agent-to-User_Interface_-_Build_AI_Generated_Apps_EASILY_CopilotKit_AG-UI_Opensource_FTtmZQBX-fk.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/Google_A2UI_-_Agent-to-User_Interface_-_Build_AI_Generated_Apps_EASILY_CopilotKit_AG-UI_Opensource_FTtmZQBX-fk.json",
+        "keywords": [
+            {
+                "word": "agent",
+                "count": 26,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "going",
+                "count": 20,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "a2ui",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "it's",
+                "count": 12,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "agui",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "Recently, I was on Google's developer blog and noticed a new framework by Google, A2Ui, which is an open project for agent-driven interfaces built by cobaltkit And it's really impressive",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
         "title": "Google AI Studio Just Killed Every AI Coding Tools",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Google_AI_Studio_Just_Killed_Every_AI_Coding_Tools_3-NkjtqnYDE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Google_AI_Studio_Just_Killed_Every_AI_Coding_Tools_3-NkjtqnYDE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Google_AI_Studio_Just_Killed_Every_AI_Coding_Tools_3-NkjtqnYDE.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Google_AI_Studio_Just_Killed_Every_AI_Coding_Tools_3-NkjtqnYDE.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Google_AI_Studio_Just_Killed_Every_AI_Coding_Tools_3-NkjtqnYDE.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Google_AI_Studio_Just_Killed_Every_AI_Coding_Tools_3-NkjtqnYDE.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1215,9 +2195,9 @@
     },
     {
         "title": "Google Search Template",
-        "video_path": "http://192.168.2.130:9000/cres/queries/google/videos/Google_Search_Template_9Rxb1OEArIo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/google/thumbnails/Google_Search_Template_9Rxb1OEArIo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/google/transcripts/Google_Search_Template_9Rxb1OEArIo.json",
+        "video_path": "http:/cres/queries/google/videos/Google_Search_Template_9Rxb1OEArIo.mp4",
+        "thumb_path": "http:/cres/queries/google/thumbnails/Google_Search_Template_9Rxb1OEArIo.webp",
+        "json_path": "http:/cres/queries/google/transcripts/Google_Search_Template_9Rxb1OEArIo.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "google",
@@ -1225,9 +2205,9 @@
     },
     {
         "title": "Google’s AI Course for Beginners (in 10 minutes)!",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Google_s_AI_Course_for_Beginners_in_10_minutes_Yq0QkCxoTHM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Google_s_AI_Course_for_Beginners_in_10_minutes_Yq0QkCxoTHM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Google_s_AI_Course_for_Beginners_in_10_minutes_Yq0QkCxoTHM.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Google_s_AI_Course_for_Beginners_in_10_minutes_Yq0QkCxoTHM.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Google_s_AI_Course_for_Beginners_in_10_minutes_Yq0QkCxoTHM.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Google_s_AI_Course_for_Beginners_in_10_minutes_Yq0QkCxoTHM.json",
         "keywords": [
             {
                 "word": "deep learning",
@@ -1266,9 +2246,9 @@
     },
     {
         "title": "Has Generative AI Already Peaked? - Computerphile",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Has_Generative_AI_Already_Peaked_-_Computerphile_dDUC-LqVrPU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Has_Generative_AI_Already_Peaked_-_Computerphile_dDUC-LqVrPU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Has_Generative_AI_Already_Peaked_-_Computerphile_dDUC-LqVrPU.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Has_Generative_AI_Already_Peaked_-_Computerphile_dDUC-LqVrPU.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Has_Generative_AI_Already_Peaked_-_Computerphile_dDUC-LqVrPU.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Has_Generative_AI_Already_Peaked_-_Computerphile_dDUC-LqVrPU.json",
         "keywords": [
             {
                 "word": "right",
@@ -1307,9 +2287,9 @@
     },
     {
         "title": "How I Would Use AI to Learn Coding Faster (5 Steps That Actually Work)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/How_I_Would_Use_AI_to_Learn_Coding_Faster_5_Steps_That_Actually_Work_UWnv_FNWut0.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/How_I_Would_Use_AI_to_Learn_Coding_Faster_5_Steps_That_Actually_Work_UWnv_FNWut0.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/How_I_Would_Use_AI_to_Learn_Coding_Faster_5_Steps_That_Actually_Work_UWnv_FNWut0.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/How_I_Would_Use_AI_to_Learn_Coding_Faster_5_Steps_That_Actually_Work_UWnv_FNWut0.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/How_I_Would_Use_AI_to_Learn_Coding_Faster_5_Steps_That_Actually_Work_UWnv_FNWut0.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/How_I_Would_Use_AI_to_Learn_Coding_Faster_5_Steps_That_Actually_Work_UWnv_FNWut0.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1347,10 +2327,92 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "How Large Language Models Work",
+        "video_path": "http:/cres/queries/hands-on-large-language-models/videos/How_Large_Language_Models_Work_5sLYAQS9sWQ.mp4",
+        "thumb_path": "http:/cres/queries/hands-on-large-language-models/thumbnails/How_Large_Language_Models_Work_5sLYAQS9sWQ.webp",
+        "json_path": "http:/cres/queries/hands-on-large-language-models/transcripts/How_Large_Language_Models_Work_5sLYAQS9sWQ.json",
+        "keywords": [
+            {
+                "word": "model",
+                "count": 22,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "data",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "large",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "language",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "models",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "GPT or generative pre-trained transformer is a large language model or an L-L-M that can generate human-like text And I've been using GPT in its various forms for years",
+        "search_query": "Hands-On-Large-Language-Models",
+        "query_updated_at": "2026-02-12T18:42:53.910000+00:00"
+    },
+    {
+        "title": "How To Row a Boat",
+        "video_path": "http:/cres/queries/rowboat/videos/How_To_Row_a_Boat_uHn94aJPSeo.mp4",
+        "thumb_path": "http:/cres/queries/rowboat/thumbnails/How_To_Row_a_Boat_uHn94aJPSeo.jpg",
+        "json_path": "http:/cres/queries/rowboat/transcripts/How_To_Row_a_Boat_uHn94aJPSeo.json",
+        "keywords": [
+            {
+                "word": "boat",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "row",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "dock",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "oars",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "paddles",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "Growing a boat may seem like a no-brainer, but in actuality, it's something of a law start So today, let's go through some of the finer points of how to row a boat",
+        "search_query": "rowboat",
+        "query_updated_at": "2026-02-12T18:38:09.358000+00:00"
+    },
+    {
         "title": "How is AI Powered?",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-powered/videos/How_is_AI_Powered_rP6A0LlvwNk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-powered/thumbnails/How_is_AI_Powered_rP6A0LlvwNk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-powered/transcripts/How_is_AI_Powered_rP6A0LlvwNk.json",
+        "video_path": "http:/cres/queries/ai-powered/videos/How_is_AI_Powered_rP6A0LlvwNk.mp4",
+        "thumb_path": "http:/cres/queries/ai-powered/thumbnails/How_is_AI_Powered_rP6A0LlvwNk.webp",
+        "json_path": "http:/cres/queries/ai-powered/transcripts/How_is_AI_Powered_rP6A0LlvwNk.json",
         "keywords": [
             {
                 "word": "natural gas",
@@ -1383,9 +2445,9 @@
     },
     {
         "title": "How to Code with AI (For Non-Coders)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/How_to_Code_with_AI_For_Non-Coders_zSlkAO9jB8I.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/How_to_Code_with_AI_For_Non-Coders_zSlkAO9jB8I.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/How_to_Code_with_AI_For_Non-Coders_zSlkAO9jB8I.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/How_to_Code_with_AI_For_Non-Coders_zSlkAO9jB8I.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/How_to_Code_with_AI_For_Non-Coders_zSlkAO9jB8I.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/How_to_Code_with_AI_For_Non-Coders_zSlkAO9jB8I.json",
         "keywords": [
             {
                 "word": "Python",
@@ -1411,10 +2473,51 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "How to Row a Row Boat",
+        "video_path": "http:/cres/queries/rowboat/videos/How_to_Row_a_Row_Boat_58yd9DUp8N4.mp4",
+        "thumb_path": "http:/cres/queries/rowboat/thumbnails/How_to_Row_a_Row_Boat_58yd9DUp8N4.webp",
+        "json_path": "http:/cres/queries/rowboat/transcripts/How_to_Row_a_Row_Boat_58yd9DUp8N4.json",
+        "keywords": [
+            {
+                "word": "back",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "going",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "boat",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "you're",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "dock",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "There's two ropes and they always get attached to the more stable bar in the dock So the vertical ones, not these little dinky angular ones",
+        "search_query": "rowboat",
+        "query_updated_at": "2026-02-12T18:38:09.358000+00:00"
+    },
+    {
         "title": "Huggingface小白AI入门，你必须了解的免费开源模型大超市",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/Huggingface_AI_51U_pSF5fhA.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/Huggingface_AI_51U_pSF5fhA.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/Huggingface_AI_51U_pSF5fhA.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/Huggingface_AI_51U_pSF5fhA.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/Huggingface_AI_51U_pSF5fhA.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/Huggingface_AI_51U_pSF5fhA.json",
         "keywords": [
             {
                 "word": "一个",
@@ -1453,9 +2556,9 @@
     },
     {
         "title": "I Built a Neural Network from Scratch",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/I_Built_a_Neural_Network_from_Scratch_cAkMcPfY_Ns.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/I_Built_a_Neural_Network_from_Scratch_cAkMcPfY_Ns.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/I_Built_a_Neural_Network_from_Scratch_cAkMcPfY_Ns.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/I_Built_a_Neural_Network_from_Scratch_cAkMcPfY_Ns.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/I_Built_a_Neural_Network_from_Scratch_cAkMcPfY_Ns.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/I_Built_a_Neural_Network_from_Scratch_cAkMcPfY_Ns.json",
         "keywords": [
             {
                 "word": "weights",
@@ -1494,9 +2597,9 @@
     },
     {
         "title": "I Have Spent 500+ Hours Programming With AI. This Is what I learned",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/I_Have_Spent_500%2B_Hours_Programming_With_AI._This_Is_what_I_learned_91B_v-wOaws.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/I_Have_Spent_500%2B_Hours_Programming_With_AI._This_Is_what_I_learned_91B_v-wOaws.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/I_Have_Spent_500%2B_Hours_Programming_With_AI._This_Is_what_I_learned_91B_v-wOaws.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/I_Have_Spent_500%2B_Hours_Programming_With_AI._This_Is_what_I_learned_91B_v-wOaws.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/I_Have_Spent_500%2B_Hours_Programming_With_AI._This_Is_what_I_learned_91B_v-wOaws.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/I_Have_Spent_500%2B_Hours_Programming_With_AI._This_Is_what_I_learned_91B_v-wOaws.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1535,9 +2638,9 @@
     },
     {
         "title": "I actually tried AI coding and it's worse than I thought...",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/I_actually_tried_AI_coding_and_it_s_worse_than_I_thought..._DLwyGjFsPPM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/I_actually_tried_AI_coding_and_it_s_worse_than_I_thought..._DLwyGjFsPPM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/I_actually_tried_AI_coding_and_it_s_worse_than_I_thought..._DLwyGjFsPPM.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/I_actually_tried_AI_coding_and_it_s_worse_than_I_thought..._DLwyGjFsPPM.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/I_actually_tried_AI_coding_and_it_s_worse_than_I_thought..._DLwyGjFsPPM.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/I_actually_tried_AI_coding_and_it_s_worse_than_I_thought..._DLwyGjFsPPM.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1576,9 +2679,9 @@
     },
     {
         "title": "I'm an ex-Google interviewer. You're doing LeetCode wrong.",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ex-google/videos/I_m_an_ex-Google_interviewer._You_re_doing_LeetCode_wrong._Cq7eND5KSPk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ex-google/thumbnails/I_m_an_ex-Google_interviewer._You_re_doing_LeetCode_wrong._Cq7eND5KSPk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ex-google/transcripts/I_m_an_ex-Google_interviewer._You_re_doing_LeetCode_wrong._Cq7eND5KSPk.json",
+        "video_path": "http:/cres/queries/ex-google/videos/I_m_an_ex-Google_interviewer._You_re_doing_LeetCode_wrong._Cq7eND5KSPk.mp4",
+        "thumb_path": "http:/cres/queries/ex-google/thumbnails/I_m_an_ex-Google_interviewer._You_re_doing_LeetCode_wrong._Cq7eND5KSPk.webp",
+        "json_path": "http:/cres/queries/ex-google/transcripts/I_m_an_ex-Google_interviewer._You_re_doing_LeetCode_wrong._Cq7eND5KSPk.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "ex-google",
@@ -1586,9 +2689,9 @@
     },
     {
         "title": "Inside Microsoft's Massive Headquarters",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/Inside_Microsoft_s_Massive_Headquarters_lOTmYcxCxjU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/Inside_Microsoft_s_Massive_Headquarters_lOTmYcxCxjU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/Inside_Microsoft_s_Massive_Headquarters_lOTmYcxCxjU.json",
+        "video_path": "http:/cres/queries/microsoft/videos/Inside_Microsoft_s_Massive_Headquarters_lOTmYcxCxjU.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/Inside_Microsoft_s_Massive_Headquarters_lOTmYcxCxjU.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/Inside_Microsoft_s_Massive_Headquarters_lOTmYcxCxjU.json",
         "keywords": [
             {
                 "word": "Microsoft",
@@ -1615,9 +2718,9 @@
     },
     {
         "title": "Intelligence",
-        "video_path": "http://192.168.2.130:9000/cres/queries/intelligence/videos/Intelligence_QL937aTiBaU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/intelligence/thumbnails/Intelligence_QL937aTiBaU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/intelligence/transcripts/Intelligence_QL937aTiBaU.json",
+        "video_path": "http:/cres/queries/intelligence/videos/Intelligence_QL937aTiBaU.mp4",
+        "thumb_path": "http:/cres/queries/intelligence/thumbnails/Intelligence_QL937aTiBaU.webp",
+        "json_path": "http:/cres/queries/intelligence/transcripts/Intelligence_QL937aTiBaU.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "intelligence",
@@ -1625,9 +2728,9 @@
     },
     {
         "title": "Introducing Google Vids",
-        "video_path": "http://192.168.2.130:9000/cres/queries/google/videos/Introducing_Google_Vids_4SCjXcBeW1E.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/google/thumbnails/Introducing_Google_Vids_4SCjXcBeW1E.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/google/transcripts/Introducing_Google_Vids_4SCjXcBeW1E.json",
+        "video_path": "http:/cres/queries/google/videos/Introducing_Google_Vids_4SCjXcBeW1E.mp4",
+        "thumb_path": "http:/cres/queries/google/thumbnails/Introducing_Google_Vids_4SCjXcBeW1E.webp",
+        "json_path": "http:/cres/queries/google/transcripts/Introducing_Google_Vids_4SCjXcBeW1E.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "google",
@@ -1635,9 +2738,9 @@
     },
     {
         "title": "Introducing Windows 11",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/Introducing_Windows_11_Uh9643c2P6k.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/Introducing_Windows_11_Uh9643c2P6k.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/Introducing_Windows_11_Uh9643c2P6k.json",
+        "video_path": "http:/cres/queries/microsoft/videos/Introducing_Windows_11_Uh9643c2P6k.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/Introducing_Windows_11_Uh9643c2P6k.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/Introducing_Windows_11_Uh9643c2P6k.json",
         "keywords": [
             {
                 "word": "general",
@@ -1664,9 +2767,9 @@
     },
     {
         "title": "Introducing iPhone 17 Pro | Apple",
-        "video_path": "http://192.168.2.130:9000/cres/queries/apple/videos/Introducing_iPhone_17_Pro_Apple__-AS5DtDeqs.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/apple/thumbnails/Introducing_iPhone_17_Pro_Apple__-AS5DtDeqs.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/apple/transcripts/Introducing_iPhone_17_Pro_Apple__-AS5DtDeqs.json",
+        "video_path": "http:/cres/queries/apple/videos/Introducing_iPhone_17_Pro_Apple__-AS5DtDeqs.mp4",
+        "thumb_path": "http:/cres/queries/apple/thumbnails/Introducing_iPhone_17_Pro_Apple__-AS5DtDeqs.webp",
+        "json_path": "http:/cres/queries/apple/transcripts/Introducing_iPhone_17_Pro_Apple__-AS5DtDeqs.json",
         "keywords": [
             {
                 "word": "pro",
@@ -1704,20 +2807,102 @@
         "query_updated_at": "2026-02-10T16:46:02.682000+00:00"
     },
     {
+        "title": "Is this the BEST BOOK on LLMs? Hands On Large Language Models by Jay Alammar and Maarten Grootendors",
+        "video_path": "http:/cres/queries/hands-on-large-language-models/videos/Is_this_the_BEST_BOOK_on_LLMs_Hands_On_Large_Language_Models_by_Jay_Alammar_and_Maarten_Grootendors_ASniivPApCw.mp4",
+        "thumb_path": "http:/cres/queries/hands-on-large-language-models/thumbnails/Is_this_the_BEST_BOOK_on_LLMs_Hands_On_Large_Language_Models_by_Jay_Alammar_and_Maarten_Grootendors_ASniivPApCw.webp",
+        "json_path": "http:/cres/queries/hands-on-large-language-models/transcripts/Is_this_the_BEST_BOOK_on_LLMs_Hands_On_Large_Language_Models_by_Jay_Alammar_and_Maarten_Grootendors_ASniivPApCw.json",
+        "keywords": [
+            {
+                "word": "book",
+                "count": 23,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "kind",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "llm's",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "llms",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "chapter",
+                "count": 7,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Lama 3 2 came out 2 weeks back, it broke a lot of benchmarks",
+        "search_query": "Hands-On-Large-Language-Models",
+        "query_updated_at": "2026-02-12T18:42:53.910000+00:00"
+    },
+    {
         "title": "Katy Perry - Artificial (Lyrics) Feat. JID",
-        "video_path": "http://192.168.2.130:9000/cres/queries/artificial/videos/Katy_Perry_-_Artificial_Lyrics_Feat._JID_uPOTZTWEDM4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/artificial/thumbnails/Katy_Perry_-_Artificial_Lyrics_Feat._JID_uPOTZTWEDM4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/artificial/transcripts/Katy_Perry_-_Artificial_Lyrics_Feat._JID_uPOTZTWEDM4.json",
+        "video_path": "http:/cres/queries/artificial/videos/Katy_Perry_-_Artificial_Lyrics_Feat._JID_uPOTZTWEDM4.mp4",
+        "thumb_path": "http:/cres/queries/artificial/thumbnails/Katy_Perry_-_Artificial_Lyrics_Feat._JID_uPOTZTWEDM4.webp",
+        "json_path": "http:/cres/queries/artificial/transcripts/Katy_Perry_-_Artificial_Lyrics_Feat._JID_uPOTZTWEDM4.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "artificial",
         "query_updated_at": "2026-02-10T16:47:01.910000+00:00"
     },
     {
+        "title": "Large Language Models explained briefly",
+        "video_path": "http:/cres/queries/hands-on-large-language-models/videos/Large_Language_Models_explained_briefly_LPZh9BOjkQs.mp4",
+        "thumb_path": "http:/cres/queries/hands-on-large-language-models/thumbnails/Large_Language_Models_explained_briefly_LPZh9BOjkQs.webp",
+        "json_path": "http:/cres/queries/hands-on-large-language-models/transcripts/Large_Language_Models_explained_briefly_LPZh9BOjkQs.json",
+        "keywords": [
+            {
+                "word": "model",
+                "count": 24,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "word",
+                "count": 19,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "text",
+                "count": 14,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "training",
+                "count": 13,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "language",
+                "count": 11,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "Imagine you happen across a short movie script that describes a scene between a person and their AI assistant The script has what the person asks the AI, but the AI's response has been torn off",
+        "search_query": "Hands-On-Large-Language-Models",
+        "query_updated_at": "2026-02-12T18:42:53.910000+00:00"
+    },
+    {
         "title": "Learning Software Engineering During the Era of AI | Raymond Fu | TEDxCSTU",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Learning_Software_Engineering_During_the_Era_of_AI_Raymond_Fu_TEDxCSTU_w4rG5GY9IlA.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Learning_Software_Engineering_During_the_Era_of_AI_Raymond_Fu_TEDxCSTU_w4rG5GY9IlA.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Learning_Software_Engineering_During_the_Era_of_AI_Raymond_Fu_TEDxCSTU_w4rG5GY9IlA.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Learning_Software_Engineering_During_the_Era_of_AI_Raymond_Fu_TEDxCSTU_w4rG5GY9IlA.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Learning_Software_Engineering_During_the_Era_of_AI_Raymond_Fu_TEDxCSTU_w4rG5GY9IlA.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Learning_Software_Engineering_During_the_Era_of_AI_Raymond_Fu_TEDxCSTU_w4rG5GY9IlA.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1756,9 +2941,9 @@
     },
     {
         "title": "Magnifier on Mac | Apple",
-        "video_path": "http://192.168.2.130:9000/cres/queries/apple/videos/Magnifier_on_Mac_Apple_R3rBlZGEssw.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/apple/thumbnails/Magnifier_on_Mac_Apple_R3rBlZGEssw.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/apple/transcripts/Magnifier_on_Mac_Apple_R3rBlZGEssw.json",
+        "video_path": "http:/cres/queries/apple/videos/Magnifier_on_Mac_Apple_R3rBlZGEssw.mp4",
+        "thumb_path": "http:/cres/queries/apple/thumbnails/Magnifier_on_Mac_Apple_R3rBlZGEssw.webp",
+        "json_path": "http:/cres/queries/apple/transcripts/Magnifier_on_Mac_Apple_R3rBlZGEssw.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "apple",
@@ -1766,9 +2951,9 @@
     },
     {
         "title": "Masterclass: AI-driven Development for Programmers",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Masterclass_-_AI-driven_Development_for_Programmers_iO1mwxPNP5A.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Masterclass_-_AI-driven_Development_for_Programmers_iO1mwxPNP5A.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Masterclass_-_AI-driven_Development_for_Programmers_iO1mwxPNP5A.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Masterclass_-_AI-driven_Development_for_Programmers_iO1mwxPNP5A.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Masterclass_-_AI-driven_Development_for_Programmers_iO1mwxPNP5A.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Masterclass_-_AI-driven_Development_for_Programmers_iO1mwxPNP5A.json",
         "keywords": [
             {
                 "word": "AI",
@@ -1801,9 +2986,9 @@
     },
     {
         "title": "Microsoft Copilot: Your everyday AI companion",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/Microsoft_Copilot_-_Your_everyday_AI_companion_l4B1UflAty8.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/Microsoft_Copilot_-_Your_everyday_AI_companion_l4B1UflAty8.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/Microsoft_Copilot_-_Your_everyday_AI_companion_l4B1UflAty8.json",
+        "video_path": "http:/cres/queries/microsoft/videos/Microsoft_Copilot_-_Your_everyday_AI_companion_l4B1UflAty8.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/Microsoft_Copilot_-_Your_everyday_AI_companion_l4B1UflAty8.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/Microsoft_Copilot_-_Your_everyday_AI_companion_l4B1UflAty8.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "Microsoft",
@@ -1811,9 +2996,9 @@
     },
     {
         "title": "Microsoft Finally Admits They Were Wrong",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/Microsoft_Finally_Admits_They_Were_Wrong_n6O0MEuIyuo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/Microsoft_Finally_Admits_They_Were_Wrong_n6O0MEuIyuo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/Microsoft_Finally_Admits_They_Were_Wrong_n6O0MEuIyuo.json",
+        "video_path": "http:/cres/queries/microsoft/videos/Microsoft_Finally_Admits_They_Were_Wrong_n6O0MEuIyuo.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/Microsoft_Finally_Admits_They_Were_Wrong_n6O0MEuIyuo.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/Microsoft_Finally_Admits_They_Were_Wrong_n6O0MEuIyuo.json",
         "keywords": [
             {
                 "word": "co-pilot",
@@ -1852,19 +3037,60 @@
     },
     {
         "title": "Microsoft can monetize AI better than any software company, says Jefferies' Brent Thill",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/Microsoft_can_monetize_AI_better_than_any_software_company_says_Jefferies_Brent_Thill_64vULvarHhQ.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/Microsoft_can_monetize_AI_better_than_any_software_company_says_Jefferies_Brent_Thill_64vULvarHhQ.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/Microsoft_can_monetize_AI_better_than_any_software_company_says_Jefferies_Brent_Thill_64vULvarHhQ.json",
+        "video_path": "http:/cres/queries/microsoft/videos/Microsoft_can_monetize_AI_better_than_any_software_company_says_Jefferies_Brent_Thill_64vULvarHhQ.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/Microsoft_can_monetize_AI_better_than_any_software_company_says_Jefferies_Brent_Thill_64vULvarHhQ.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/Microsoft_can_monetize_AI_better_than_any_software_company_says_Jefferies_Brent_Thill_64vULvarHhQ.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "Microsoft",
         "query_updated_at": "2026-02-10T16:46:29.218000+00:00"
     },
     {
+        "title": "Multimodal Large Language Models | Chapter 9 — Hands-On Large Language Models",
+        "video_path": "http:/cres/queries/hands-on-large-language-models/videos/Multimodal_Large_Language_Models_Chapter_9_Hands-On_Large_Language_Models_ka6m6GG5LMY.mp4",
+        "thumb_path": "http:/cres/queries/hands-on-large-language-models/thumbnails/Multimodal_Large_Language_Models_Chapter_9_Hands-On_Large_Language_Models_ka6m6GG5LMY.webp",
+        "json_path": "http:/cres/queries/hands-on-large-language-models/transcripts/Multimodal_Large_Language_Models_Chapter_9_Hands-On_Large_Language_Models_ka6m6GG5LMY.json",
+        "keywords": [
+            {
+                "word": "model",
+                "count": 27,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "image",
+                "count": 26,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "text",
+                "count": 23,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "it's",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "really",
+                "count": 12,
+                "score": 4,
+                "start_time": 0
+            }
+        ],
+        "summary": "In this chapter, we're going to explore how large language models which are, you know, absolute masters of text can be taught to understand and even reason about the visual world It's a really fascinating journey that bridges the gap between language and sight and it dramatically expands what these AI models are capable of",
+        "search_query": "Hands-On-Large-Language-Models",
+        "query_updated_at": "2026-02-12T18:42:53.910000+00:00"
+    },
+    {
         "title": "NVIDIA AI Building Blocks for Agentic AI",
-        "video_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/videos/NVIDIA_AI_Building_Blocks_for_Agentic_AI_Htg-J86Usig.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/thumbnails/NVIDIA_AI_Building_Blocks_for_Agentic_AI_Htg-J86Usig.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/transcripts/NVIDIA_AI_Building_Blocks_for_Agentic_AI_Htg-J86Usig.json",
+        "video_path": "http:/cres/queries/nvidia-ai/videos/NVIDIA_AI_Building_Blocks_for_Agentic_AI_Htg-J86Usig.mp4",
+        "thumb_path": "http:/cres/queries/nvidia-ai/thumbnails/NVIDIA_AI_Building_Blocks_for_Agentic_AI_Htg-J86Usig.webp",
+        "json_path": "http:/cres/queries/nvidia-ai/transcripts/NVIDIA_AI_Building_Blocks_for_Agentic_AI_Htg-J86Usig.json",
         "keywords": [
             {
                 "word": "A.I. agents",
@@ -1891,9 +3117,9 @@
     },
     {
         "title": "Nail Trends Everyone Will Be Wearing in 2026 | The Social",
-        "video_path": "http://192.168.2.130:9000/cres/queries/trends/videos/Nail_Trends_Everyone_Will_Be_Wearing_in_2026_The_Social_-tJ6F6qode0.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/trends/thumbnails/Nail_Trends_Everyone_Will_Be_Wearing_in_2026_The_Social_-tJ6F6qode0.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/trends/transcripts/Nail_Trends_Everyone_Will_Be_Wearing_in_2026_The_Social_-tJ6F6qode0.json",
+        "video_path": "http:/cres/queries/trends/videos/Nail_Trends_Everyone_Will_Be_Wearing_in_2026_The_Social_-tJ6F6qode0.mp4",
+        "thumb_path": "http:/cres/queries/trends/thumbnails/Nail_Trends_Everyone_Will_Be_Wearing_in_2026_The_Social_-tJ6F6qode0.webp",
+        "json_path": "http:/cres/queries/trends/transcripts/Nail_Trends_Everyone_Will_Be_Wearing_in_2026_The_Social_-tJ6F6qode0.json",
         "keywords": [
             {
                 "word": "plaid nails",
@@ -1932,9 +3158,9 @@
     },
     {
         "title": "Noah Cyrus - Again (Lyrics) Ft. XXXTENTACION",
-        "video_path": "http://192.168.2.130:9000/cres/queries/again/videos/Noah_Cyrus_-_Again_Lyrics_Ft._XXXTENTACION_gsl_8xorMIM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/again/thumbnails/Noah_Cyrus_-_Again_Lyrics_Ft._XXXTENTACION_gsl_8xorMIM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/again/transcripts/Noah_Cyrus_-_Again_Lyrics_Ft._XXXTENTACION_gsl_8xorMIM.json",
+        "video_path": "http:/cres/queries/again/videos/Noah_Cyrus_-_Again_Lyrics_Ft._XXXTENTACION_gsl_8xorMIM.mp4",
+        "thumb_path": "http:/cres/queries/again/thumbnails/Noah_Cyrus_-_Again_Lyrics_Ft._XXXTENTACION_gsl_8xorMIM.webp",
+        "json_path": "http:/cres/queries/again/transcripts/Noah_Cyrus_-_Again_Lyrics_Ft._XXXTENTACION_gsl_8xorMIM.json",
         "keywords": [
             {
                 "word": "love",
@@ -1961,9 +3187,9 @@
     },
     {
         "title": "Noah Cyrus - Again (Official Music Video) ft. XXXTENTACION",
-        "video_path": "http://192.168.2.130:9000/cres/queries/again/videos/Noah_Cyrus_-_Again_Official_Music_Video_ft._XXXTENTACION_G_SjnHwxWMU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/again/thumbnails/Noah_Cyrus_-_Again_Official_Music_Video_ft._XXXTENTACION_G_SjnHwxWMU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/again/transcripts/Noah_Cyrus_-_Again_Official_Music_Video_ft._XXXTENTACION_G_SjnHwxWMU.json",
+        "video_path": "http:/cres/queries/again/videos/Noah_Cyrus_-_Again_Official_Music_Video_ft._XXXTENTACION_G_SjnHwxWMU.mp4",
+        "thumb_path": "http:/cres/queries/again/thumbnails/Noah_Cyrus_-_Again_Official_Music_Video_ft._XXXTENTACION_G_SjnHwxWMU.webp",
+        "json_path": "http:/cres/queries/again/transcripts/Noah_Cyrus_-_Again_Official_Music_Video_ft._XXXTENTACION_G_SjnHwxWMU.json",
         "keywords": [
             {
                 "word": "don't know",
@@ -1996,9 +3222,9 @@
     },
     {
         "title": "Nvidia CEO: AI is going to transform every single industry",
-        "video_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/videos/Nvidia_CEO_-_AI_is_going_to_transform_every_single_industry_-AAT_h47Pyw.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/thumbnails/Nvidia_CEO_-_AI_is_going_to_transform_every_single_industry_-AAT_h47Pyw.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/transcripts/Nvidia_CEO_-_AI_is_going_to_transform_every_single_industry_-AAT_h47Pyw.json",
+        "video_path": "http:/cres/queries/nvidia-ai/videos/Nvidia_CEO_-_AI_is_going_to_transform_every_single_industry_-AAT_h47Pyw.mp4",
+        "thumb_path": "http:/cres/queries/nvidia-ai/thumbnails/Nvidia_CEO_-_AI_is_going_to_transform_every_single_industry_-AAT_h47Pyw.webp",
+        "json_path": "http:/cres/queries/nvidia-ai/transcripts/Nvidia_CEO_-_AI_is_going_to_transform_every_single_industry_-AAT_h47Pyw.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2025,9 +3251,9 @@
     },
     {
         "title": "Nvidia announces \"Vera Rubin\" AI platform at CES",
-        "video_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/videos/Nvidia_announces_Vera_Rubin_AI_platform_at_CES_GUTg1LlH3sQ.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/thumbnails/Nvidia_announces_Vera_Rubin_AI_platform_at_CES_GUTg1LlH3sQ.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/transcripts/Nvidia_announces_Vera_Rubin_AI_platform_at_CES_GUTg1LlH3sQ.json",
+        "video_path": "http:/cres/queries/nvidia-ai/videos/Nvidia_announces_Vera_Rubin_AI_platform_at_CES_GUTg1LlH3sQ.mp4",
+        "thumb_path": "http:/cres/queries/nvidia-ai/thumbnails/Nvidia_announces_Vera_Rubin_AI_platform_at_CES_GUTg1LlH3sQ.webp",
+        "json_path": "http:/cres/queries/nvidia-ai/transcripts/Nvidia_announces_Vera_Rubin_AI_platform_at_CES_GUTg1LlH3sQ.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2060,9 +3286,9 @@
     },
     {
         "title": "OpenAI Super Bowl 2026 | Codex | You Can Just Build Things",
-        "video_path": "http://192.168.2.130:9000/cres/queries/openai/videos/OpenAI_Super_Bowl_2026_Codex_You_Can_Just_Build_Things_aCN9iCXNJqQ.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/openai/thumbnails/OpenAI_Super_Bowl_2026_Codex_You_Can_Just_Build_Things_aCN9iCXNJqQ.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/openai/transcripts/OpenAI_Super_Bowl_2026_Codex_You_Can_Just_Build_Things_aCN9iCXNJqQ.json",
+        "video_path": "http:/cres/queries/openai/videos/OpenAI_Super_Bowl_2026_Codex_You_Can_Just_Build_Things_aCN9iCXNJqQ.mp4",
+        "thumb_path": "http:/cres/queries/openai/thumbnails/OpenAI_Super_Bowl_2026_Codex_You_Can_Just_Build_Things_aCN9iCXNJqQ.webp",
+        "json_path": "http:/cres/queries/openai/transcripts/OpenAI_Super_Bowl_2026_Codex_You_Can_Just_Build_Things_aCN9iCXNJqQ.json",
         "keywords": [
             {
                 "word": "general",
@@ -2089,9 +3315,9 @@
     },
     {
         "title": "OpenAI 开源模型 GPT-OSS 120B 全面测试：本地部署、代码生成、逻辑推理，它真的比肩 O4 mini 吗？#openai #chatgpt #ollama #gptoss",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/OpenAI_GPT-OSS_120B_-_O4_mini_openai_chatgpt_ollama_gptoss_DvmJo_mUi3o.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/OpenAI_GPT-OSS_120B_-_O4_mini_openai_chatgpt_ollama_gptoss_DvmJo_mUi3o.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/OpenAI_GPT-OSS_120B_-_O4_mini_openai_chatgpt_ollama_gptoss_DvmJo_mUi3o.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/OpenAI_GPT-OSS_120B_-_O4_mini_openai_chatgpt_ollama_gptoss_DvmJo_mUi3o.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/OpenAI_GPT-OSS_120B_-_O4_mini_openai_chatgpt_ollama_gptoss_DvmJo_mUi3o.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/OpenAI_GPT-OSS_120B_-_O4_mini_openai_chatgpt_ollama_gptoss_DvmJo_mUi3o.json",
         "keywords": [
             {
                 "word": "的是",
@@ -2130,9 +3356,9 @@
     },
     {
         "title": "OpenAI's New Device was LEAKED (Dime)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/openai/videos/OpenAI_s_New_Device_was_LEAKED_Dime_boP_p-2YoZs.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/openai/thumbnails/OpenAI_s_New_Device_was_LEAKED_Dime_boP_p-2YoZs.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/openai/transcripts/OpenAI_s_New_Device_was_LEAKED_Dime_boP_p-2YoZs.json",
+        "video_path": "http:/cres/queries/openai/videos/OpenAI_s_New_Device_was_LEAKED_Dime_boP_p-2YoZs.mp4",
+        "thumb_path": "http:/cres/queries/openai/thumbnails/OpenAI_s_New_Device_was_LEAKED_Dime_boP_p-2YoZs.webp",
+        "json_path": "http:/cres/queries/openai/transcripts/OpenAI_s_New_Device_was_LEAKED_Dime_boP_p-2YoZs.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "openai",
@@ -2140,9 +3366,9 @@
     },
     {
         "title": "OpenAI终于开源！普通电脑（8G显存）硬核挑战gpt-oss 20B大模型本地部署，我替你试过了，结果出乎意料 OpenAI | gpt-oss 20B 120B | 开源大模型",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/OpenAI_8G_gpt-oss_20B_OpenAI_gpt-oss_20B_120B_i4OA6h0ueg4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/OpenAI_8G_gpt-oss_20B_OpenAI_gpt-oss_20B_120B_i4OA6h0ueg4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/OpenAI_8G_gpt-oss_20B_OpenAI_gpt-oss_20B_120B_i4OA6h0ueg4.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/OpenAI_8G_gpt-oss_20B_OpenAI_gpt-oss_20B_120B_i4OA6h0ueg4.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/OpenAI_8G_gpt-oss_20B_OpenAI_gpt-oss_20B_120B_i4OA6h0ueg4.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/OpenAI_8G_gpt-oss_20B_OpenAI_gpt-oss_20B_120B_i4OA6h0ueg4.json",
         "keywords": [
             {
                 "word": "这个",
@@ -2181,9 +3407,9 @@
     },
     {
         "title": "Oracle",
-        "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/Oracle_hZPEPs52bZg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/Oracle_hZPEPs52bZg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/oracle/transcripts/Oracle_hZPEPs52bZg.json",
+        "video_path": "http:/cres/queries/oracle/videos/Oracle_hZPEPs52bZg.mp4",
+        "thumb_path": "http:/cres/queries/oracle/thumbnails/Oracle_hZPEPs52bZg.webp",
+        "json_path": "http:/cres/queries/oracle/transcripts/Oracle_hZPEPs52bZg.json",
         "keywords": [
             {
                 "word": "doubt",
@@ -2210,9 +3436,9 @@
     },
     {
         "title": "Oracle May Lay Off up to 30,000 Employees, And The Reason is 'Commitment' to Sam Altman's OpenAI",
-        "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/Oracle_May_Lay_Off_up_to_30_000_Employees_And_The_Reason_is_Commitment_to_Sam_Altman_s_OpenAI_7CA3lGYrVSc.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/Oracle_May_Lay_Off_up_to_30_000_Employees_And_The_Reason_is_Commitment_to_Sam_Altman_s_OpenAI_7CA3lGYrVSc.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/oracle/transcripts/Oracle_May_Lay_Off_up_to_30_000_Employees_And_The_Reason_is_Commitment_to_Sam_Altman_s_OpenAI_7CA3lGYrVSc.json",
+        "video_path": "http:/cres/queries/oracle/videos/Oracle_May_Lay_Off_up_to_30_000_Employees_And_The_Reason_is_Commitment_to_Sam_Altman_s_OpenAI_7CA3lGYrVSc.mp4",
+        "thumb_path": "http:/cres/queries/oracle/thumbnails/Oracle_May_Lay_Off_up_to_30_000_Employees_And_The_Reason_is_Commitment_to_Sam_Altman_s_OpenAI_7CA3lGYrVSc.webp",
+        "json_path": "http:/cres/queries/oracle/transcripts/Oracle_May_Lay_Off_up_to_30_000_Employees_And_The_Reason_is_Commitment_to_Sam_Altman_s_OpenAI_7CA3lGYrVSc.json",
         "keywords": [
             {
                 "word": "Oracle",
@@ -2244,10 +3470,153 @@
         "query_updated_at": "2026-02-10T16:54:26.183000+00:00"
     },
     {
+        "title": "Read these if you want to build AI applications",
+        "video_path": "http:/cres/queries/hands-on-large-language-models/videos/Read_these_if_you_want_to_build_AI_applications_379s4W_EaTk.mp4",
+        "thumb_path": "http:/cres/queries/hands-on-large-language-models/thumbnails/Read_these_if_you_want_to_build_AI_applications_379s4W_EaTk.webp",
+        "json_path": "http:/cres/queries/hands-on-large-language-models/transcripts/Read_these_if_you_want_to_build_AI_applications_379s4W_EaTk.json",
+        "keywords": [],
+        "summary": "Generated automatically",
+        "search_query": "Hands-On-Large-Language-Models",
+        "query_updated_at": "2026-02-12T18:42:53.910000+00:00"
+    },
+    {
+        "title": "Reinforcement Learning Tutorial - RLVR with NVIDIA & Unsloth",
+        "video_path": "http:/cres/queries/unsloth/videos/Reinforcement_Learning_Tutorial_-_RLVR_with_NVIDIA_Unsloth_9t-BAjzBWj8.mp4",
+        "thumb_path": "http:/cres/queries/unsloth/thumbnails/Reinforcement_Learning_Tutorial_-_RLVR_with_NVIDIA_Unsloth_9t-BAjzBWj8.webp",
+        "json_path": "http:/cres/queries/unsloth/transcripts/Reinforcement_Learning_Tutorial_-_RLVR_with_NVIDIA_Unsloth_9t-BAjzBWj8.json",
+        "keywords": [],
+        "summary": "Generated automatically",
+        "search_query": "unsloth",
+        "query_updated_at": "2026-02-12T18:42:56.953000+00:00"
+    },
+    {
+        "title": "Rowboat",
+        "video_path": "http:/cres/queries/rowboat/videos/Rowboat_3-81h8r2_LQ.mp4",
+        "thumb_path": "http:/cres/queries/rowboat/thumbnails/Rowboat_3-81h8r2_LQ.webp",
+        "json_path": "http:/cres/queries/rowboat/transcripts/Rowboat_3-81h8r2_LQ.json",
+        "keywords": [
+            {
+                "word": "kiss",
+                "count": 46,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "sucks",
+                "count": 46,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "world",
+                "count": 25,
+                "score": 5,
+                "start_time": 0
+            },
+            {
+                "word": "butterflies",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "jar",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "I Now it is in the air, blinding me with smoke, you are the air I breathe, when I choke, Butterflies in the jar, Butterflies in the jar, Butterflies in the jar, so pamphlets, Get out of my raffles, Get out of my raffles, get out of my raffles, I love you honey, it sucks in your kiss, it sucks in your kiss, it sucks in your kiss, it sucks in your kiss, it sucks in your kiss, it sucks in your kiss, you are my friend, I love you honey, it sucks in your kiss, it sucks in your kis",
+        "search_query": "rowboat",
+        "query_updated_at": "2026-02-12T18:38:09.358000+00:00"
+    },
+    {
+        "title": "Rowboat",
+        "video_path": "http:/cres/queries/rowboat/videos/Rowboat_9sBYeHxGTTQ.mp4",
+        "thumb_path": "http:/cres/queries/rowboat/thumbnails/Rowboat_9sBYeHxGTTQ.webp",
+        "json_path": "http:/cres/queries/rowboat/transcripts/Rowboat_9sBYeHxGTTQ.json",
+        "keywords": [
+            {
+                "word": "she",
+                "count": 9,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "away",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "you'll",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "don't",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "friend",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "The End Robo Roll me to the shore And she don't wanna be my friend no more She dug a hole in the bottom of my soul She don't wanna be my friend no more And took me out Give me some food in your child Go in no place I'll be Talking to nobody You'll be strange You'll be far away Big fat moon And my body is out of town With no burn and waves And she's a billion years away Dark food on the floor And I've been like this before She is all And everything else is small Take me out Gi",
+        "search_query": "rowboat",
+        "query_updated_at": "2026-02-12T18:38:09.358000+00:00"
+    },
+    {
+        "title": "Rowboat",
+        "video_path": "http:/cres/queries/rowboat/videos/Rowboat_RDs73VyafI4.mp4",
+        "thumb_path": "http:/cres/queries/rowboat/thumbnails/Rowboat_RDs73VyafI4.webp",
+        "json_path": "http:/cres/queries/rowboat/transcripts/Rowboat_RDs73VyafI4.json",
+        "keywords": [
+            {
+                "word": "she",
+                "count": 10,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "don't",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "friend",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "want",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "you'll",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "Roll me to the shore, she don't want to be my friend no more, she dug a hole in the bottom of my soul, she don't want to be my friend no more, pick me up, give me some food to eat on your truck, go in no place, I'll be home, talking to nobody, you'll be strange, you'll be far away, big fat moon and my body's out of tune with the bird and waves, she's a billion years away, dark food on the floor and I've been like this before, she is old and everything else is long, pick me up",
+        "search_query": "rowboat",
+        "query_updated_at": "2026-02-12T18:38:09.358000+00:00"
+    },
+    {
         "title": "Stop Using AI for Programming",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Stop_Using_AI_for_Programming_tS_uNo5eDTA.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Stop_Using_AI_for_Programming_tS_uNo5eDTA.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Stop_Using_AI_for_Programming_tS_uNo5eDTA.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Stop_Using_AI_for_Programming_tS_uNo5eDTA.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Stop_Using_AI_for_Programming_tS_uNo5eDTA.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Stop_Using_AI_for_Programming_tS_uNo5eDTA.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2286,9 +3655,9 @@
     },
     {
         "title": "THIS Is How You ACTUALLY Use AI For Programming",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/THIS_Is_How_You_ACTUALLY_Use_AI_For_Programming_jeCDCbqqmes.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/THIS_Is_How_You_ACTUALLY_Use_AI_For_Programming_jeCDCbqqmes.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/THIS_Is_How_You_ACTUALLY_Use_AI_For_Programming_jeCDCbqqmes.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/THIS_Is_How_You_ACTUALLY_Use_AI_For_Programming_jeCDCbqqmes.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/THIS_Is_How_You_ACTUALLY_Use_AI_For_Programming_jeCDCbqqmes.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/THIS_Is_How_You_ACTUALLY_Use_AI_For_Programming_jeCDCbqqmes.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2321,50 +3690,19 @@
     },
     {
         "title": "Tambo",
-        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Tambo_nBoIFynCa50.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Tambo_nBoIFynCa50.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Tambo_nBoIFynCa50.json",
-        "keywords": [
-            {
-                "word": "une",
-                "count": 36,
-                "score": 5,
-                "start_time": 0
-            },
-            {
-                "word": "y'a",
-                "count": 24,
-                "score": 5,
-                "start_time": 0
-            },
-            {
-                "word": "sidi",
-                "count": 14,
-                "score": 4,
-                "start_time": 0
-            },
-            {
-                "word": "ils",
-                "count": 10,
-                "score": 4,
-                "start_time": 0
-            },
-            {
-                "word": "femme",
-                "count": 8,
-                "score": 3,
-                "start_time": 0
-            }
-        ],
-        "summary": "GAMULA DOYOYE GAMULA TAMBO TAMBO COTAIN DANGA NU DOYOYE DANGA NU TAMBO TAMBO DANGA NU DOYOYE Je peux avoir une coco- DM 2 à injured Je peux avoir une coco- DM 3 Je vais pas avoir une coco- DM 3",
+        "video_path": "http:/cres/queries/tambo/videos/Tambo_nBoIFynCa50.mp4",
+        "thumb_path": "http:/cres/queries/tambo/thumbnails/Tambo_nBoIFynCa50.webp",
+        "json_path": "http:/cres/queries/tambo/transcripts/Tambo_nBoIFynCa50.json",
+        "keywords": [],
+        "summary": "Generated automatically",
         "search_query": "tambo",
-        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+        "query_updated_at": "2026-02-12T18:26:59.174000+00:00"
     },
     {
         "title": "The \"vibe coding\" mind virus explained…",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/The_vibe_coding_mind_virus_explained..._Tw18-4U7mts.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/The_vibe_coding_mind_virus_explained..._Tw18-4U7mts.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/The_vibe_coding_mind_virus_explained..._Tw18-4U7mts.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/The_vibe_coding_mind_virus_explained..._Tw18-4U7mts.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/The_vibe_coding_mind_virus_explained..._Tw18-4U7mts.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/The_vibe_coding_mind_virus_explained..._Tw18-4U7mts.json",
         "keywords": [
             {
                 "word": "code",
@@ -2403,9 +3741,9 @@
     },
     {
         "title": "The 7 FREE AI Courses You Need to Master AI in 2026",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-related/videos/The_7_FREE_AI_Courses_You_Need_to_Master_AI_in_2026_InowktzMfK0.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-related/thumbnails/The_7_FREE_AI_Courses_You_Need_to_Master_AI_in_2026_InowktzMfK0.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-related/transcripts/The_7_FREE_AI_Courses_You_Need_to_Master_AI_in_2026_InowktzMfK0.json",
+        "video_path": "http:/cres/queries/ai-related/videos/The_7_FREE_AI_Courses_You_Need_to_Master_AI_in_2026_InowktzMfK0.mp4",
+        "thumb_path": "http:/cres/queries/ai-related/thumbnails/The_7_FREE_AI_Courses_You_Need_to_Master_AI_in_2026_InowktzMfK0.webp",
+        "json_path": "http:/cres/queries/ai-related/transcripts/The_7_FREE_AI_Courses_You_Need_to_Master_AI_in_2026_InowktzMfK0.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2444,9 +3782,9 @@
     },
     {
         "title": "The AI Bubble is BURSTING…",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/The_AI_Bubble_is_BURSTING..._5os_nalLwvI.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/The_AI_Bubble_is_BURSTING..._5os_nalLwvI.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/The_AI_Bubble_is_BURSTING..._5os_nalLwvI.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/The_AI_Bubble_is_BURSTING..._5os_nalLwvI.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/The_AI_Bubble_is_BURSTING..._5os_nalLwvI.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/The_AI_Bubble_is_BURSTING..._5os_nalLwvI.json",
         "keywords": [
             {
                 "word": "hiring",
@@ -2485,9 +3823,9 @@
     },
     {
         "title": "The Future of AI-Defined Vehicles",
-        "video_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/videos/The_Future_of_AI-Defined_Vehicles_FArba43GtV8.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/thumbnails/The_Future_of_AI-Defined_Vehicles_FArba43GtV8.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/transcripts/The_Future_of_AI-Defined_Vehicles_FArba43GtV8.json",
+        "video_path": "http:/cres/queries/nvidia-ai/videos/The_Future_of_AI-Defined_Vehicles_FArba43GtV8.mp4",
+        "thumb_path": "http:/cres/queries/nvidia-ai/thumbnails/The_Future_of_AI-Defined_Vehicles_FArba43GtV8.webp",
+        "json_path": "http:/cres/queries/nvidia-ai/transcripts/The_Future_of_AI-Defined_Vehicles_FArba43GtV8.json",
         "keywords": [
             {
                 "word": "NVIDIA",
@@ -2514,9 +3852,9 @@
     },
     {
         "title": "Tiktok mashup trend 2026🧸",
-        "video_path": "http://192.168.2.130:9000/cres/queries/trends/videos/Tiktok_mashup_trend_2026_tVUGfQyrlJY.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/trends/thumbnails/Tiktok_mashup_trend_2026_tVUGfQyrlJY.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/trends/transcripts/Tiktok_mashup_trend_2026_tVUGfQyrlJY.json",
+        "video_path": "http:/cres/queries/trends/videos/Tiktok_mashup_trend_2026_tVUGfQyrlJY.mp4",
+        "thumb_path": "http:/cres/queries/trends/thumbnails/Tiktok_mashup_trend_2026_tVUGfQyrlJY.webp",
+        "json_path": "http:/cres/queries/trends/transcripts/Tiktok_mashup_trend_2026_tVUGfQyrlJY.json",
         "keywords": [
             {
                 "word": "romance",
@@ -2543,9 +3881,9 @@
     },
     {
         "title": "Token、多模态、LLM、Agent到底是什么意思？他们有什么区别？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/duomotai/videos/Token_LLM_Agent_vE4ldgHfc-A.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/duomotai/thumbnails/Token_LLM_Agent_vE4ldgHfc-A.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/duomotai/transcripts/Token_LLM_Agent_vE4ldgHfc-A.json",
+        "video_path": "http:/cres/queries/duomotai/videos/Token_LLM_Agent_vE4ldgHfc-A.mp4",
+        "thumb_path": "http:/cres/queries/duomotai/thumbnails/Token_LLM_Agent_vE4ldgHfc-A.webp",
+        "json_path": "http:/cres/queries/duomotai/transcripts/Token_LLM_Agent_vE4ldgHfc-A.json",
         "keywords": [
             {
                 "word": "浏览源",
@@ -2572,9 +3910,9 @@
     },
     {
         "title": "Top 3 AI Coding Assistant for Programmers 🤯 | 2026",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Top_3_AI_Coding_Assistant_for_Programmers_2026_mj_A8qta4As.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Top_3_AI_Coding_Assistant_for_Programmers_2026_mj_A8qta4As.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Top_3_AI_Coding_Assistant_for_Programmers_2026_mj_A8qta4As.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Top_3_AI_Coding_Assistant_for_Programmers_2026_mj_A8qta4As.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Top_3_AI_Coding_Assistant_for_Programmers_2026_mj_A8qta4As.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Top_3_AI_Coding_Assistant_for_Programmers_2026_mj_A8qta4As.json",
         "keywords": [
             {
                 "word": "Codeium",
@@ -2613,9 +3951,9 @@
     },
     {
         "title": "Torvalds Speaks: Impact of Artificial Intelligence on Programming",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Torvalds_Speaks_-_Impact_of_Artificial_Intelligence_on_Programming_VHHT6W-N0ak.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Torvalds_Speaks_-_Impact_of_Artificial_Intelligence_on_Programming_VHHT6W-N0ak.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Torvalds_Speaks_-_Impact_of_Artificial_Intelligence_on_Programming_VHHT6W-N0ak.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Torvalds_Speaks_-_Impact_of_Artificial_Intelligence_on_Programming_VHHT6W-N0ak.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Torvalds_Speaks_-_Impact_of_Artificial_Intelligence_on_Programming_VHHT6W-N0ak.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Torvalds_Speaks_-_Impact_of_Artificial_Intelligence_on_Programming_VHHT6W-N0ak.json",
         "keywords": [
             {
                 "word": "LLM",
@@ -2648,9 +3986,9 @@
     },
     {
         "title": "Unwrap NVIDIA Jetson Deals: Make Your Robot’s Holiday Wish Come True",
-        "video_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/videos/Unwrap_NVIDIA_Jetson_Deals_-_Make_Your_Robot_s_Holiday_Wish_Come_True_RJ8Yhy1OdYI.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/thumbnails/Unwrap_NVIDIA_Jetson_Deals_-_Make_Your_Robot_s_Holiday_Wish_Come_True_RJ8Yhy1OdYI.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/transcripts/Unwrap_NVIDIA_Jetson_Deals_-_Make_Your_Robot_s_Holiday_Wish_Come_True_RJ8Yhy1OdYI.json",
+        "video_path": "http:/cres/queries/nvidia-ai/videos/Unwrap_NVIDIA_Jetson_Deals_-_Make_Your_Robot_s_Holiday_Wish_Come_True_RJ8Yhy1OdYI.mp4",
+        "thumb_path": "http:/cres/queries/nvidia-ai/thumbnails/Unwrap_NVIDIA_Jetson_Deals_-_Make_Your_Robot_s_Holiday_Wish_Come_True_RJ8Yhy1OdYI.webp",
+        "json_path": "http:/cres/queries/nvidia-ai/transcripts/Unwrap_NVIDIA_Jetson_Deals_-_Make_Your_Robot_s_Holiday_Wish_Come_True_RJ8Yhy1OdYI.json",
         "keywords": [
             {
                 "word": "Jetson",
@@ -2677,9 +4015,9 @@
     },
     {
         "title": "Vol.137 如何在纳米尺度雕刻芯片？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/xinpian/videos/Vol.137_Co7-_d1NjkM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/xinpian/thumbnails/Vol.137_Co7-_d1NjkM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/xinpian/transcripts/Vol.137_Co7-_d1NjkM.json",
+        "video_path": "http:/cres/queries/xinpian/videos/Vol.137_Co7-_d1NjkM.mp4",
+        "thumb_path": "http:/cres/queries/xinpian/thumbnails/Vol.137_Co7-_d1NjkM.webp",
+        "json_path": "http:/cres/queries/xinpian/transcripts/Vol.137_Co7-_d1NjkM.json",
         "keywords": [
             {
                 "word": "芯片",
@@ -2712,9 +4050,9 @@
     },
     {
         "title": "What Is AI? | Learn all about artificial intelligence",
-        "video_path": "http://192.168.2.130:9000/cres/queries/artificial/videos/What_Is_AI_Learn_all_about_artificial_intelligence_JcXKbUIebrU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/artificial/thumbnails/What_Is_AI_Learn_all_about_artificial_intelligence_JcXKbUIebrU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/artificial/transcripts/What_Is_AI_Learn_all_about_artificial_intelligence_JcXKbUIebrU.json",
+        "video_path": "http:/cres/queries/artificial/videos/What_Is_AI_Learn_all_about_artificial_intelligence_JcXKbUIebrU.mp4",
+        "thumb_path": "http:/cres/queries/artificial/thumbnails/What_Is_AI_Learn_all_about_artificial_intelligence_JcXKbUIebrU.webp",
+        "json_path": "http:/cres/queries/artificial/transcripts/What_Is_AI_Learn_all_about_artificial_intelligence_JcXKbUIebrU.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2753,9 +4091,9 @@
     },
     {
         "title": "What Is Intelligence? Where Does it Begin?",
-        "video_path": "http://192.168.2.130:9000/cres/queries/intelligence/videos/What_Is_Intelligence_Where_Does_it_Begin_ck4RGeoHFko.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/intelligence/thumbnails/What_Is_Intelligence_Where_Does_it_Begin_ck4RGeoHFko.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/intelligence/transcripts/What_Is_Intelligence_Where_Does_it_Begin_ck4RGeoHFko.json",
+        "video_path": "http:/cres/queries/intelligence/videos/What_Is_Intelligence_Where_Does_it_Begin_ck4RGeoHFko.mp4",
+        "thumb_path": "http:/cres/queries/intelligence/thumbnails/What_Is_Intelligence_Where_Does_it_Begin_ck4RGeoHFko.webp",
+        "json_path": "http:/cres/queries/intelligence/transcripts/What_Is_Intelligence_Where_Does_it_Begin_ck4RGeoHFko.json",
         "keywords": [
             {
                 "word": "intelligence",
@@ -2794,9 +4132,9 @@
     },
     {
         "title": "What does Oracle do?",
-        "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/What_does_Oracle_do_YgtKt7qLJT4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/What_does_Oracle_do_YgtKt7qLJT4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/oracle/transcripts/What_does_Oracle_do_YgtKt7qLJT4.json",
+        "video_path": "http:/cres/queries/oracle/videos/What_does_Oracle_do_YgtKt7qLJT4.mp4",
+        "thumb_path": "http:/cres/queries/oracle/thumbnails/What_does_Oracle_do_YgtKt7qLJT4.webp",
+        "json_path": "http:/cres/queries/oracle/transcripts/What_does_Oracle_do_YgtKt7qLJT4.json",
         "keywords": [
             {
                 "word": "Oracle",
@@ -2823,9 +4161,9 @@
     },
     {
         "title": "What is Artificial Intelligence? | ChatGPT | The Dr Binocs Show | Peekaboo Kidz",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-related/videos/What_is_Artificial_Intelligence_ChatGPT_The_Dr_Binocs_Show_Peekaboo_Kidz_ttIOdAdQaUE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-related/thumbnails/What_is_Artificial_Intelligence_ChatGPT_The_Dr_Binocs_Show_Peekaboo_Kidz_ttIOdAdQaUE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-related/transcripts/What_is_Artificial_Intelligence_ChatGPT_The_Dr_Binocs_Show_Peekaboo_Kidz_ttIOdAdQaUE.json",
+        "video_path": "http:/cres/queries/ai-related/videos/What_is_Artificial_Intelligence_ChatGPT_The_Dr_Binocs_Show_Peekaboo_Kidz_ttIOdAdQaUE.mp4",
+        "thumb_path": "http:/cres/queries/ai-related/thumbnails/What_is_Artificial_Intelligence_ChatGPT_The_Dr_Binocs_Show_Peekaboo_Kidz_ttIOdAdQaUE.webp",
+        "json_path": "http:/cres/queries/ai-related/transcripts/What_is_Artificial_Intelligence_ChatGPT_The_Dr_Binocs_Show_Peekaboo_Kidz_ttIOdAdQaUE.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2852,9 +4190,9 @@
     },
     {
         "title": "What's going on with Claude Code?",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/What_s_going_on_with_Claude_Code_pwmK46hhfwg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/What_s_going_on_with_Claude_Code_pwmK46hhfwg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/What_s_going_on_with_Claude_Code_pwmK46hhfwg.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/What_s_going_on_with_Claude_Code_pwmK46hhfwg.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/What_s_going_on_with_Claude_Code_pwmK46hhfwg.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/What_s_going_on_with_Claude_Code_pwmK46hhfwg.json",
         "keywords": [
             {
                 "word": "Cloud Code",
@@ -2893,9 +4231,9 @@
     },
     {
         "title": "Why this analyst is bullish on OpenAI and Oracle",
-        "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/oracle/transcripts/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.json",
+        "video_path": "http:/cres/queries/oracle/videos/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.mp4",
+        "thumb_path": "http:/cres/queries/oracle/thumbnails/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.webp",
+        "json_path": "http:/cres/queries/oracle/transcripts/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.json",
         "keywords": [
             {
                 "word": "OpenAI",
@@ -2934,9 +4272,9 @@
     },
     {
         "title": "Will AI Replace Software Engineers?",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Will_AI_Replace_Software_Engineers_Oq8TUJuButM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Will_AI_Replace_Software_Engineers_Oq8TUJuButM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Will_AI_Replace_Software_Engineers_Oq8TUJuButM.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Will_AI_Replace_Software_Engineers_Oq8TUJuButM.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Will_AI_Replace_Software_Engineers_Oq8TUJuButM.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Will_AI_Replace_Software_Engineers_Oq8TUJuButM.json",
         "keywords": [
             {
                 "word": "AI",
@@ -2975,9 +4313,9 @@
     },
     {
         "title": "World's First Interactive AI-Enabled Fusion Reactor Digital Twin",
-        "video_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/videos/World_s_First_Interactive_AI-Enabled_Fusion_Reactor_Digital_Twin_mxs0Z8hmMZU.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/thumbnails/World_s_First_Interactive_AI-Enabled_Fusion_Reactor_Digital_Twin_mxs0Z8hmMZU.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/nvidia-ai/transcripts/World_s_First_Interactive_AI-Enabled_Fusion_Reactor_Digital_Twin_mxs0Z8hmMZU.json",
+        "video_path": "http:/cres/queries/nvidia-ai/videos/World_s_First_Interactive_AI-Enabled_Fusion_Reactor_Digital_Twin_mxs0Z8hmMZU.mp4",
+        "thumb_path": "http:/cres/queries/nvidia-ai/thumbnails/World_s_First_Interactive_AI-Enabled_Fusion_Reactor_Digital_Twin_mxs0Z8hmMZU.webp",
+        "json_path": "http:/cres/queries/nvidia-ai/transcripts/World_s_First_Interactive_AI-Enabled_Fusion_Reactor_Digital_Twin_mxs0Z8hmMZU.json",
         "keywords": [
             {
                 "word": "fusion",
@@ -3004,9 +4342,9 @@
     },
     {
         "title": "Worried About AI and Coding in 2026? Watch This First",
-        "video_path": "http://192.168.2.130:9000/cres/queries/ai-programming/videos/Worried_About_AI_and_Coding_in_2026_Watch_This_First_UVrmXpUdgxI.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/ai-programming/thumbnails/Worried_About_AI_and_Coding_in_2026_Watch_This_First_UVrmXpUdgxI.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/ai-programming/transcripts/Worried_About_AI_and_Coding_in_2026_Watch_This_First_UVrmXpUdgxI.json",
+        "video_path": "http:/cres/queries/ai-programming/videos/Worried_About_AI_and_Coding_in_2026_Watch_This_First_UVrmXpUdgxI.mp4",
+        "thumb_path": "http:/cres/queries/ai-programming/thumbnails/Worried_About_AI_and_Coding_in_2026_Watch_This_First_UVrmXpUdgxI.webp",
+        "json_path": "http:/cres/queries/ai-programming/transcripts/Worried_About_AI_and_Coding_in_2026_Watch_This_First_UVrmXpUdgxI.json",
         "keywords": [
             {
                 "word": "AI",
@@ -3038,10 +4376,109 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "[Unsloth.ai] Fine-tuning LLMs: Models gpt-oss, Llama, DeepSeek, TTS, Qwen, Mistral, Gemma. SFT, RL",
+        "video_path": "http:/cres/queries/unsloth/videos/Unsloth.ai_Fine-tuning_LLMs_-_Models_gpt-oss_Llama_DeepSeek_TTS_Qwen_Mistral_Gemma._SFT_RL_vQJ6UsQ5tus.mp4",
+        "thumb_path": "http:/cres/queries/unsloth/thumbnails/Unsloth.ai_Fine-tuning_LLMs_-_Models_gpt-oss_Llama_DeepSeek_TTS_Qwen_Mistral_Gemma._SFT_RL_vQJ6UsQ5tus.webp",
+        "json_path": "http:/cres/queries/unsloth/transcripts/Unsloth.ai_Fine-tuning_LLMs_-_Models_gpt-oss_Llama_DeepSeek_TTS_Qwen_Mistral_Gemma._SFT_RL_vQJ6UsQ5tus.json",
+        "keywords": [
+            {
+                "word": "model",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "it's",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "models",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "training",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "you're",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Hey everyone Welcome to the tutorial on fine-tuning language models",
+        "search_query": "unsloth",
+        "query_updated_at": "2026-02-12T18:42:56.953000+00:00"
+    },
+    {
+        "title": "github/gh-aw - Gource visualisation",
+        "video_path": "http:/cres/queries/gh-aw/videos/github_gh-aw_-_Gource_visualisation_tF7q6E6CWak.mp4",
+        "thumb_path": "http:/cres/queries/gh-aw/thumbnails/github_gh-aw_-_Gource_visualisation_tF7q6E6CWak.webp",
+        "json_path": "http:/cres/queries/gh-aw/transcripts/github_gh-aw_-_Gource_visualisation_tF7q6E6CWak.json",
+        "keywords": [
+            {
+                "word": "general",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "overview",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "topic",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "You You",
+        "search_query": "gh-aw",
+        "query_updated_at": "2026-02-12T18:38:21.059000+00:00"
+    },
+    {
+        "title": "iOfficeAI/AionUi - Gource visualisation",
+        "video_path": "http:/cres/queries/aionui/videos/iOfficeAI_AionUi_-_Gource_visualisation_pGki7SOILIs.mp4",
+        "thumb_path": "http:/cres/queries/aionui/thumbnails/iOfficeAI_AionUi_-_Gource_visualisation_pGki7SOILIs.webp",
+        "json_path": "http:/cres/queries/aionui/transcripts/iOfficeAI_AionUi_-_Gource_visualisation_pGki7SOILIs.json",
+        "keywords": [
+            {
+                "word": "general",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "overview",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "topic",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "You You",
+        "search_query": "AionUi",
+        "query_updated_at": "2026-02-12T18:29:26.822000+00:00"
+    },
+    {
         "title": "is0kenny- Intelligence (Official Audio)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/intelligence/videos/is0kenny-_Intelligence_Official_Audio_GI2ZSrFEEc4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/intelligence/thumbnails/is0kenny-_Intelligence_Official_Audio_GI2ZSrFEEc4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/intelligence/transcripts/is0kenny-_Intelligence_Official_Audio_GI2ZSrFEEc4.json",
+        "video_path": "http:/cres/queries/intelligence/videos/is0kenny-_Intelligence_Official_Audio_GI2ZSrFEEc4.mp4",
+        "thumb_path": "http:/cres/queries/intelligence/thumbnails/is0kenny-_Intelligence_Official_Audio_GI2ZSrFEEc4.webp",
+        "json_path": "http:/cres/queries/intelligence/transcripts/is0kenny-_Intelligence_Official_Audio_GI2ZSrFEEc4.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "intelligence",
@@ -3049,9 +4486,9 @@
     },
     {
         "title": "they're falling apart",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft/videos/they_re_falling_apart_hK-c_wsrA2w.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft/thumbnails/they_re_falling_apart_hK-c_wsrA2w.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft/transcripts/they_re_falling_apart_hK-c_wsrA2w.json",
+        "video_path": "http:/cres/queries/microsoft/videos/they_re_falling_apart_hK-c_wsrA2w.mp4",
+        "thumb_path": "http:/cres/queries/microsoft/thumbnails/they_re_falling_apart_hK-c_wsrA2w.webp",
+        "json_path": "http:/cres/queries/microsoft/transcripts/they_re_falling_apart_hK-c_wsrA2w.json",
         "keywords": [
             {
                 "word": "AI",
@@ -3078,9 +4515,9 @@
     },
     {
         "title": "www.google.com",
-        "video_path": "http://192.168.2.130:9000/cres/queries/google/videos/www.google.com_xi8Z-BdLuLo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/google/thumbnails/www.google.com_xi8Z-BdLuLo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/google/transcripts/www.google.com_xi8Z-BdLuLo.json",
+        "video_path": "http:/cres/queries/google/videos/www.google.com_xi8Z-BdLuLo.mp4",
+        "thumb_path": "http:/cres/queries/google/thumbnails/www.google.com_xi8Z-BdLuLo.webp",
+        "json_path": "http:/cres/queries/google/transcripts/www.google.com_xi8Z-BdLuLo.json",
         "keywords": [],
         "summary": "Generated automatically",
         "search_query": "google",
@@ -3088,9 +4525,9 @@
     },
     {
         "title": "☁️ How to use Multitasking on iPadOS 26: everything you NEED to know!",
-        "video_path": "http://192.168.2.130:9000/cres/queries/microsoft-3560129e/videos/How_to_use_Multitasking_on_iPadOS_26_-_everything_you_NEED_to_know_G_q2VsfmL6w.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/microsoft-3560129e/thumbnails/How_to_use_Multitasking_on_iPadOS_26_-_everything_you_NEED_to_know_G_q2VsfmL6w.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/microsoft-3560129e/transcripts/How_to_use_Multitasking_on_iPadOS_26_-_everything_you_NEED_to_know_G_q2VsfmL6w.json",
+        "video_path": "http:/cres/queries/microsoft-3560129e/videos/How_to_use_Multitasking_on_iPadOS_26_-_everything_you_NEED_to_know_G_q2VsfmL6w.mp4",
+        "thumb_path": "http:/cres/queries/microsoft-3560129e/thumbnails/How_to_use_Multitasking_on_iPadOS_26_-_everything_you_NEED_to_know_G_q2VsfmL6w.webp",
+        "json_path": "http:/cres/queries/microsoft-3560129e/transcripts/How_to_use_Multitasking_on_iPadOS_26_-_everything_you_NEED_to_know_G_q2VsfmL6w.json",
         "keywords": [
             {
                 "word": "apps",
@@ -3129,9 +4566,9 @@
     },
     {
         "title": "「千問AI」整合阿里生態鏈 語音點外送.訂票｜TVBS新聞 @TVBSNEWS01",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/AI_._TVBS_%40TVBSNEWS01_tsvwawZailk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/AI_._TVBS_%40TVBSNEWS01_tsvwawZailk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/AI_._TVBS_%40TVBSNEWS01_tsvwawZailk.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/AI_._TVBS_%40TVBSNEWS01_tsvwawZailk.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/AI_._TVBS_%40TVBSNEWS01_tsvwawZailk.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/AI_._TVBS_%40TVBSNEWS01_tsvwawZailk.json",
         "keywords": [
             {
                 "word": "一些飲品美杯",
@@ -3170,9 +4607,9 @@
     },
     {
         "title": "「千問AI」整合阿里生態鏈 語音點外送.訂票｜TVBS新聞 @TVBSNEWS02",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/AI_._TVBS_%40TVBSNEWS02_y8jyaS89ZbE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/AI_._TVBS_%40TVBSNEWS02_y8jyaS89ZbE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/AI_._TVBS_%40TVBSNEWS02_y8jyaS89ZbE.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/AI_._TVBS_%40TVBSNEWS02_y8jyaS89ZbE.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/AI_._TVBS_%40TVBSNEWS02_y8jyaS89ZbE.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/AI_._TVBS_%40TVBSNEWS02_y8jyaS89ZbE.json",
         "keywords": [
             {
                 "word": "一些飲品美杯",
@@ -3211,9 +4648,9 @@
     },
     {
         "title": "【ComfyUi】最强开源图像模型 小参数大猛兽Z-IMAGE | 极致速度、极致质量、极致性价比。包含文生图，自动反推图片洗图 ，超低配置要求，最低6G显存",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/ComfyUi_Z-IMAGE_6G_qnE5_UsjXfw.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/ComfyUi_Z-IMAGE_6G_qnE5_UsjXfw.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/ComfyUi_Z-IMAGE_6G_qnE5_UsjXfw.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/ComfyUi_Z-IMAGE_6G_qnE5_UsjXfw.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/ComfyUi_Z-IMAGE_6G_qnE5_UsjXfw.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/ComfyUi_Z-IMAGE_6G_qnE5_UsjXfw.json",
         "keywords": [
             {
                 "word": "version",
@@ -3252,9 +4689,9 @@
     },
     {
         "title": "【科技一点通】每周科技新闻概要",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/videos/__Ji6hiwggzZg.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/thumbnails/__Ji6hiwggzZg.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/transcripts/__Ji6hiwggzZg.json",
+        "video_path": "http:/cres/queries/kejixinwen/videos/__Ji6hiwggzZg.mp4",
+        "thumb_path": "http:/cres/queries/kejixinwen/thumbnails/__Ji6hiwggzZg.webp",
+        "json_path": "http:/cres/queries/kejixinwen/transcripts/__Ji6hiwggzZg.json",
         "keywords": [
             {
                 "word": "一起打破最多",
@@ -3293,9 +4730,9 @@
     },
     {
         "title": "【科普３分鐘】簡單瞭解「生成式 AI」在科技研發上之應用",
-        "video_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/videos/3_AI_g3NqVz3nL2c.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/thumbnails/3_AI_g3NqVz3nL2c.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/transcripts/3_AI_g3NqVz3nL2c.json",
+        "video_path": "http:/cres/queries/shengchengshiai/videos/3_AI_g3NqVz3nL2c.mp4",
+        "thumb_path": "http:/cres/queries/shengchengshiai/thumbnails/3_AI_g3NqVz3nL2c.webp",
+        "json_path": "http:/cres/queries/shengchengshiai/transcripts/3_AI_g3NqVz3nL2c.json",
         "keywords": [
             {
                 "word": "聲稱是AI",
@@ -3322,9 +4759,9 @@
     },
     {
         "title": "一口气看懂深度学习的核心",
-        "video_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/videos/__Yhp1nK_7lSQ.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/thumbnails/__Yhp1nK_7lSQ.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/transcripts/__Yhp1nK_7lSQ.json",
+        "video_path": "http:/cres/queries/shenduxuexi/videos/__Yhp1nK_7lSQ.mp4",
+        "thumb_path": "http:/cres/queries/shenduxuexi/thumbnails/__Yhp1nK_7lSQ.webp",
+        "json_path": "http:/cres/queries/shenduxuexi/transcripts/__Yhp1nK_7lSQ.json",
         "keywords": [
             {
                 "word": "一下不符就可",
@@ -3363,9 +4800,9 @@
     },
     {
         "title": "三步学会开发自己的智能体Agent【Trae小白教程】",
-        "video_path": "http://192.168.2.130:9000/cres/queries/zhinengti/videos/Agent_Trae_4KXUPMlNSho.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/zhinengti/thumbnails/Agent_Trae_4KXUPMlNSho.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/zhinengti/transcripts/Agent_Trae_4KXUPMlNSho.json",
+        "video_path": "http:/cres/queries/zhinengti/videos/Agent_Trae_4KXUPMlNSho.mp4",
+        "thumb_path": "http:/cres/queries/zhinengti/thumbnails/Agent_Trae_4KXUPMlNSho.webp",
+        "json_path": "http:/cres/queries/zhinengti/transcripts/Agent_Trae_4KXUPMlNSho.json",
         "keywords": [
             {
                 "word": "一个",
@@ -3404,9 +4841,9 @@
     },
     {
         "title": "不输Claude 4 的阿里开源大模型Qwen3-Coder安装指南，后悔定阅Cursor！",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/Claude_4_Qwen3-Coder_Cursor_jkv2_qsXh9E.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/Claude_4_Qwen3-Coder_Cursor_jkv2_qsXh9E.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/Claude_4_Qwen3-Coder_Cursor_jkv2_qsXh9E.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/Claude_4_Qwen3-Coder_Cursor_jkv2_qsXh9E.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/Claude_4_Qwen3-Coder_Cursor_jkv2_qsXh9E.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/Claude_4_Qwen3-Coder_Cursor_jkv2_qsXh9E.json",
         "keywords": [
             {
                 "word": "主流的一些模",
@@ -3445,9 +4882,9 @@
     },
     {
         "title": "为什么现在AI芯片、算力、PCB、CPO这些涨得飞起，都拉冒烟了，但算力租赁却没看到什么动静呢？有很多朋友看到AI这么火热，CPO、PCB又涨的太好了不敢追，所以转头就去干了算力租赁，肯定是想着A",
-        "video_path": "http://192.168.2.130:9000/cres/queries/suanli/videos/AI_PCB_CPO_AI_CPO_PCB_A_3J3O4xXxiSo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/suanli/thumbnails/AI_PCB_CPO_AI_CPO_PCB_A_3J3O4xXxiSo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/suanli/transcripts/AI_PCB_CPO_AI_CPO_PCB_A_3J3O4xXxiSo.json",
+        "video_path": "http:/cres/queries/suanli/videos/AI_PCB_CPO_AI_CPO_PCB_A_3J3O4xXxiSo.mp4",
+        "thumb_path": "http:/cres/queries/suanli/thumbnails/AI_PCB_CPO_AI_CPO_PCB_A_3J3O4xXxiSo.webp",
+        "json_path": "http:/cres/queries/suanli/transcripts/AI_PCB_CPO_AI_CPO_PCB_A_3J3O4xXxiSo.json",
         "keywords": [
             {
                 "word": "相关的资本开",
@@ -3486,9 +4923,9 @@
     },
     {
         "title": "为啥大模型开源了还会被质疑出身？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/__0djXIX1_VKo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/__0djXIX1_VKo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/__0djXIX1_VKo.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/__0djXIX1_VKo.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/__0djXIX1_VKo.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/__0djXIX1_VKo.json",
         "keywords": [
             {
                 "word": "預測下首寫數",
@@ -3527,9 +4964,9 @@
     },
     {
         "title": "人工智能大战，实用最强招法，连续弃子，计算力碾压人类！火花四溅！【四郎讲棋】",
-        "video_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/videos/__a3Uc7LT7jZ8.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/thumbnails/__a3Uc7LT7jZ8.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/transcripts/__a3Uc7LT7jZ8.json",
+        "video_path": "http:/cres/queries/rengongzhineng/videos/__a3Uc7LT7jZ8.mp4",
+        "thumb_path": "http:/cres/queries/rengongzhineng/thumbnails/__a3Uc7LT7jZ8.webp",
+        "json_path": "http:/cres/queries/rengongzhineng/transcripts/__a3Uc7LT7jZ8.json",
         "keywords": [
             {
                 "word": "一下那黑方在",
@@ -3568,9 +5005,9 @@
     },
     {
         "title": "什么是AI Agent｜一条视频说清楚AI Agent的演进过程&应用落地&商业价值",
-        "video_path": "http://192.168.2.130:9000/cres/queries/zhinengti/videos/AI_Agent_AI_Agent_Lnnt0Gcozhs.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/zhinengti/thumbnails/AI_Agent_AI_Agent_Lnnt0Gcozhs.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/zhinengti/transcripts/AI_Agent_AI_Agent_Lnnt0Gcozhs.json",
+        "video_path": "http:/cres/queries/zhinengti/videos/AI_Agent_AI_Agent_Lnnt0Gcozhs.mp4",
+        "thumb_path": "http:/cres/queries/zhinengti/thumbnails/AI_Agent_AI_Agent_Lnnt0Gcozhs.webp",
+        "json_path": "http:/cres/queries/zhinengti/transcripts/AI_Agent_AI_Agent_Lnnt0Gcozhs.json",
         "keywords": [
             {
                 "word": "我",
@@ -3597,9 +5034,9 @@
     },
     {
         "title": "什么是AI、AIGC、机器学习、深度学习、大语言模型、多模态、深度伪造",
-        "video_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/videos/AI_AIGC_OOqk7awpR-4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/thumbnails/AI_AIGC_OOqk7awpR-4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/transcripts/AI_AIGC_OOqk7awpR-4.json",
+        "video_path": "http:/cres/queries/jiqixuexi/videos/AI_AIGC_OOqk7awpR-4.mp4",
+        "thumb_path": "http:/cres/queries/jiqixuexi/thumbnails/AI_AIGC_OOqk7awpR-4.webp",
+        "json_path": "http:/cres/queries/jiqixuexi/transcripts/AI_AIGC_OOqk7awpR-4.json",
         "keywords": [
             {
                 "word": "喜欢",
@@ -3638,9 +5075,9 @@
     },
     {
         "title": "别再被AI术语忽悠了！3分钟看懂ChatGPT、Workflow、Agent的本质区别",
-        "video_path": "http://192.168.2.130:9000/cres/queries/zhinengti/videos/AI_3_ChatGPT_Workflow_Agent_-0rtLBaJs1c.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/zhinengti/thumbnails/AI_3_ChatGPT_Workflow_Agent_-0rtLBaJs1c.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/zhinengti/transcripts/AI_3_ChatGPT_Workflow_Agent_-0rtLBaJs1c.json",
+        "video_path": "http:/cres/queries/zhinengti/videos/AI_3_ChatGPT_Workflow_Agent_-0rtLBaJs1c.mp4",
+        "thumb_path": "http:/cres/queries/zhinengti/thumbnails/AI_3_ChatGPT_Workflow_Agent_-0rtLBaJs1c.webp",
+        "json_path": "http:/cres/queries/zhinengti/transcripts/AI_3_ChatGPT_Workflow_Agent_-0rtLBaJs1c.json",
         "keywords": [
             {
                 "word": "常用图标",
@@ -3667,9 +5104,9 @@
     },
     {
         "title": "半导体包括什么？芯片和半导体的关系？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/xinpian/videos/__5h9JkzsNHCo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/xinpian/thumbnails/__5h9JkzsNHCo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/xinpian/transcripts/__5h9JkzsNHCo.json",
+        "video_path": "http:/cres/queries/xinpian/videos/__5h9JkzsNHCo.mp4",
+        "thumb_path": "http:/cres/queries/xinpian/thumbnails/__5h9JkzsNHCo.webp",
+        "json_path": "http:/cres/queries/xinpian/transcripts/__5h9JkzsNHCo.json",
         "keywords": [
             {
                 "word": "給它施加電壓",
@@ -3708,9 +5145,9 @@
     },
     {
         "title": "它是深度学习的核心，但却被起了个烂名字，十分钟彻底搞懂张量！",
-        "video_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/videos/__JHwbi4q3Y5Q.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/thumbnails/__JHwbi4q3Y5Q.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/shenduxuexi/transcripts/__JHwbi4q3Y5Q.json",
+        "video_path": "http:/cres/queries/shenduxuexi/videos/__JHwbi4q3Y5Q.mp4",
+        "thumb_path": "http:/cres/queries/shenduxuexi/thumbnails/__JHwbi4q3Y5Q.webp",
+        "json_path": "http:/cres/queries/shenduxuexi/transcripts/__JHwbi4q3Y5Q.json",
         "keywords": [
             {
                 "word": "等于",
@@ -3749,9 +5186,9 @@
     },
     {
         "title": "左手千问，右手平头哥，阿里开启AI大反击",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/AI_WZDDB3Zz51c.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/AI_WZDDB3Zz51c.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/AI_WZDDB3Zz51c.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/AI_WZDDB3Zz51c.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/AI_WZDDB3Zz51c.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/AI_WZDDB3Zz51c.json",
         "keywords": [
             {
                 "word": "一天",
@@ -3790,9 +5227,9 @@
     },
     {
         "title": "新加坡棄用Meta改用阿里千問  為什麼？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/Meta_LBm7imOT5AY.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/Meta_LBm7imOT5AY.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/Meta_LBm7imOT5AY.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/Meta_LBm7imOT5AY.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/Meta_LBm7imOT5AY.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/Meta_LBm7imOT5AY.json",
         "keywords": [
             {
                 "word": "平台",
@@ -3819,9 +5256,9 @@
     },
     {
         "title": "本地跑大模型，需要什么配置",
-        "video_path": "http://192.168.2.130:9000/cres/queries/damoxing/videos/__TlTBNGioJIk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/damoxing/thumbnails/__TlTBNGioJIk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/damoxing/transcripts/__TlTBNGioJIk.json",
+        "video_path": "http:/cres/queries/damoxing/videos/__TlTBNGioJIk.mp4",
+        "thumb_path": "http:/cres/queries/damoxing/thumbnails/__TlTBNGioJIk.webp",
+        "json_path": "http:/cres/queries/damoxing/transcripts/__TlTBNGioJIk.json",
         "keywords": [
             {
                 "word": "的内存和",
@@ -3860,9 +5297,9 @@
     },
     {
         "title": "本地跑大模型，需要什么配置",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/__TlTBNGioJIk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/__TlTBNGioJIk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/__TlTBNGioJIk.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/__TlTBNGioJIk.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/__TlTBNGioJIk.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/__TlTBNGioJIk.json",
         "keywords": [
             {
                 "word": "的内存和",
@@ -3901,9 +5338,9 @@
     },
     {
         "title": "机器学习简介（机器学习从零到一第一集)",
-        "video_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/videos/__OXNC_sefxi4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/thumbnails/__OXNC_sefxi4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/jiqixuexi/transcripts/__OXNC_sefxi4.json",
+        "video_path": "http:/cres/queries/jiqixuexi/videos/__OXNC_sefxi4.mp4",
+        "thumb_path": "http:/cres/queries/jiqixuexi/thumbnails/__OXNC_sefxi4.webp",
+        "json_path": "http:/cres/queries/jiqixuexi/transcripts/__OXNC_sefxi4.json",
         "keywords": [
             {
                 "word": "等於",
@@ -3942,9 +5379,9 @@
     },
     {
         "title": "概念百科：什么是多模态大模型",
-        "video_path": "http://192.168.2.130:9000/cres/queries/duomotai/videos/__CQCl7vR2u34.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/duomotai/thumbnails/__CQCl7vR2u34.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/duomotai/transcripts/__CQCl7vR2u34.json",
+        "video_path": "http:/cres/queries/duomotai/videos/__CQCl7vR2u34.mp4",
+        "thumb_path": "http:/cres/queries/duomotai/thumbnails/__CQCl7vR2u34.webp",
+        "json_path": "http:/cres/queries/duomotai/transcripts/__CQCl7vR2u34.json",
         "keywords": [
             {
                 "word": "多摩太",
@@ -3977,9 +5414,9 @@
     },
     {
         "title": "淘宝，高德，飞猪，支付宝，闪购全面接入千问app！【白话天下】 #阿里千问  #阿里 #AI",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/app_AI_Hr0MJbr3_10.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/app_AI_Hr0MJbr3_10.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/app_AI_Hr0MJbr3_10.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/app_AI_Hr0MJbr3_10.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/app_AI_Hr0MJbr3_10.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/app_AI_Hr0MJbr3_10.json",
         "keywords": [
             {
                 "word": "这个酒店订票",
@@ -4018,9 +5455,9 @@
     },
     {
         "title": "理解透这两个基本概念，你看所有AI都将豁然开朗",
-        "video_path": "http://192.168.2.130:9000/cres/queries/damoxing/videos/AI_kDmUHCKmA8E.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/damoxing/thumbnails/AI_kDmUHCKmA8E.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/damoxing/transcripts/AI_kDmUHCKmA8E.json",
+        "video_path": "http:/cres/queries/damoxing/videos/AI_kDmUHCKmA8E.mp4",
+        "thumb_path": "http:/cres/queries/damoxing/thumbnails/AI_kDmUHCKmA8E.webp",
+        "json_path": "http:/cres/queries/damoxing/transcripts/AI_kDmUHCKmA8E.json",
         "keywords": [
             {
                 "word": "安全分",
@@ -4047,9 +5484,9 @@
     },
     {
         "title": "理解透这两个基本概念，你看所有AI都将豁然开朗",
-        "video_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/videos/AI_kDmUHCKmA8E.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/thumbnails/AI_kDmUHCKmA8E.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/rengongzhineng/transcripts/AI_kDmUHCKmA8E.json",
+        "video_path": "http:/cres/queries/rengongzhineng/videos/AI_kDmUHCKmA8E.mp4",
+        "thumb_path": "http:/cres/queries/rengongzhineng/thumbnails/AI_kDmUHCKmA8E.webp",
+        "json_path": "http:/cres/queries/rengongzhineng/transcripts/AI_kDmUHCKmA8E.json",
         "keywords": [
             {
                 "word": "一个一个字去",
@@ -4088,9 +5525,9 @@
     },
     {
         "title": "生成式AI是什麼? 什麼是Generative AI？| AI基礎觀念-1",
-        "video_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/videos/AI_Generative_AI_AI_-1_bn4OpKNcf6A.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/thumbnails/AI_Generative_AI_AI_-1_bn4OpKNcf6A.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/shengchengshiai/transcripts/AI_Generative_AI_AI_-1_bn4OpKNcf6A.json",
+        "video_path": "http:/cres/queries/shengchengshiai/videos/AI_Generative_AI_AI_-1_bn4OpKNcf6A.mp4",
+        "thumb_path": "http:/cres/queries/shengchengshiai/thumbnails/AI_Generative_AI_AI_-1_bn4OpKNcf6A.webp",
+        "json_path": "http:/cres/queries/shengchengshiai/transcripts/AI_Generative_AI_AI_-1_bn4OpKNcf6A.json",
         "keywords": [
             {
                 "word": "定义把海终AI",
@@ -4117,9 +5554,9 @@
     },
     {
         "title": "科技新闻：用机器鸟驱赶飞鸟 护卫航班飞行安全",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/videos/__9p9F6RGpERY.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/thumbnails/__9p9F6RGpERY.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/transcripts/__9p9F6RGpERY.json",
+        "video_path": "http:/cres/queries/kejixinwen/videos/__9p9F6RGpERY.mp4",
+        "thumb_path": "http:/cres/queries/kejixinwen/thumbnails/__9p9F6RGpERY.webp",
+        "json_path": "http:/cres/queries/kejixinwen/transcripts/__9p9F6RGpERY.json",
         "keywords": [
             {
                 "word": "獵鷹",
@@ -4146,9 +5583,9 @@
     },
     {
         "title": "算力是什么？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/suanli/videos/__Td6s7Ltev8o.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/suanli/thumbnails/__Td6s7Ltev8o.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/suanli/transcripts/__Td6s7Ltev8o.json",
+        "video_path": "http:/cres/queries/suanli/videos/__Td6s7Ltev8o.mp4",
+        "thumb_path": "http:/cres/queries/suanli/thumbnails/__Td6s7Ltev8o.webp",
+        "json_path": "http:/cres/queries/suanli/transcripts/__Td6s7Ltev8o.json",
         "keywords": [
             {
                 "word": "世纪",
@@ -4187,9 +5624,9 @@
     },
     {
         "title": "芯片是如何制造的？ 3分鐘帶你看微芯片制造全過程#科普一下 #知識科普 #三維動畫",
-        "video_path": "http://192.168.2.130:9000/cres/queries/xinpian/videos/3_czt3s671GVA.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/xinpian/thumbnails/3_czt3s671GVA.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/xinpian/transcripts/3_czt3s671GVA.json",
+        "video_path": "http:/cres/queries/xinpian/videos/3_czt3s671GVA.mp4",
+        "thumb_path": "http:/cres/queries/xinpian/thumbnails/3_czt3s671GVA.webp",
+        "json_path": "http:/cres/queries/xinpian/transcripts/3_czt3s671GVA.json",
         "keywords": [
             {
                 "word": "晶體管",
@@ -4216,9 +5653,9 @@
     },
     {
         "title": "这个开源模型直接生成4K图片！【附安装教程】",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/4K_2q0FFSuSdEE.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/4K_2q0FFSuSdEE.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/4K_2q0FFSuSdEE.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/4K_2q0FFSuSdEE.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/4K_2q0FFSuSdEE.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/4K_2q0FFSuSdEE.json",
         "keywords": [
             {
                 "word": "这个",
@@ -4257,9 +5694,9 @@
     },
     {
         "title": "阿里千问计划在美引发恐慌！有人开始动手了！【白话天下】 #千问计划 #杭州人 #千问  #阿里ai",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/ai_BiaXZdEmoJk.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/ai_BiaXZdEmoJk.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/ai_BiaXZdEmoJk.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/ai_BiaXZdEmoJk.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/ai_BiaXZdEmoJk.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/ai_BiaXZdEmoJk.json",
         "keywords": [
             {
                 "word": "最大的這個",
@@ -4298,9 +5735,9 @@
     },
     {
         "title": "阿里大杀器Qwen3-Coder实测比肩Claude 4，开源AI代码大模型已经这么强了吗？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/videos/Qwen3-Coder_Claude_4_AI_FzgCQLz0tu4.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/thumbnails/Qwen3-Coder_Claude_4_AI_FzgCQLz0tu4.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kaiyuanmoxing/transcripts/Qwen3-Coder_Claude_4_AI_FzgCQLz0tu4.json",
+        "video_path": "http:/cres/queries/kaiyuanmoxing/videos/Qwen3-Coder_Claude_4_AI_FzgCQLz0tu4.mp4",
+        "thumb_path": "http:/cres/queries/kaiyuanmoxing/thumbnails/Qwen3-Coder_Claude_4_AI_FzgCQLz0tu4.webp",
+        "json_path": "http:/cres/queries/kaiyuanmoxing/transcripts/Qwen3-Coder_Claude_4_AI_FzgCQLz0tu4.json",
         "keywords": [
             {
                 "word": "接下来的话我",
@@ -4339,9 +5776,9 @@
     },
     {
         "title": "阿里开源入局C端战场，千问APP对标ChatGPT？#阿里云 #千问APP开始公测#开源大模型#CHATGPT#英伟达",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/C_APP_ChatGPT_APP_CHATGPT_hT8pRfQIcGY.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/C_APP_ChatGPT_APP_CHATGPT_hT8pRfQIcGY.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/C_APP_ChatGPT_APP_CHATGPT_hT8pRfQIcGY.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/C_APP_ChatGPT_APP_CHATGPT_hT8pRfQIcGY.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/C_APP_ChatGPT_APP_CHATGPT_hT8pRfQIcGY.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/C_APP_ChatGPT_APP_CHATGPT_hT8pRfQIcGY.json",
         "keywords": [
             {
                 "word": "阿里",
@@ -4374,9 +5811,9 @@
     },
     {
         "title": "阿里抢先谷歌一步？千问APP把 AI 购物和 AI 办事直接做出来了，AGI已来？",
-        "video_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/videos/APP_AI_AI_AGI_ryyYnnC6QYo.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/thumbnails/APP_AI_AI_AGI_ryyYnnC6QYo.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/aliqianwen/transcripts/APP_AI_AI_AGI_ryyYnnC6QYo.json",
+        "video_path": "http:/cres/queries/aliqianwen/videos/APP_AI_AI_AGI_ryyYnnC6QYo.mp4",
+        "thumb_path": "http:/cres/queries/aliqianwen/thumbnails/APP_AI_AI_AGI_ryyYnnC6QYo.webp",
+        "json_path": "http:/cres/queries/aliqianwen/transcripts/APP_AI_AI_AGI_ryyYnnC6QYo.json",
         "keywords": [
             {
                 "word": "AI",
@@ -4409,9 +5846,9 @@
     },
     {
         "title": "高學歷紅利蒸發 AI讓科技業鬆綁學位門檻｜FOCUS午間新聞 20251229 @TVBSNEWS01",
-        "video_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/videos/AI_FOCUS_20251229_%40TVBSNEWS01_17zWJ2PPqxM.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/thumbnails/AI_FOCUS_20251229_%40TVBSNEWS01_17zWJ2PPqxM.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/kejixinwen/transcripts/AI_FOCUS_20251229_%40TVBSNEWS01_17zWJ2PPqxM.json",
+        "video_path": "http:/cres/queries/kejixinwen/videos/AI_FOCUS_20251229_%40TVBSNEWS01_17zWJ2PPqxM.mp4",
+        "thumb_path": "http:/cres/queries/kejixinwen/thumbnails/AI_FOCUS_20251229_%40TVBSNEWS01_17zWJ2PPqxM.webp",
+        "json_path": "http:/cres/queries/kejixinwen/transcripts/AI_FOCUS_20251229_%40TVBSNEWS01_17zWJ2PPqxM.json",
         "keywords": [
             {
                 "word": "事業大學畢業",
@@ -4450,9 +5887,9 @@
     },
     {
         "title": "🧸 Explore Tambo Queensland ~ Things to do in and around Tambo",
-        "video_path": "http://192.168.2.130:9000/cres/queries/tambo/videos/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.mp4",
-        "thumb_path": "http://192.168.2.130:9000/cres/queries/tambo/thumbnails/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.webp",
-        "json_path": "http://192.168.2.130:9000/cres/queries/tambo/transcripts/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.json",
+        "video_path": "http:/cres/queries/tambo/videos/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.mp4",
+        "thumb_path": "http:/cres/queries/tambo/thumbnails/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.webp",
+        "json_path": "http:/cres/queries/tambo/transcripts/Explore_Tambo_Queensland_~_Things_to_do_in_and_around_Tambo_EzhQjwr8W1M.json",
         "keywords": [
             {
                 "word": "tambow",
@@ -4487,6 +5924,6 @@
         ],
         "summary": "Welcome to Wonder Explorer's Sculler Today we're going to explore Tambow, the oldest town in Western Queensland",
         "search_query": "tambo",
-        "query_updated_at": "2026-02-12T18:13:05.205000+00:00"
+        "query_updated_at": "2026-02-12T18:26:59.174000+00:00"
     }
 ]
