@@ -22,7 +22,7 @@ chmod +x /workspace/*.sh
 # Call the refined remote startup script
 if [ -f "./start_remote.sh" ]; then
     echo "[$(date)] Calling start_remote.sh..." >> $LOGFILE
-    ./start_remote.sh >> $LOGFILE 2>&1
+    bash ./start_remote.sh >> $LOGFILE 2>&1
 else
     echo "[$(date)] ERROR: start_remote.sh not found!" >> $LOGFILE
 fi

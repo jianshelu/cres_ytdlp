@@ -27,17 +27,63 @@ load_workspace_env
 # Normalize line endings to avoid Windows CRLF startup issues.
 sed -i 's/\r$//' "$WORKSPACE_ROOT/start_remote.sh" "$WORKSPACE_ROOT/entrypoint.sh" "$WORKSPACE_ROOT/onstart.sh" 2>/dev/null || true
 
+SUPERVISOR_SOCKET="${SUPERVISOR_SOCKET:-unix:///tmp/supervisor.sock}"
+
+supervisor_status_raw() {
+    supervisorctl -s "$SUPERVISOR_SOCKET" status 2>/dev/null || true
+}
+
+detect_supervisor_conf() {
+    if [ -n "${SUPERVISOR_CONF:-}" ] && [ -f "${SUPERVISOR_CONF}" ]; then
+        echo "${SUPERVISOR_CONF}"
+        return 0
+    fi
+    for candidate in "/etc/supervisor/supervisord.conf" "$WORKSPACE_ROOT/scripts/supervisord.conf"; do
+        if [ -f "$candidate" ]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
 supervisor_controls_backend() {
     if ! command -v supervisorctl >/dev/null 2>&1; then
         return 1
     fi
     local status
-    status="$(supervisorctl -s unix:///tmp/supervisor.sock status 2>/dev/null || true)"
+    status="$(supervisor_status_raw)"
     if [ -z "$status" ]; then
         return 1
     fi
-    echo "$status" | grep -q "^fastapi[[:space:]]\+RUNNING" || return 1
     return 0
+}
+
+ensure_supervisor_backend() {
+    if supervisor_controls_backend; then
+        return 0
+    fi
+    if ! command -v supervisord >/dev/null 2>&1; then
+        return 1
+    fi
+    local conf
+    conf="$(detect_supervisor_conf 2>/dev/null || true)"
+    if [ -z "$conf" ]; then
+        return 1
+    fi
+
+    echo "Supervisor backend not detected. Starting supervisord with: $conf"
+    nohup "$(command -v supervisord)" -n -c "$conf" >/var/log/supervisord-bootstrap.log 2>&1 &
+
+    local status
+    for _ in $(seq 1 20); do
+        status="$(supervisor_status_raw)"
+        if [ -n "$status" ]; then
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
 }
 
 pid_status_line() {
@@ -128,6 +174,11 @@ show_status() {
     check_http "FastAPI" "http://127.0.0.1:8000/health"
     check_http "MinIO" "${minio_scheme}://${minio_endpoint}/minio/health/live"
     check_temporal_grpc "${temporal_addr}"
+    if supervisor_controls_backend; then
+        echo
+        echo "== Supervisor Programs =="
+        supervisor_status_raw
+    fi
     echo
     echo "== Recent Logs =="
     echo "-- $WORKSPACE_ROOT/logs/app.log --"
@@ -213,7 +264,7 @@ terminate_workspace_next_server() {
 
 restart_services() {
     local supervisor_backend=0
-    if supervisor_controls_backend; then
+    if ensure_supervisor_backend; then
         supervisor_backend=1
     fi
 
@@ -271,7 +322,7 @@ restart_services() {
             echo $! > "$PID_DIR/cres_next_wrapper.pid"
         fi
     else
-        echo "Starting services via entrypoint..."
+        echo "Supervisor backend unavailable. Falling back to entrypoint startup path."
         if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:3000 || true)" = "200" ]; then
             echo "Detected healthy service on :3000, skipping Next.js relaunch command."
             nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -lc "while true; do sleep 3600; done" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &

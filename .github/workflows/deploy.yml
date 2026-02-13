@@ -12,6 +12,8 @@ on:
       - "scripts/start-llama.sh"
       - "scripts/with_compute_env.sh"
       - "scripts/container_smoke.sh"
+      - "onstart.sh"
+      - "start_remote.sh"
       - "src/**"
       - "web/**"
       - ".github/workflows/deploy.yml"

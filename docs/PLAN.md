@@ -1,4 +1,41 @@
 # PLAN
+## 2026-02-13 - Make Vast Startup Prefer Supervisor Backend and Remove Entry Drift
+
+- Objective: ensure Vast boot path consistently uses the same supervisor-managed runtime as container image entrypoint.
+- Root cause:
+  - `start_remote.sh` only treated supervisor as active when `fastapi` was already `RUNNING`; otherwise it fell back to `entrypoint.sh`.
+  - This created runtime drift from `scripts/supervisord.conf` and could bypass dedicated `worker-gpu` process wiring.
+  - `onstart.sh` invoked `./start_remote.sh` directly; using `bash` is safer against exec-bit inconsistencies.
+- Changes:
+  - `start_remote.sh`
+    - Added supervisor helpers:
+      - `supervisor_status_raw`
+      - `detect_supervisor_conf`
+      - `ensure_supervisor_backend`
+    - Updated `supervisor_controls_backend` to treat non-empty supervisor status as backend-managed (no strict `fastapi RUNNING` gate).
+    - `restart_services` now calls `ensure_supervisor_backend` first and prefers supervisor path; only falls back to `entrypoint` when supervisor is unavailable.
+    - `show_status` now prints supervisor program status when available.
+  - `onstart.sh`
+    - Updated start invocation from `./start_remote.sh` to `bash ./start_remote.sh`.
+
+### Validation
+
+- Syntax check:
+  - `bash -n start_remote.sh`
+  - `bash -n onstart.sh`
+- Verify supervisor-first logic:
+  - `rg --line-number "ensure_supervisor_backend|detect_supervisor_conf|SUPERVISOR_SOCKET|Supervisor backend unavailable" start_remote.sh`
+- Runtime verification on Vast instance (read-only):
+  - `tail -n 120 /var/log/onstart.log`
+  - `supervisorctl -s unix:///tmp/supervisor.sock status`
+  - `ss -ltnp | grep -E ":8000|:8081"`
+
+### Rollback
+
+1. Revert `start_remote.sh` to previous supervisor detection and entrypoint fallback behavior.
+2. Revert `onstart.sh` invocation back to `./start_remote.sh`.
+3. Redeploy previous image tag if needed.
+
 ## 2026-02-13 - Harden Vast Startup and llama Runtime Lib Packaging for New Instance Boot
 
 - Objective: prevent compute container boot failure on new Vast instances and eliminate missing `llama-server` shared-lib errors.
