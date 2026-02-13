@@ -1,4 +1,37 @@
 # PLAN
+## 2026-02-13 - Fix Dual-Route Failures (Runner Disk + Missing llama-src-latest)
+
+- Objective: stabilize both routes after observed failures:
+  - `minimal-build-and-boot`: runner disk exhaustion (`No space left on device` in `_diag`).
+  - `llama-prebuilt` route: missing source artifact image (`llama-src-latest: not found`).
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Keep `workflow_dispatch` only to avoid push-triggered heavy builds that can exhaust runner disk.
+  - `.github/workflows/deploy.yml`
+    - In `build-base-llama-prebuilt`, added artifact-image resolver:
+      - primary: `...-base:llama-src-latest`
+      - fallback: `...-base:latest`
+      - fail with explicit error if neither exists.
+    - Build arg `LLAMA_ARTIFACT_IMAGE` now comes from resolver output.
+  - `Dockerfile`
+    - Default app base changed to:
+      - `ghcr.io/jianshelu/cres_ytdlp-base:llama-prebuilt-latest`
+
+### Validation
+
+- Verify minimal workflow trigger scope:
+  - `rg --line-number "^on:|workflow_dispatch:|push:|pull_request:" .github/workflows/ci-minimal-image.yml`
+- Verify prebuilt artifact fallback logic:
+  - `rg --line-number "Resolve llama artifact source image|llama-src-latest|base:latest|llama_artifact_image" .github/workflows/deploy.yml`
+- Verify Docker default base route:
+  - `rg --line-number "^ARG BASE_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:llama-prebuilt-latest" Dockerfile`
+
+### Rollback
+
+1. Revert resolver step in `.github/workflows/deploy.yml` and restore fixed `LLAMA_ARTIFACT_IMAGE=...:llama-src-latest`.
+2. Revert `Dockerfile` base default to previous tag.
+3. (Optional) restore push/pull_request triggers in `.github/workflows/ci-minimal-image.yml` if automatic minimal CI is required.
+
 ## 2026-02-13 - Split Trigger Policy by Base Route (Prebuilt Auto on Push, Source Compile Manual)
 
 - Objective: enforce mixed trigger policy:

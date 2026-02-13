@@ -1,5 +1,5 @@
 # Dockerfile (supervisord PID1; starts all services)
-ARG BASE_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:llama-src-latest
+ARG BASE_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:llama-prebuilt-latest
 FROM ${BASE_IMAGE} AS base
 
 WORKDIR /workspace

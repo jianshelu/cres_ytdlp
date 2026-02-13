@@ -1,27 +1,6 @@
 name: CI Minimal Image Boot
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "Dockerfile"
-      - "Dockerfile.base"
-      - "requirements.instance.txt"
-      - "scripts/supervisord.conf"
-      - "scripts/start-llama.sh"
-      - "scripts/container_smoke.sh"
-      - "src/**"
-      - ".github/workflows/ci-minimal-image.yml"
-  pull_request:
-    paths:
-      - "Dockerfile"
-      - "Dockerfile.base"
-      - "requirements.instance.txt"
-      - "scripts/supervisord.conf"
-      - "scripts/start-llama.sh"
-      - "scripts/container_smoke.sh"
-      - "src/**"
-      - ".github/workflows/ci-minimal-image.yml"
   workflow_dispatch:
 
 jobs:

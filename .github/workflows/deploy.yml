@@ -200,6 +200,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Resolve llama artifact source image
+        id: resolve_llama_artifact
+        shell: bash
+        run: |
+          set -euxo pipefail
+          primary="${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base:llama-src-latest"
+          fallback="${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base:latest"
+
+          artifact="$primary"
+          if ! docker buildx imagetools inspect "$artifact" >/dev/null 2>&1; then
+            echo "Primary llama artifact image not found: $artifact"
+            artifact="$fallback"
+          fi
+
+          if ! docker buildx imagetools inspect "$artifact" >/dev/null 2>&1; then
+            echo "No valid llama artifact image found. Tried: $primary and $fallback"
+            exit 1
+          fi
+
+          echo "Using LLAMA_ARTIFACT_IMAGE=$artifact"
+          echo "llama_artifact_image=$artifact" >> "$GITHUB_OUTPUT"
+
       - name: Extract metadata for llama-prebuilt base image
         id: meta
         uses: docker/metadata-action@v5
@@ -221,7 +243,7 @@ jobs:
           file: Dockerfile.base.prebuilt
           platforms: linux/amd64
           build-args: |
-            LLAMA_ARTIFACT_IMAGE=${{ env.REGISTRY }}/${{ needs.filter.outputs.image_name_lower }}-base:llama-src-latest
+            LLAMA_ARTIFACT_IMAGE=${{ steps.resolve_llama_artifact.outputs.llama_artifact_image }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
