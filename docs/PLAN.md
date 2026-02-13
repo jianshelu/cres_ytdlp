@@ -1,4 +1,33 @@
 # PLAN
+## 2026-02-13 - Fix build-app Disk Exhaustion in BuildKit Snapshot Stage
+
+- Objective: prevent `build-app` failures like `ResourceExhausted ... /var/lib/buildkit/... no space left on device` during app smoke image build.
+- Root cause:
+  - `build-app` used Buildx `docker-container` with `load: true`, which increases local snapshot/export pressure on constrained runner disks.
+  - App job also configured `type=gha` cache directives, locking the job to buildkit-container behavior.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - In `build-app` job `Set up Docker Buildx`, switched driver:
+      - `docker-container -> docker`
+    - Removed app-image GHA cache directives:
+      - smoke build: removed `cache-from: type=gha,scope=app`
+      - publish build: removed `cache-from/cache-to type=gha,scope=app`
+    - Base-image jobs remain on `docker-container` with GHA cache unchanged.
+
+### Validation
+
+- Verify app Buildx driver and cache removal:
+  - `rg --line-number "build-app:|Set up Docker Buildx|driver: docker|cache-from: type=gha,scope=app|cache-to: type=gha,scope=app" .github/workflows/deploy.yml`
+- Re-run `Build and Push to GHCR` and confirm:
+  - app smoke build no longer fails at `WORKDIR /workspace` with `ResourceExhausted`.
+  - smoke + publish steps complete successfully.
+
+### Rollback
+
+1. In `.github/workflows/deploy.yml` `build-app` job, restore `driver: docker-container`.
+2. Restore app `cache-from/cache-to type=gha,scope=app` lines in smoke/publish steps.
+3. Re-run workflow and compare disk behavior.
+
 ## 2026-02-13 - Align CI Minimal GHCR Base Selection with Prebuilt Tags
 
 - Objective: reduce unnecessary local base rebuilds in `CI Minimal Image Boot` and harden GHCR build-cache compatibility in deploy jobs.

@@ -5,7 +5,10 @@
 - [x] Fix `CI Minimal Image Boot` prebuilt-base resolution to prefer `llama-prebuilt-latest` and fall back through valid GHCR tags before local build.
 - [x] Configure explicit Buildx `driver: docker-container` in GHCR deploy workflow jobs that use `type=gha` cache.
 - [x] Document GHCR base-selection and Buildx-driver hardening with validation/rollback steps in `docs/PLAN.md`.
+- [x] Fix `build-app` Buildx driver to `docker` and remove app GHA cache directives to reduce `/var/lib/buildkit` disk pressure during smoke build.
+- [x] Document `ResourceExhausted` disk-fix change and rollback in `docs/PLAN.md`.
 - [ ] Verify `CI Minimal Image Boot` and `Build and Push to GHCR` pass after GHCR base-selection and Buildx-driver updates.
+- [ ] Verify `Build and Push to GHCR` no longer fails with `write /var/lib/buildkit/... no space left on device` in `build-app`.
 
 ## 2026-02-12 (Thursday)
 ### Control Plane (Temporal / MinIO / Web / Control API)
