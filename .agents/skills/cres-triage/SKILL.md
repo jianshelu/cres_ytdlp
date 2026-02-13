@@ -22,7 +22,10 @@ Detailed troubleshooting and extended checks live in `./REFERENCE.md`.
 | From | To | Method |
 |---|---|---|
 | Norfolk | huihuang | SSH (`id_ed25519_huihuang`) |
-| huihuang | Vast.ai GPU | SSH (`id_huihuang2vastai`) |
+| huihuang | Vast.ai GPU | SSH (`id_huihuang2vastai`, path: `~/.ssh/id_huihuang2vastai`) |
+
+Instance connection key for Vast.ai GPU is `id_huihuang2vastai`.
+Always initiate this hop from `huihuang` (not directly from Norfolk).
 
 ## 3) Endpoints and NAT Rules
 
