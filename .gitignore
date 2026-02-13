@@ -39,6 +39,7 @@ id_vast_key
 
 # Temporary local artifacts (session-generated)
 .tmp_*
+.tmp/
 backend_deploy.tar
 backend_deploy.zip
 web_deploy.tar
@@ -67,6 +68,5 @@ output/
 scripts/_tmp_*.sh
 docs/Implementation
 .agent/artifacts/google_ai_pipeline_report.json
-
 
 

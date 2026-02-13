@@ -1,4 +1,37 @@
 # PLAN
+## 2026-02-13 - Reduce build-app Disk Pressure on Runner
+
+- Objective: avoid `No space left on device` failures during `build-app` on self-hosted runner.
+- Root cause:
+  - App pipeline performs smoke build + publish build in one job.
+  - Residual Docker images/cache plus large cache/provenance export can exhaust root disk over long runs.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - Enhanced `Reclaim disk space before app build`:
+      - added `docker system df` visibility.
+      - added `_diag` log cleanup (`/home/runner/actions-runner/cached/_diag`).
+      - added extra prune (`docker image prune`, `docker volume prune`).
+    - Added new step `Reclaim disk space before app publish build`:
+      - removes `cres-smoke:<sha>` image and prunes builder/image/volume before final push build.
+      - includes `_diag` log cleanup and disk usage print.
+    - Reduced app publish build artifact pressure:
+      - `cache-to` mode changed `max -> min`
+      - disabled `provenance` and `sbom` for app publish step.
+
+### Validation
+
+- Verify new cleanup steps and prune calls:
+  - `rg --line-number "Reclaim disk space before app build|Reclaim disk space before app publish build|docker system df|cached/_diag|docker image prune|docker volume prune|cres-smoke:\\$\\{\\{ github.sha \\}\\}" .github/workflows/deploy.yml`
+- Verify app publish build output settings:
+  - `rg --line-number "cache-to: type=gha,scope=app,mode=min|provenance: false|sbom: false" .github/workflows/deploy.yml`
+- Re-run push-triggered workflow and confirm no `_diag` disk exhaustion in `build-app`.
+
+### Rollback
+
+1. Remove the additional publish-cleanup step.
+2. Revert app cleanup step to previous prune subset.
+3. Restore app publish `cache-to mode=max`, `provenance`, and `sbom` settings.
+
 ## 2026-02-13 - Stabilize Push Path by Building Prebuilt Base Every Push and Pinning SHA Tag
 
 - Objective: prevent push-triggered `build-app` from resolving stale/invalid base tags.
