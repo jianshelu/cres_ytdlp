@@ -26,7 +26,7 @@ As of 2026-02-10, the project uses a specific 3-node Hybrid Architecture:
      - Web UI: http://192.168.2.130:3000/
      - MinIO Console: http://192.168.2.130:9001/
      - Temporal UI: http://192.168.2.130:8233/
-3. Compute Plane (Instance): Vast.ai GPU Server (ssh2.vast.ai).
+3. Compute Plane (Instance): Vast.ai GPU Server (ssh3.vast.ai).
    - Role: Runs heavy compute tasks (Worker, Llama, Whisper).
    - Connectivity: Connected via SSH from Norfolk for management. Connects back to Huihuang for data/API access via public IP/Port Forwarding.
 
@@ -36,12 +36,12 @@ Web (Next.js)	Huihuang	192.168.2.130	3000	User Interface.
 FastAPI	Huihuang	192.168.2.130	8000	Backend API & Health.
 Temporal Server	Huihuang	192.168.2.130	7233/8233	Workflow Orchestration.
 MinIO Storage	Huihuang	192.168.2.130	9000	Object Storage (User: cres).
-Temporal Worker	Instance (ssh2.vast.ai)	Remote	N/A	GPU Task Execution.
-llama-server	Instance (ssh2.vast.ai)	Remote	8081	LLM Inference.
+Temporal Worker	Instance (ssh3.vast.ai)	Remote	N/A	GPU Task Execution.
+llama-server	Instance (ssh3.vast.ai)	Remote	8081	LLM Inference.
 Development	Norfolk	192.168.2.131	N/A	Code & Deploy.
 
 SSH Connectivity & Tunneling
-- **Norfolk -> Instance**: `ssh -p 27139 root@ssh2.vast.ai -L 8080:localhost:8080`
+- **Norfolk -> Instance**: `ssh -p 15307 root@ssh3.vast.ai -L 8080:localhost:8080`
   - Purpose: Mangement and forwarding llama-server (8081->8080) for debugging if needed.
 - **Instance -> Huihuang**: Traffic routes through Router Port Forwarding (Public IP -> 192.168.2.130).
 - **Norfolk -> Huihuang**: Direct LAN connection (User: `rama`).

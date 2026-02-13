@@ -61,4 +61,5 @@ RUN pip3 install --upgrade pip \
 # Supervisor config + llama wrapper
 COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf
 COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh
-RUN chmod +x /usr/local/bin/start-llama.sh
+COPY scripts/with_compute_env.sh /workspace/scripts/with_compute_env.sh
+RUN chmod +x /usr/local/bin/start-llama.sh /workspace/scripts/with_compute_env.sh

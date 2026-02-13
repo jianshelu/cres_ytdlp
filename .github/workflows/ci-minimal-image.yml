@@ -36,6 +36,7 @@ jobs:
               - "requirements.instance.txt"
               - "scripts/supervisord.conf"
               - "scripts/start-llama.sh"
+              - "scripts/with_compute_env.sh"
 
       - name: Reclaim disk space before build
         run: |
@@ -138,6 +139,8 @@ jobs:
         with:
           context: .
           file: Dockerfile.base
+          build-args: |
+            LLAMA_BUILD_JOBS=2
           push: false
           load: true
           tags: cres-base-ci:${{ github.sha }}

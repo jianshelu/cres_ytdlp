@@ -1,27 +1,41 @@
 # Tasks
 
 ## 2026-02-13 (Friday)
+### Compute API
+- [ ] Verify FastAPI crash root cause on GPU instance by collecting `/var/log/fastapi.err` and confirming `src.api.main` import path availability.
+- [ ] Fix Vast runtime image target to deploy the app image (with `/workspace/src`) instead of base `.../jupyter` image for compute startup.
+- [ ] Test Compute API health on GPU node (`/health`) and confirm dependency checks (`temporal`, `minio`, `llama`) return healthy.
+
+### llama
+- [ ] Verify Google Drive model sync postcondition by checking `/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` as a regular readable file with stable non-zero size.
+- [ ] Fix model sync flow to download to temporary file and perform atomic rename to `Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` only after transfer completion.
+- [ ] Configure llama startup preflight to fail fast on model-dir write anomalies and emit explicit diagnostics when file checks return inconsistent `exists` states.
+
 ### Docs & Ops (Runbook / Validation / Architecture)
 - [x] Fix `CI Minimal Image Boot` prebuilt-base resolution to prefer `llama-prebuilt-latest` and fall back through valid GHCR tags before local build.
 - [x] Configure explicit Buildx `driver: docker-container` in GHCR deploy workflow jobs that use `type=gha` cache.
 - [x] Document GHCR base-selection and Buildx-driver hardening with validation/rollback steps in `docs/PLAN.md`.
 - [x] Fix `build-app` Buildx driver to `docker` and remove app GHA cache directives to reduce `/var/lib/buildkit` disk pressure during smoke build.
 - [x] Document `ResourceExhausted` disk-fix change and rollback in `docs/PLAN.md`.
+- [x] Implement `.agents/skills/frontend/SKILL.md` and `.agents/skills/frontend/REFERENCE.md` for reusable UI/web workflow guidance.
 - [ ] Verify `CI Minimal Image Boot` and `Build and Push to GHCR` pass after GHCR base-selection and Buildx-driver updates.
 - [ ] Verify `Build and Push to GHCR` no longer fails with `write /var/lib/buildkit/... no space left on device` in `build-app`.
+- [x] Configure Vast SSH endpoint rotation in `.env`, `.env.example`, and `docs/Perimeter.md` using the new running instance host/port.
+- [x] Verify public-key authentication for the rotated Vast endpoint and keep `VAST_SSH_KEY=~/.ssh/id_huihuang2vastai`.
+- [x] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs for the new instance.
 
 ## 2026-02-12 (Thursday)
 ### Control Plane (Temporal / MinIO / Web / Control API)
-- [ ] Implement `web/src/app/audio/page.tsx` to add `/audio` route with server-side data loading from existing `data.json` source.
-- [ ] Implement `web/src/app/audio/AudioClient.tsx` for audio-focused list/filter UI without changing existing `/video` behavior.
-- [ ] Implement homepage navigation entry in `web/src/app/page.tsx` to expose the new `Audio` page.
-- [ ] Configure styles in `web/src/app/globals.css` for audio page layout using existing design tokens.
+- [x] Implement `web/src/app/audio/page.tsx` to add `/audio` route with server-side data loading from existing `data.json` source.
+- [x] Implement `web/src/app/audio/AudioClient.tsx` for audio-focused list/filter UI without changing existing `/video` behavior.
+- [x] Implement homepage navigation entry in `web/src/app/page.tsx` to expose the new `Audio` page.
+- [x] Configure styles in `web/src/app/globals.css` for audio page layout using existing design tokens.
 
 ### Docs & Ops (Runbook / Validation / Architecture)
-- [ ] Verify `npm run build` in `web/` passes after adding the new route.
+- [x] Verify `npm run build` in `web/` passes after adding the new route.
 - [ ] Test `/audio` page manually on `http://127.0.0.1:3000/audio` and confirm links/playback fall back gracefully when media is missing.
 - [ ] Document rollout and rollback steps for the audio page in `docs/PLAN.md` only if API contract or ops behavior changes.
-- [ ] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs.
+- [x] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs.
 - [x] Document source-of-truth precedence from `AGENTS.md` `Where the truth lives vividly` in `docs/PLAN.md`.
 - [x] Update daily task tracking source references to follow `.agents/skills/cres-triage/SKILL.md` -> `docs/PLAN.md` -> `docs/Task.md` -> `docs/DECISIONS.md`.
 - [x] Document Where the truth lives vividly color+emoji interaction requirement for `docs/PLAN.md` and `docs/Task.md` updates (HCI docs scope only).
@@ -90,7 +104,7 @@
 - [ ] Verify connectivity to both hosts after SSH config updates.
 - [ ] Document latest IP/port mapping in perimeter/runbook docs.
 - [x] Configure Vast SSH endpoint rotation to `ssh2.vast.ai:27139` in `.env`, `.env.example`, and `docs/Perimeter.md`.
-- [ ] Verify public-key authentication for `ssh -p 27139 root@ssh2.vast.ai -L 8080:localhost:8080`.
+- [x] Verify public-key authentication for `ssh -p 15307 root@ssh3.vast.ai -L 8080:localhost:8080`.
 
 ### Workers & Queues (@cpu / @gpu)
 - [ ] Verify Temporal monitoring results for 30 workflows (`turbo-all`).

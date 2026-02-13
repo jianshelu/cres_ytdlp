@@ -74,6 +74,7 @@ When handling a task, select and apply the relevant domain skill:
 Always apply `$cres-triage` first for architecture constraints and hard limits.
 
 If a required domain skill does not exist, create it under: `.agents/skills/DOMAIN/SKILL.md`, using the exact domain names above.
+Every skill ONLY works on his own domain, and never cross-domain unless instructed.
 
 ### Skill Generation Rule
 
@@ -99,3 +100,4 @@ When proposing changes:
 - Provide validation steps
 - Provide rollback steps
 - Update `docs/PLAN.md` when changes affect architecture/ops
+- When generating dates (e.g., in `docs/Task.md`), use the timezone of host `huihuang`, unless the date is explicitly collected from an external instance.
