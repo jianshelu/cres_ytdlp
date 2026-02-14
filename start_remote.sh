@@ -28,6 +28,7 @@ load_workspace_env
 sed -i 's/\r$//' "$WORKSPACE_ROOT/start_remote.sh" "$WORKSPACE_ROOT/entrypoint.sh" "$WORKSPACE_ROOT/onstart.sh" 2>/dev/null || true
 
 SUPERVISOR_SOCKET="${SUPERVISOR_SOCKET:-unix:///tmp/supervisor.sock}"
+SUPERVISOR_SOCKET_PATH="${SUPERVISOR_SOCKET#unix://}"
 
 supervisor_status_raw() {
     supervisorctl -s "$SUPERVISOR_SOCKET" status 2>/dev/null || true
@@ -49,6 +50,9 @@ detect_supervisor_conf() {
 
 supervisor_controls_backend() {
     if ! command -v supervisorctl >/dev/null 2>&1; then
+        return 1
+    fi
+    if [[ "$SUPERVISOR_SOCKET" == unix://* ]] && [ ! -S "$SUPERVISOR_SOCKET_PATH" ]; then
         return 1
     fi
     local status
@@ -75,10 +79,8 @@ ensure_supervisor_backend() {
     echo "Supervisor backend not detected. Starting supervisord with: $conf"
     nohup "$(command -v supervisord)" -n -c "$conf" >/var/log/supervisord-bootstrap.log 2>&1 &
 
-    local status
     for _ in $(seq 1 20); do
-        status="$(supervisor_status_raw)"
-        if [ -n "$status" ]; then
+        if supervisor_controls_backend; then
             return 0
         fi
         sleep 1
