@@ -1,4 +1,36 @@
 # PLAN
+## 2026-02-14 - Prevent False Supervisor-Healthy Detection on Cold Boot
+
+- Objective: avoid startup drift where `start_remote.sh` skips supervisor bootstrap due to false-positive backend detection.
+- Root cause:
+  - `supervisor_controls_backend()` treated non-empty `supervisorctl status` output as success.
+  - On some instances, stale socket/transport errors produced non-empty text, causing a false "supervisor is managing backend" branch.
+- Changes:
+  - `start_remote.sh`
+    - `supervisor_status_raw()` now returns real `supervisorctl` exit code (removed `|| true`).
+    - `supervisor_controls_backend()` now:
+      - requires successful `supervisorctl` command execution;
+      - requires non-empty output;
+      - requires at least one valid supervisor program status line (`RUNNING|STARTING|BACKOFF|STOPPED|FATAL|EXITED|UNKNOWN`).
+    - This ensures cold boot reliably enters `ensure_supervisor_backend()` when supervisor is not actually active.
+
+### Validation
+
+- Syntax check:
+  - `bash -n start_remote.sh`
+- Verify guard logic:
+  - `rg --line-number "supervisor_status_raw|supervisor_controls_backend|RUNNING\\|STARTING\\|BACKOFF" start_remote.sh`
+- Runtime check on new instance:
+  - `tail -n 120 /var/log/onstart.log`
+  - `supervisorctl -s unix:///tmp/supervisor.sock status`
+  - `ps -eo pid,lstart,etime,cmd | grep supervisord`
+
+### Rollback
+
+1. Restore previous `supervisor_status_raw()` (`... || true`).
+2. Remove strict status-line pattern validation in `supervisor_controls_backend()`.
+3. Redeploy previous app image tag.
+
 ## 2026-02-14 - Rollback: Keep CPU Worker on `huihuang` by Default
 
 - Objective: revert the topology change that moved `@cpu` worker ownership to instance-only.

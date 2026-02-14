@@ -31,7 +31,7 @@ SUPERVISOR_SOCKET="${SUPERVISOR_SOCKET:-unix:///tmp/supervisor.sock}"
 SUPERVISOR_SOCKET_PATH="${SUPERVISOR_SOCKET#unix://}"
 
 supervisor_status_raw() {
-    supervisorctl -s "$SUPERVISOR_SOCKET" status 2>/dev/null || true
+    supervisorctl -s "$SUPERVISOR_SOCKET" status 2>/dev/null
 }
 
 detect_supervisor_conf() {
@@ -56,8 +56,15 @@ supervisor_controls_backend() {
         return 1
     fi
     local status
-    status="$(supervisor_status_raw)"
+    if ! status="$(supervisor_status_raw)"; then
+        return 1
+    fi
     if [ -z "$status" ]; then
+        return 1
+    fi
+    # Require at least one valid supervisord program status line.
+    # This avoids treating supervisorctl transport errors as a healthy backend.
+    if ! echo "$status" | grep -Eq '^[[:alnum:]_.-]+[[:space:]]+(RUNNING|STARTING|BACKOFF|STOPPED|FATAL|EXITED|UNKNOWN)[[:space:]]'; then
         return 1
     fi
     return 0
