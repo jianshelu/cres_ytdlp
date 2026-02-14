@@ -20,6 +20,23 @@ jobs:
           grep -nE "^FROM nvidia/cuda:.* AS llama_cpp_builder$" Dockerfile.base
           grep -n "cmake --build build --config Release --target llama-server" Dockerfile.base
 
+      - name: Validate Dockerfile FROM references
+        run: |
+          set -euxo pipefail
+          FILES=(Dockerfile Dockerfile.base Dockerfile.base.prebuilt)
+          for f in "${FILES[@]}"; do
+            test -f "$f"
+            grep -nE '^[[:space:]]*FROM[[:space:]]+' "$f"
+          done
+          if grep -nE '^[[:space:]]*FROM[[:space:]]+[^ ]*:@' "${FILES[@]}"; then
+            echo "Invalid Docker FROM reference contains ':@'"
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*FROM[[:space:]]+[^ ]+:([[:space:]]+|$)' "${FILES[@]}"; then
+            echo "Invalid Docker FROM reference has empty tag"
+            exit 1
+          fi
+
       - name: Lowercase image name
         id: lowercase
         run: |
@@ -211,8 +228,6 @@ jobs:
             -e MINIO_SECURE=false \
             -e MINIO_ACCESS_KEY=cres \
             -e MINIO_SECRET_KEY='Qh@113113' \
-            -e AWS_ACCESS_KEY_ID=cres \
-            -e AWS_SECRET_ACCESS_KEY='Qh@113113' \
             -e ENABLE_WEB=false \
             cres-app-ci:${{ github.sha }}
           docker exec app-ci /bin/bash /workspace/scripts/container_smoke.sh

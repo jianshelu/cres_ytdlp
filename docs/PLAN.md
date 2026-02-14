@@ -1,4 +1,65 @@
 # PLAN
+## 2026-02-14 - MinIO Credential Contract Cleanup (Single Source + Safe Alias)
+
+- Objective: keep runtime credential input unambiguous by using `MINIO_*` as the only externally injected keys.
+- Root cause:
+  - CI smoke and legacy supervisor template injected both `MINIO_*` and `AWS_*`, which created duplicated credential sources.
+  - `scripts/with_compute_env.sh` alias-sync used unguarded `$MINIO_*` expansion under `set -u`, which could fail before clear validation.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - Removed `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` from smoke `docker run` env.
+  - `.github/workflows/ci-minimal-image.yml`
+    - Removed `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` from smoke `docker run` env.
+  - `scripts/supervisord_remote.conf`
+    - Removed duplicated `AWS_*` injection from `fastapi`, `worker-cpu`, and `worker-gpu` program env lines.
+  - `scripts/with_compute_env.sh`
+    - Hardened alias sync with `${MINIO_ACCESS_KEY:-}` and `${MINIO_SECRET_KEY:-}` to avoid unbound-variable crashes.
+
+### Validation
+
+- `rg --line-number "AWS_ACCESS_KEY_ID=|AWS_SECRET_ACCESS_KEY=" .github/workflows/deploy.yml .github/workflows/ci-minimal-image.yml scripts/supervisord_remote.conf`
+- `rg --line-number "AWS_ACCESS_KEY_ID:-\\$\\{MINIO_ACCESS_KEY:-\\}|AWS_SECRET_KEY_ID:-\\$\\{MINIO_SECRET_KEY:-\\}" scripts/with_compute_env.sh`
+
+### Rollback
+
+1. Re-add `AWS_*` env lines in workflow smoke runs and `scripts/supervisord_remote.conf`.
+2. Restore previous alias-sync lines in `scripts/with_compute_env.sh`.
+3. Re-run smoke workflow to confirm restored behavior.
+
+## 2026-02-14 - Docker Build Pipeline Guard Rails (Deterministic + Non-Interactive)
+
+- Objective: reduce CI image build regressions by enforcing Docker reference preflight checks and fully non-interactive apt installs.
+- Root cause:
+  - `deploy.yml` push trigger did not include `Dockerfile.base`, so some base-image changes could skip publish pipeline.
+  - Node.js install layers in base Dockerfiles were not explicitly guarded with non-interactive dpkg options.
+  - Workflow-level preflight for invalid `FROM` references was incomplete.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - Added `Dockerfile.base` to `on.push.paths`.
+    - Added `Validate Dockerfile FROM references` preflight step in `filter` job.
+    - Removed `driver-opts: network=host` from `build-app` buildx setup when using `driver: docker`.
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added `Validate Dockerfile FROM references` preflight step.
+  - `Dockerfile.base`
+    - Enforced non-interactive Node.js apt install with dpkg conffile options.
+  - `Dockerfile.base.prebuilt`
+    - Enforced non-interactive Node.js apt install with dpkg conffile options.
+
+### Validation
+
+- Verify trigger paths include base Dockerfile:
+  - `rg --line-number 'Dockerfile.base' .github/workflows/deploy.yml`
+- Verify FROM preflight exists in both workflows:
+  - `rg --line-number 'Validate Dockerfile FROM references' .github/workflows/ci-minimal-image.yml .github/workflows/deploy.yml`
+- Verify non-interactive Node.js apt install in both Dockerfiles:
+  - `rg --line-number 'DEBIAN_FRONTEND=noninteractive apt-get install|Dpkg::Options' Dockerfile.base Dockerfile.base.prebuilt`
+
+### Rollback
+
+1. Revert edited lines in `.github/workflows/deploy.yml` and `.github/workflows/ci-minimal-image.yml`.
+2. Restore previous Node.js install commands in `Dockerfile.base` and `Dockerfile.base.prebuilt`.
+3. Re-run CI minimal image workflow to confirm rollback behavior.
+
 ## 2026-02-14 - Fix MinIO Credential Drift Between Template Env and /workspace/.env
 
 - Objective: prevent GPU worker from starting with wrong MinIO credentials due to silent fallback or stale `.env` overrides.
@@ -9,6 +70,7 @@
   - `scripts/with_compute_env.sh`
     - Removed `minioadmin` default fallback for `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY`.
     - Kept AWS alias mapping (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_KEY_ID`) as fallback source only.
+    - Added PID1 env fallback (`/proc/1/environ`) for `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` when supervisor child env drops credentials.
     - Added fail-fast guard: exit with clear error when resolved `MINIO_*` credentials are missing.
   - `start_remote.sh`
     - Updated `load_workspace_env()` to preserve runtime-injected sensitive keys while sourcing `/workspace/.env`.
@@ -21,6 +83,8 @@
 
 - Verify no default `minioadmin` fallback remains:
   - `rg --line-number "minioadmin|missing MINIO_ACCESS_KEY" scripts/with_compute_env.sh`
+- Verify PID1 fallback exists:
+  - `rg --line-number "read_pid1_env|/proc/1/environ" scripts/with_compute_env.sh`
 - Verify env-preserve logic in `start_remote.sh`:
   - `rg --line-number "snapshot_file|sensitive_keys|Preserve runtime-injected env" start_remote.sh`
 - Runtime check on instance (redacted):

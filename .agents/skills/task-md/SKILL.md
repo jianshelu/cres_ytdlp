@@ -33,17 +33,17 @@ Maintain a single source-of-truth task file at: `docs/Task.md`.
 
 ## Rules
 1) If `docs/Task.md` does NOT exist:
-   â†?Create it using the template.
+   -> Create it using the template.
 
 2) If it exists:
-   â†?Update today's section if present.
-   â†?Otherwise prepend a new day section at the top.
+   -> Update today's section if present.
+   -> Otherwise prepend a new day section at the top.
 
 3) Do NOT delete historical days unless explicitly instructed.
 
-4) Each work category should contain â‰?7 active tasks.
+4) Each work category should contain <= 7 active tasks.
    If overflow occurs:
-   â†?Move extras under a subsection: "Upcoming".
+   -> Move extras under a subsection: "Upcoming".
 
 5) Tasks must start with verbs:
    Fix / Implement / Verify / Refactor / Document / Test / Configure / Deploy.
