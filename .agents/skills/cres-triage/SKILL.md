@@ -1,4 +1,4 @@
-﻿---
+---
 name: cres-triage
 description: Triage and execute tasks for cres_ytdlp (LAN control plane + NAT + floating Vast.ai GPU architecture with dual FastAPI and dual workers).
 ---

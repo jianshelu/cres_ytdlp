@@ -1,4 +1,54 @@
 # PLAN
+## 2026-02-14 - Harden Vast On-Start MinIO Credential Handling
+
+- Objective: prevent silent GPU activity retry loops when Vast template env uses inconsistent AWS/MinIO key names.
+- Root cause:
+  - Vast template invocations sometimes provide `AWS_SECRET_KEY_ID` (typo) instead of `AWS_SECRET_ACCESS_KEY`.
+  - When MinIO credentials are missing/misaligned at boot, GPU worker starts but `transcribe_video` repeatedly fails with `InvalidAccessKeyId`.
+- Changes:
+  - `onstart.sh`
+    - Added env alias normalization:
+      - `AWS_SECRET_KEY_ID -> AWS_SECRET_ACCESS_KEY`
+      - fallback mapping between `AWS_*` and `MINIO_*` credentials.
+    - Added fail-fast guard:
+      - abort startup with explicit log error when `MINIO_ACCESS_KEY` or `MINIO_SECRET_KEY` is missing.
+
+### Validation
+
+- `bash -n onstart.sh`
+- Boot-time log check on instance:
+  - `sed -n '1,120p' /var/log/onstart.log`
+- Runtime env check:
+  - `env | grep -E '^(MINIO_ACCESS_KEY|MINIO_SECRET_KEY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)='`
+- Temporal queue check:
+  - `video-processing@gpu` poller exists and no new `InvalidAccessKeyId` in worker logs.
+
+### Rollback
+
+1. Revert credential normalization/fail-fast block in `onstart.sh`.
+2. Redeploy previous image/tag.
+3. Restart instance and re-check `/var/log/onstart.log` plus GPU worker queue pollers.
+
+## 2026-02-14 - Rotate Vast SSH Endpoint to `ssh7.vast.ai:17568` (Recreated Instance)
+
+- Objective: switch tooling to the recreated Vast.ai instance and restore GPU queue polling path.
+- Changes:
+  - `.env`
+    - `VAST_HOST=ssh7.vast.ai`
+    - `VAST_PORT=17568`
+  - `.env.example`
+    - `VAST_HOST=ssh7.vast.ai`
+    - `VAST_PORT=17568`
+- Validation:
+  - SSH connectivity:
+    - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang2vastai -p 17568 root@ssh7.vast.ai "hostname; whoami"`
+  - GPU activity poller recovered on Temporal:
+    - `D:\soft\temporal.exe task-queue describe --address 127.0.0.1:7233 --namespace default --task-queue video-processing@gpu --task-queue-type activity`
+    - Observed poller identity: `61f9310790fb@gpu`
+- Rollback:
+  1. Revert `VAST_HOST` / `VAST_PORT` in `.env` and `.env.example` to previous values.
+  2. Re-run SSH validation against previous endpoint.
+
 ## 2026-02-13 - Make Vast Startup Prefer Supervisor Backend and Remove Entry Drift
 
 - Objective: ensure Vast boot path consistently uses the same supervisor-managed runtime as container image entrypoint.
