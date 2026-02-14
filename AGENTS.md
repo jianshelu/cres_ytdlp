@@ -4,14 +4,14 @@ Global agent instructions for this repository.
 
 ## Mandatory rule (always)
 At the start of EVERY new chat/task in this repo, you MUST apply the skills:
-1) Apply: $cres-triage
+1) Apply: $triage
 2) If Codex offer user solution / planning / to-do / schedule / Task.md:
    Apply: $task-md
 
-Do not proceed with analysis, edits, or recommendations until you have loaded and followed `$cres-triage`.
+Do not proceed with analysis, edits, or recommendations until you have loaded and followed `$triage`.
 
 ## Scope
-`$cres-triage` is the authoritative source for:
+`$triage` is the authoritative source for:
 - Architecture (Norfolk / huihuang / Vast.ai GPU)
 - NAT/public endpoints and port-forward rules
 - Dual FastAPI roles
@@ -20,7 +20,7 @@ Do not proceed with analysis, edits, or recommendations until you have loaded an
 - Model paths
 - Validation checklist + DoD
 
-If there is any conflict between other files and `$cres-triage`, `$cres-triage` wins.
+If there is any conflict between other files and `$triage`, `$triage` wins.
 
 ## Hard constraints (summary)
 - Never commit secrets/tokens.
@@ -28,8 +28,8 @@ If there is any conflict between other files and `$cres-triage`, `$cres-triage` 
 - Minimal diffs; no broad rewrites.
 
 ## GPU SSH ACCESS MODEL
-- The Vast.ai GPU instance is accessed from huihuang using SSH key: id_huihuang2vastai
-- Connection chain: Norfolk → SSH → huihuang → SSH (id_huihuang2vastai) → Vast.ai GPU
+- The Vast.ai GPU instance is accessed from huihuang using SSH key: id_huihuang92vastai
+- Connection chain: Norfolk → SSH → huihuang → SSH (id_huihuang92vastai) → Vast.ai GPU
 
 Rules:
 - GPU IP is floating and may change per instance.
@@ -40,7 +40,7 @@ Rules:
 
 
 ## Where the truth lives vividly
-- Skills: `.agents/skills/cres-triage/SKILL.md` (authoritative)
+- Skills: `.agents/skills/triage/SKILL.md` (authoritative)
 - Plan: `docs/PLAN.md` (current status)
 - Task List: `docs/Task.md`
 - Decisions: `docs/DECISIONS.md` (tradeoffs; optional)
@@ -71,7 +71,7 @@ When handling a task, select and apply the relevant domain skill:
 - Compute-related tasks  → apply `$compute`
 - Brainstorm/roadmap tasks → apply `$cres`
 
-Always apply `$cres-triage` first for architecture constraints and hard limits.
+Always apply `$triage` first for architecture constraints and hard limits.
 
 If a required domain skill does not exist, create it under: `.agents/skills/DOMAIN/SKILL.md`, using the exact domain names above.
 Every skill ONLY works on his own domain, and never cross-domain unless instructed.
@@ -82,7 +82,7 @@ When creating or expanding a domain skill:
 
 - Keep `SKILL.md` compact and constraint-first.
 - Place extended procedures and troubleshooting in `REFERENCE.md` within the same skill folder.
-- Do not duplicate `$cres-triage` constraints.
+- Do not duplicate `$triage` constraints.
 - Add only stable, reusable rules.
 - Do not record one-off chat artifacts as permanent constraints.
 

@@ -299,10 +299,49 @@ terminate_workspace_next_server() {
     done
 }
 
+validate_compute_image_layout() {
+    local required_files=(
+        "$WORKSPACE_ROOT/src/api/main.py"
+        "$WORKSPACE_ROOT/src/backend/worker.py"
+    )
+    local missing=0
+
+    for f in "${required_files[@]}"; do
+        if [ ! -f "$f" ]; then
+            echo "[FATAL] Missing required app file: $f"
+            missing=1
+        fi
+    done
+
+    if [ "$missing" -ne 0 ]; then
+        echo "[FATAL] Compute app source tree not found under $WORKSPACE_ROOT/src."
+        echo "[FATAL] Likely wrong runtime image target (base/jupyter image instead of app image)."
+        ls -lah "$WORKSPACE_ROOT" 2>/dev/null || true
+        return 1
+    fi
+    return 0
+}
+
 restart_services() {
+    if ! validate_compute_image_layout; then
+        return 1
+    fi
+
+    local allow_entrypoint_fallback="${ALLOW_ENTRYPOINT_FALLBACK:-false}"
+    case "${allow_entrypoint_fallback,,}" in
+        1|true|yes|on) allow_entrypoint_fallback="true" ;;
+        *) allow_entrypoint_fallback="false" ;;
+    esac
+
     local supervisor_backend=0
     if ensure_supervisor_backend; then
         supervisor_backend=1
+    fi
+    if [ "$supervisor_backend" -eq 0 ] && [ "$allow_entrypoint_fallback" != "true" ]; then
+        echo "[FATAL] Supervisor backend unavailable and entrypoint fallback is disabled."
+        echo "[FATAL] Refusing fallback startup to avoid duplicate FastAPI/llama/worker process trees."
+        echo "[FATAL] Set ALLOW_ENTRYPOINT_FALLBACK=true only for emergency rollback."
+        return 1
     fi
 
     echo "Cleaning up existing project processes..."
@@ -359,7 +398,7 @@ restart_services() {
             echo $! > "$PID_DIR/cres_next_wrapper.pid"
         fi
     else
-        echo "Supervisor backend unavailable. Falling back to entrypoint startup path."
+        echo "Supervisor backend unavailable. Entrypoint fallback explicitly enabled."
         if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:3000 || true)" = "200" ]; then
             echo "Detected healthy service on :3000, skipping Next.js relaunch command."
             nohup "$WORKSPACE_ROOT/entrypoint.sh" bash -lc "while true; do sleep 3600; done" > "$WORKSPACE_ROOT/logs/app.log" 2>&1 &

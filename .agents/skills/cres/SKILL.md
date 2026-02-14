@@ -7,7 +7,7 @@ description: Project brainstorm, architecture options, roadmap planning
 
 Apply this skill for planning-domain tasks: project framing, architecture option comparison, milestone sequencing, and roadmap decisions.
 
-Always apply `$cres-triage` first. This skill does not override topology, NAT, endpoint, queue, runtime, or security constraints defined there.
+Always apply `$triage` first. This skill does not override topology, NAT, endpoint, queue, runtime, or security constraints defined there.
 
 ## 1) Scope
 
@@ -18,7 +18,7 @@ Always apply `$cres-triage` first. This skill does not override topology, NAT, e
 
 ## 2) Hard Rules
 
-1. Keep proposals compliant with `$cres-triage` hard constraints.
+1. Keep proposals compliant with `$triage` hard constraints.
 2. Keep documentation diffs minimal and localized.
 3. Separate facts, assumptions, and risks explicitly.
 4. Every recommended action must include file, change, why, validation, and rollback.
@@ -28,7 +28,7 @@ Always apply `$cres-triage` first. This skill does not override topology, NAT, e
 ## 3) Default Workflow
 
 1. Define objective, success criteria, and time horizon.
-2. Capture current state and non-negotiable constraints from `$cres-triage`.
+2. Capture current state and non-negotiable constraints from `$triage`.
 3. Produce 2-3 feasible options with explicit tradeoffs.
 4. Recommend one path with phased milestones and dependency order.
 5. Convert immediate steps into concrete file/task updates.

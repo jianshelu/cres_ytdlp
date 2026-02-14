@@ -7,7 +7,7 @@ description: GPU runtime, llama.cpp, Whisper, performance/resource constraints
 
 Apply this skill for compute-domain tasks on the GPU side: runtime boot issues, llama.cpp and Whisper behavior, worker GPU execution, and performance/resource tuning.
 
-Always apply `$cres-triage` first. This skill does not override topology, endpoint, queue, or hard runtime constraints defined there.
+Always apply `$triage` first. This skill does not override topology, endpoint, queue, or hard runtime constraints defined there.
 
 ## 1) Scope
 

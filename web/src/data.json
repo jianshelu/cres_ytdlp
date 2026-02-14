@@ -73,7 +73,7 @@
         ],
         "summary": "Candy, this is what people talk about It is your immaturity, your arrogance, your entitlement",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "(Mandarin)Science and technology 科技 Chinese story | HSK3/4/5 |",
@@ -1085,7 +1085,7 @@
         ],
         "summary": "I know I know",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Becoming an Insights-Driven Business",
@@ -1126,7 +1126,7 @@
         ],
         "summary": "Companies must use data effectively to make informed decisions, leveraging creativity and technology to turn insights into business outcomes.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Best AI Coding Tools for Developers in 2025",
@@ -1339,7 +1339,7 @@
         ],
         "summary": "Oh No And he's gonna hate me Young nigga front of trenches hooping on the crates I'm pulling up contested shooting all the em face I brought my lab with me",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "CINNY -  TPM (Official Audio)",
@@ -1380,7 +1380,7 @@
         ],
         "summary": "Nois vê tudo bem Tudo pronto",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "CIO predicts Microsoft will become an AI winner in the long term",
@@ -1510,39 +1510,27 @@
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/Can_Slime_Mould_Solve_Mazes_Earth_Science_HyzT5b0tNtk.json",
         "keywords": [
             {
-                "word": "slime",
+                "word": "slime mold",
                 "count": 12,
                 "score": 4,
                 "start_time": 0
             },
             {
-                "word": "mold",
-                "count": 12,
-                "score": 4,
-                "start_time": 0
-            },
-            {
-                "word": "tokyo",
+                "word": "Tokyo",
                 "count": 6,
                 "score": 3,
                 "start_time": 0
             },
             {
-                "word": "flakes",
-                "count": 5,
-                "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "oat",
-                "count": 5,
-                "score": 3,
+                "word": "network",
+                "count": 3,
+                "score": 2,
                 "start_time": 0
             }
         ],
-        "summary": "At Oxford University in England, Dr Mark Fricker is one of a team of botanists and computer scientists studying a form of slime mold called phycerium polysephalum For years, slime molds have fascinated scientists with their ability to navigate the quickest route through a maze to get at some food",
+        "summary": "Slime mold maps out efficient network like Tokyo's rail system",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Car Wash: More Than Meets the Eye",
@@ -1767,7 +1755,7 @@
         ],
         "summary": "Hey baby, me ligar, temos muita coisa para conversar, n o, n",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Claude Agent Skills Explained",
@@ -1899,39 +1887,27 @@
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/Computer_circuits_made_of_slime_-_BBC_Click_GBPkl7YEiuE.json",
         "keywords": [
             {
-                "word": "play",
-                "count": 4,
-                "score": 2,
-                "start_time": 0
-            },
-            {
-                "word": "mold",
+                "word": "slime mold",
                 "count": 3,
                 "score": 2,
                 "start_time": 0
             },
             {
-                "word": "slime",
-                "count": 3,
-                "score": 2,
-                "start_time": 0
-            },
-            {
-                "word": "circuit",
-                "count": 2,
+                "word": "analogue computing",
+                "count": 1,
                 "score": 1,
                 "start_time": 0
             },
             {
-                "word": "connections",
-                "count": 2,
+                "word": "bio computers",
+                "count": 1,
                 "score": 1,
                 "start_time": 0
             }
         ],
-        "summary": "This is music research at its most slippery, you're listening to slime mold Well, the result of connecting an analogue computing circuit to components grown from a slime mold",
+        "summary": "Researchers use slime mold to create an analogue computing circuit that evolves connections based on music played on a piano.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Craft Agents (Claude Code UI): This OPENSOURCE Claude Code GUI is THE BEST!",
@@ -2112,39 +2088,27 @@
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/EASY_SCIENCE_EXPERIMENTS_TO_DO_AT_HOME_z-R3DShHbkA.json",
         "keywords": [
             {
-                "word": "ciao",
+                "word": "Crafts",
                 "count": 1,
                 "score": 1,
                 "start_time": 0
             },
             {
-                "word": "crafts",
+                "word": "Kids",
                 "count": 1,
                 "score": 1,
                 "start_time": 0
             },
             {
-                "word": "kids",
-                "count": 1,
-                "score": 1,
-                "start_time": 0
-            },
-            {
-                "word": "thanks",
-                "count": 1,
-                "score": 1,
-                "start_time": 0
-            },
-            {
-                "word": "watching",
+                "word": "Welcome",
                 "count": 1,
                 "score": 1,
                 "start_time": 0
             }
         ],
-        "summary": "Welcome to Crafts for Kids Ciao",
+        "summary": "Welcome message for a kids' crafting show.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "End broken CLIs! AionUi turns Gemini/Claude into your desktop super teammate—no more one-off chats",
@@ -2340,6 +2304,35 @@
         "summary": "A helpful assistant analyzes a transcript and returns concise JSON, focusing on keywords from the transcript and providing guidance on navigating a PIP situation.",
         "search_query": "ex-google",
         "query_updated_at": "2026-02-10T16:47:54.743000+00:00"
+    },
+    {
+        "title": "Experiments with Sound",
+        "video_path": "http://192.168.2.130:9000/cres/queries/zvec/videos/Experiments_with_Sound_CURwamAgo50.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/zvec/thumbnails/Experiments_with_Sound_CURwamAgo50.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/zvec/transcripts/Experiments_with_Sound_CURwamAgo50.json",
+        "keywords": [
+            {
+                "word": "general",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "overview",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "topic",
+                "count": 0,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "Summary unavailable.",
+        "search_query": "zvec",
+        "query_updated_at": "2026-02-14T18:21:11.529000+00:00"
     },
     {
         "title": "Explore Unstract's Prompt Studio",
@@ -3697,10 +3690,29 @@
         "video_path": "http://192.168.2.130:9000/cres/queries/slime/videos/How_to_Make_Magnetic_Slime_Science_Project_bIfo0anMI98.mp4",
         "thumb_path": "http://192.168.2.130:9000/cres/queries/slime/thumbnails/How_to_Make_Magnetic_Slime_Science_Project_bIfo0anMI98.webp",
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/How_to_Make_Magnetic_Slime_Science_Project_bIfo0anMI98.json",
-        "keywords": [],
-        "summary": "Generated automatically",
+        "keywords": [
+            {
+                "word": "iron filings",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "neodymium magnet",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "magnetic slime",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "Dr. Ben Finno demonstrates how to make magnetic slime using water, glue, baking soda, contact lens solution, iron filings, and a magnet.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "How to Row a Row Boat",
@@ -3750,39 +3762,27 @@
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/How_to_make_slime_Science_Widget_Hangout_pCpgE7u5J6c.json",
         "keywords": [
             {
-                "word": "here",
-                "count": 17,
+                "word": "experiment",
+                "count": 11,
                 "score": 4,
                 "start_time": 0
             },
             {
-                "word": "canada",
-                "count": 9,
-                "score": 3,
+                "word": "slime",
+                "count": 3,
+                "score": 2,
                 "start_time": 0
             },
             {
-                "word": "going",
-                "count": 9,
-                "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "any",
-                "count": 9,
-                "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "experiments",
-                "count": 7,
-                "score": 3,
+                "word": "polymers",
+                "count": 1,
+                "score": 1,
                 "start_time": 0
             }
         ],
-        "summary": "Hello, everybody I'm hoping that my microphone is on and that you can hear me, but so thank you for joining us today during our Hangout",
+        "summary": "The speaker from the Canada Science and Technology Museum's Corporation conducts a slime-making experiment using polymers with students, providing resources for teachers to replicate the experiment in their classrooms.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Huggingface小白AI入门，你必须了解的免费开源模型大超市",
@@ -4066,6 +4066,41 @@
         "summary": "Generated automatically",
         "search_query": "intelligence",
         "query_updated_at": "2026-02-10T16:47:46.955000+00:00"
+    },
+    {
+        "title": "Interview avec Dr. Mohammed Sharif, Conseiller en science et technologie à l’ICESCO",
+        "video_path": "http://192.168.2.130:9000/cres/queries/zvec/videos/Interview_avec_Dr._Mohammed_Sharif_Conseiller_en_science_et_technologie_a_l_ICESCO_9n3_eGpYsNc.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/zvec/thumbnails/Interview_avec_Dr._Mohammed_Sharif_Conseiller_en_science_et_technologie_a_l_ICESCO_9n3_eGpYsNc.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/zvec/transcripts/Interview_avec_Dr._Mohammed_Sharif_Conseiller_en_science_et_technologie_a_l_ICESCO_9n3_eGpYsNc.json",
+        "keywords": [
+            {
+                "word": "science",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "artificial intelligence",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "technology",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "capacity building",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "Dr. Mohammad Sharif discusses various science and technology programs at ISH School for 54 member countries in the Islamic world, including youth programs, capacity building, and collaborations with international partners.",
+        "search_query": "zvec",
+        "query_updated_at": "2026-02-14T18:21:11.529000+00:00"
     },
     {
         "title": "Introducing Google Vids",
@@ -4658,7 +4693,7 @@
         ],
         "summary": "Disconnect between data and decision making can hinder business progress.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Northern Light Customer Summit   How to Measure and Report the Impact of M&CI",
@@ -4699,7 +4734,7 @@
         ],
         "summary": "Measuring MNCI impact requires more than just tracking clicks. A team uses qualitative methods to assess their contribution to key decisions and rate themselves based on their perceived influence.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Northern Light Customer Summit Forrester Cinny Little The Skills Your MC&I Team Needs for Successful",
@@ -4728,7 +4763,7 @@
         ],
         "summary": "Team success in market and competitive intelligence requires a mix of data, technology, business, and human skills.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Northern Light Customer Summit Forrester The Value of Market and Competitive Intelligence Platforms",
@@ -4757,7 +4792,7 @@
         ],
         "summary": "The highest value comes from a centralized platform with AI and machine learning capabilities that can automate repeatable work, provide meaningful proactive alerts, eliminate duplicative content, and reuse knowledge assets.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Nothern Light Customer Summit Forrester Cinny Little The Human Element Remains Critical for MC&I",
@@ -4786,7 +4821,7 @@
         ],
         "summary": "The human element is crucial in AI and machine learning, focusing on building relationships with stakeholders and decision makers.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Nov 2025: My Personal AI Stack—Pros, Cons, and Pitfalls",
@@ -5351,7 +5386,7 @@
         ],
         "summary": "The speaker discusses the OSI model and its seven layers, using a poster analogy to explain how it works. They also mention different applications and protocols used in communication.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "Read these if you want to build AI applications",
@@ -5659,38 +5694,38 @@
         "keywords": [
             {
                 "word": "okay",
-                "count": 10,
+                "count": 12,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "going",
+                "count": 11,
                 "score": 4,
                 "start_time": 0
             },
             {
                 "word": "it's",
-                "count": 8,
+                "count": 9,
                 "score": 3,
                 "start_time": 0
             },
             {
-                "word": "slime",
-                "count": 7,
+                "word": "let's",
+                "count": 9,
                 "score": 3,
                 "start_time": 0
             },
             {
-                "word": "going",
-                "count": 6,
-                "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "help",
-                "count": 6,
+                "word": "yeah",
+                "count": 9,
                 "score": 3,
                 "start_time": 0
             }
         ],
-        "summary": "Good afternoon, everyone I'm Crystal Boyer, President and CEO of National Childers UCM",
+        "summary": "Crystal Boyer, President of National Childers UCM, and her son Preston make slime together at home during the COVID-19 pandemic.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Sci-Tech Science Series: Fluffy Slime",
@@ -5729,9 +5764,9 @@
                 "start_time": 0
             }
         ],
-        "summary": "Hi guys, my name is Val and I'm here with SciTech Discovery Center for their science series and today we're going to be doing some more fun science that we can do at home and we're going to be learning how to do fluffy slime just like this one but before I show you that let's talk about the materials that you're going to need You're going to need some white elmer glue and it's very important that it's the white elmer glue because that is very specific to the slime itself",
+        "summary": "Val from SciTech Discovery Center shows how to make fluffy slime at home using white Elmer's glue, baking soda, water, shaving cream, food coloring, and contact solution.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Science & Technology - DIY Slime",
@@ -5746,33 +5781,21 @@
                 "start_time": 0
             },
             {
-                "word": "going",
-                "count": 14,
-                "score": 4,
+                "word": "non-Newtonian fluid",
+                "count": 2,
+                "score": 1,
                 "start_time": 0
             },
             {
-                "word": "it's",
-                "count": 13,
-                "score": 4,
-                "start_time": 0
-            },
-            {
-                "word": "need",
-                "count": 10,
-                "score": 4,
-                "start_time": 0
-            },
-            {
-                "word": "add",
-                "count": 10,
-                "score": 4,
+                "word": "polymer",
+                "count": 2,
+                "score": 1,
                 "start_time": 0
             }
         ],
-        "summary": "Hi everyone, it's Moira with the Mississippi Library and today I'm here with a do-it-yourself slime recipe for you But before we get into the recipe, I thought we could talk a little bit about some of the science behind slime So what is slime Slime is a non-Newtonian fluid, which means that it blows like liquid, but sometimes it behaves like a solid Slime doesn't have a consistent viscosity So what that means is that when you pour slime or you let it ooze through your fingers",
+        "summary": "Moira from the Mississippi Library shares a do-it-yourself slime recipe and explains the science behind slime. She discusses its non-Newtonian fluid properties, polymer composition, and how temperature affects its viscosity.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Should YOU Become An AI Engineer?",
@@ -5851,27 +5874,9 @@
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/Slime_Science_u7SI5zgSsyA.json",
         "keywords": [
             {
-                "word": "it's",
-                "count": 11,
-                "score": 4,
-                "start_time": 0
-            },
-            {
                 "word": "solid",
                 "count": 5,
                 "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "cool",
-                "count": 4,
-                "score": 2,
-                "start_time": 0
-            },
-            {
-                "word": "convention",
-                "count": 3,
-                "score": 2,
                 "start_time": 0
             },
             {
@@ -5879,11 +5884,17 @@
                 "count": 3,
                 "score": 2,
                 "start_time": 0
+            },
+            {
+                "word": "properties of matter",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
             }
         ],
-        "summary": "You could do that at home, but it looks like it's a solid that works when it happens and you get it in your heels It's there, it looks like it's a solid",
+        "summary": "A teacher discusses using a solid that turns into a liquid as an educational tool for teaching properties of matter to 2nd-grade students.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "Stop Using AI for Programming",
@@ -6053,6 +6064,35 @@
         "summary": "The speaker discusses a study on spinal cord stimulation using transcutaneous electrical stimulation to help patients with paralysis regain motor function. The study showed significant improvement in movement, up to 900% increase in force, and has potential implications for other organs and the central nervous system.",
         "search_query": "superhuman",
         "query_updated_at": "2026-02-13T17:22:46.061000+00:00"
+    },
+    {
+        "title": "THE SCIENCE OF SUPERPOWERS?",
+        "video_path": "http://192.168.2.130:9000/cres/queries/superpowers/videos/THE_SCIENCE_OF_SUPERPOWERS_ZDYWeDqkCTI.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/superpowers/thumbnails/THE_SCIENCE_OF_SUPERPOWERS_ZDYWeDqkCTI.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/superpowers/transcripts/THE_SCIENCE_OF_SUPERPOWERS_ZDYWeDqkCTI.json",
+        "keywords": [
+            {
+                "word": "superpowers",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "science",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "technology",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "The pursuit of superpowers like flying, super speed, and super strength may be impossible with our current biology, but research into these ideas has led to advancements in technology such as lightweight materials, energy breakthroughs, and enhanced human capabilities.",
+        "search_query": "superpowers",
+        "query_updated_at": "2026-02-14T18:38:39.963000+00:00"
     },
     {
         "title": "THIS Is How You ACTUALLY Use AI For Programming",
@@ -6252,45 +6292,62 @@
         "query_updated_at": "2026-02-10T06:38:20.574000+00:00"
     },
     {
+        "title": "The Science Behind Superpowers",
+        "video_path": "http://192.168.2.130:9000/cres/queries/superpowers/videos/The_Science_Behind_Superpowers_3-xG0jCjlGY.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/superpowers/thumbnails/The_Science_Behind_Superpowers_3-xG0jCjlGY.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/superpowers/transcripts/The_Science_Behind_Superpowers_3-xG0jCjlGY.json",
+        "keywords": [
+            {
+                "word": "telekinesis",
+                "count": 4,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "superpowers",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "shapeshifting",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            }
+        ],
+        "summary": "The video discusses the scientific possibilities behind various superpowers such as telekinesis, shapeshifting, time manipulation, mind-reading, and healing powers. Scientists are exploring gene therapy and genetic engineering to enhance muscle strength, developing technologies for cloaking and invisibility, and making progress in brain-to-brain communication.",
+        "search_query": "superpowers",
+        "query_updated_at": "2026-02-14T18:38:39.963000+00:00"
+    },
+    {
         "title": "The Science of Slime - Learn to love STEAM - Science",
         "video_path": "http://192.168.2.130:9000/cres/queries/slime/videos/The_Science_of_Slime_-_Learn_to_love_STEAM_-_Science_C-q5KVeRYDs.mp4",
         "thumb_path": "http://192.168.2.130:9000/cres/queries/slime/thumbnails/The_Science_of_Slime_-_Learn_to_love_STEAM_-_Science_C-q5KVeRYDs.webp",
         "json_path": "http://192.168.2.130:9000/cres/queries/slime/transcripts/The_Science_of_Slime_-_Learn_to_love_STEAM_-_Science_C-q5KVeRYDs.json",
         "keywords": [
             {
-                "word": "glue",
-                "count": 6,
-                "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "contact",
+                "word": "Contact Solution",
                 "count": 5,
                 "score": 3,
                 "start_time": 0
             },
             {
-                "word": "glitter",
-                "count": 5,
-                "score": 3,
+                "word": "Valentine's Day",
+                "count": 2,
+                "score": 1,
                 "start_time": 0
             },
             {
-                "word": "mix",
-                "count": 5,
-                "score": 3,
-                "start_time": 0
-            },
-            {
-                "word": "solution",
-                "count": 5,
-                "score": 3,
+                "word": "Glitter Slime",
+                "count": 1,
+                "score": 1,
                 "start_time": 0
             }
         ],
-        "summary": "Hello and welcome to our Valentine's Steam video series Today we're making Valentine's Day Glitter slime",
+        "summary": "This video shows how to make Valentine's Day Glitter slime using glue, baking soda, glitter glue, and contact solution.",
         "search_query": "slime",
-        "query_updated_at": "2026-02-14T01:59:15.595000+00:00"
+        "query_updated_at": "2026-02-14T17:58:25.838000+00:00"
     },
     {
         "title": "The technology behind rowing boats",
@@ -6538,6 +6595,35 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "Unboxing The Science of Superpowers | STEM Kits by PCS Edventures!",
+        "video_path": "http://192.168.2.130:9000/cres/queries/superpowers/videos/Unboxing_The_Science_of_Superpowers_STEM_Kits_by_PCS_Edventures_gV06MbHl7y4.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/superpowers/thumbnails/Unboxing_The_Science_of_Superpowers_STEM_Kits_by_PCS_Edventures_gV06MbHl7y4.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/superpowers/transcripts/Unboxing_The_Science_of_Superpowers_STEM_Kits_by_PCS_Edventures_gV06MbHl7y4.json",
+        "keywords": [
+            {
+                "word": "Science of Superpowers",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "STEM",
+                "count": 3,
+                "score": 2,
+                "start_time": 0
+            },
+            {
+                "word": "BrickLab",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "The Science of Superpowers is a STEM enrichment program for grades 1-3 that includes instructor guides, printed student pages, and consumable supplies. It's designed for turn-key implementation with no tech requirements.",
+        "search_query": "superpowers",
+        "query_updated_at": "2026-02-14T18:38:39.963000+00:00"
+    },
+    {
         "title": "Unlock Free Access to Google Gemini LLM API A Step-by-Step Guide",
         "video_path": "http://192.168.2.130:9000/cres/queries/free-llm-api/videos/Unlock_Free_Access_to_Google_Gemini_LLM_API_A_Step-by-Step_Guide_zgg9dxRjSKQ.mp4",
         "thumb_path": "http://192.168.2.130:9000/cres/queries/free-llm-api/thumbnails/Unlock_Free_Access_to_Google_Gemini_LLM_API_A_Step-by-Step_Guide_zgg9dxRjSKQ.webp",
@@ -6734,6 +6820,76 @@
         "summary": "课时机是制造芯片的关键设备,它利用高能等离子体轰击金原表面实现工艺。",
         "search_query": "芯片",
         "query_updated_at": "2026-02-10T04:49:21.550000+00:00"
+    },
+    {
+        "title": "What Are Simple Machines? | Types Of Simple Machines | The Dr Binocs Show | Peekaboo Kidz",
+        "video_path": "http://192.168.2.130:9000/cres/queries/zvec/videos/What_Are_Simple_Machines_Types_Of_Simple_Machines_The_Dr_Binocs_Show_Peekaboo_Kidz_tk9iUjMEnaY.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/zvec/thumbnails/What_Are_Simple_Machines_Types_Of_Simple_Machines_The_Dr_Binocs_Show_Peekaboo_Kidz_tk9iUjMEnaY.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/zvec/transcripts/What_Are_Simple_Machines_Types_Of_Simple_Machines_The_Dr_Binocs_Show_Peekaboo_Kidz_tk9iUjMEnaY.json",
+        "keywords": [
+            {
+                "word": "simple",
+                "count": 8,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "heavy",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "machines",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "used",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "called",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Dr. Binox explains simple machines and their importance in making tasks easier and more efficient by applying the laws of physics.",
+        "search_query": "zvec",
+        "query_updated_at": "2026-02-14T18:21:11.529000+00:00"
+    },
+    {
+        "title": "What Is A Semiconductor?",
+        "video_path": "http://192.168.2.130:9000/cres/queries/zvec/videos/What_Is_A_Semiconductor_gUmDVe6C-BU.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/zvec/thumbnails/What_Is_A_Semiconductor_gUmDVe6C-BU.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/zvec/transcripts/What_Is_A_Semiconductor_gUmDVe6C-BU.json",
+        "keywords": [
+            {
+                "word": "conductor",
+                "count": 15,
+                "score": 4,
+                "start_time": 0
+            },
+            {
+                "word": "semiconductor",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "insulator",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "The speaker explains the properties of semiconductors and their role in electronics, specifically how they can conduct or insulate based on temperature and energy levels.",
+        "search_query": "zvec",
+        "query_updated_at": "2026-02-14T18:21:11.529000+00:00"
     },
     {
         "title": "What Is AI? | Learn all about artificial intelligence",
@@ -7086,6 +7242,35 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "Why Science and Tech Are Your Superpowers\"",
+        "video_path": "http://192.168.2.130:9000/cres/queries/superpowers/videos/Why_Science_and_Tech_Are_Your_Superpowers_ioodh-xg1hY.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/superpowers/thumbnails/Why_Science_and_Tech_Are_Your_Superpowers_ioodh-xg1hY.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/superpowers/transcripts/Why_Science_and_Tech_Are_Your_Superpowers_ioodh-xg1hY.json",
+        "keywords": [
+            {
+                "word": "tech",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "science",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "superpowers",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "The host Uriana introduces a series on science and technology, highlighting its importance and potential as 'superpowers' that can be used for various applications such as coding, sound tech, and environmental conservation.",
+        "search_query": "superpowers",
+        "query_updated_at": "2026-02-14T18:38:39.963000+00:00"
+    },
+    {
         "title": "Why this analyst is bullish on OpenAI and Oracle",
         "video_path": "http://192.168.2.130:9000/cres/queries/oracle/videos/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.mp4",
         "thumb_path": "http://192.168.2.130:9000/cres/queries/oracle/thumbnails/Why_this_analyst_is_bullish_on_OpenAI_and_Oracle_R7546Ed9AG4.webp",
@@ -7331,6 +7516,35 @@
         "query_updated_at": "2026-02-10T20:29:33.039000+00:00"
     },
     {
+        "title": "[ #MASTER ] : Devenir Data Scientist avec le Master of Science \"Agricultural & Food Data Management\"",
+        "video_path": "http://192.168.2.130:9000/cres/queries/zvec/videos/MASTER_-_Devenir_Data_Scientist_avec_le_Master_of_Science_Agricultural_Food_Data_Management_iTWXi-fYsUA.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/zvec/thumbnails/MASTER_-_Devenir_Data_Scientist_avec_le_Master_of_Science_Agricultural_Food_Data_Management_iTWXi-fYsUA.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/zvec/transcripts/MASTER_-_Devenir_Data_Scientist_avec_le_Master_of_Science_Agricultural_Food_Data_Management_iTWXi-fYsUA.json",
+        "keywords": [
+            {
+                "word": "urban agriculture",
+                "count": 2,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "master degree",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
+            },
+            {
+                "word": "sociology",
+                "count": 1,
+                "score": 1,
+                "start_time": 0
+            }
+        ],
+        "summary": "Alisaar, an international student from Syria, discusses the unique aspects of his master's program in urban agriculture and green cities, highlighting the diversity of subjects, teachers, and classmates.",
+        "search_query": "zvec",
+        "query_updated_at": "2026-02-14T18:21:11.529000+00:00"
+    },
+    {
         "title": "[Unsloth.ai] Fine-tuning LLMs: Models gpt-oss, Llama, DeepSeek, TTS, Qwen, Mistral, Gemma. SFT, RL",
         "video_path": "http://192.168.2.130:9000/cres/queries/unsloth/videos/Unsloth.ai_Fine-tuning_LLMs_-_Models_gpt-oss_Llama_DeepSeek_TTS_Qwen_Mistral_Gemma._SFT_RL_vQJ6UsQ5tus.mp4",
         "thumb_path": "http://192.168.2.130:9000/cres/queries/unsloth/thumbnails/Unsloth.ai_Fine-tuning_LLMs_-_Models_gpt-oss_Llama_DeepSeek_TTS_Qwen_Mistral_Gemma._SFT_RL_vQJ6UsQ5tus.webp",
@@ -7439,7 +7653,7 @@
         ],
         "summary": "Summary unavailable.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "are AI image generator's even that good?",
@@ -7480,7 +7694,7 @@
         ],
         "summary": "The speaker discusses their experience with AI-generated images and how they can be used as a tool for creating thumbnails for scary stories. They express skepticism about AI replacing human artists and believe that it is best suited for simple designs, while complex or specific designs are better handled by human artists.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "cinnyapp/cinny - Gource visualisation",
@@ -7509,7 +7723,7 @@
         ],
         "summary": "The transcript is a repetition of the word 'You'.",
         "search_query": "cinny",
-        "query_updated_at": "2026-02-14T16:03:29.225000+00:00"
+        "query_updated_at": "2026-02-14T16:03:32.506000+00:00"
     },
     {
         "title": "eDNA監測技術如何通過水樣鑒定水生生物？| 科技有狠活 #science #technology",
@@ -9084,6 +9298,35 @@
         "summary": "The video discusses various superhuman technologies that are becoming a reality, including Brain Computer Interfaces (BCIs), Regenerative Medicine, Augmented Reality, and Exoskeletons.",
         "search_query": "superhuman",
         "query_updated_at": "2026-02-13T17:22:46.061000+00:00"
+    },
+    {
+        "title": "🧬 Gene Editing Technology — Can Humans Create Superpowers? | Amazing Science – PXB",
+        "video_path": "http://192.168.2.130:9000/cres/queries/superpowers/videos/Gene_Editing_Technology_Can_Humans_Create_Superpowers_Amazing_Science_PXB_ZpBAbp1bwIw.mp4",
+        "thumb_path": "http://192.168.2.130:9000/cres/queries/superpowers/thumbnails/Gene_Editing_Technology_Can_Humans_Create_Superpowers_Amazing_Science_PXB_ZpBAbp1bwIw.webp",
+        "json_path": "http://192.168.2.130:9000/cres/queries/superpowers/transcripts/Gene_Editing_Technology_Can_Humans_Create_Superpowers_Amazing_Science_PXB_ZpBAbp1bwIw.json",
+        "keywords": [
+            {
+                "word": "Gene Editing",
+                "count": 6,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "CRISPR",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            },
+            {
+                "word": "DNA",
+                "count": 5,
+                "score": 3,
+                "start_time": 0
+            }
+        ],
+        "summary": "Gene editing technology, specifically CRISPR, allows scientists to modify DNA and potentially unlock superpowers such as superhuman strength, perfect memory, and disease immunity.",
+        "search_query": "superpowers",
+        "query_updated_at": "2026-02-14T18:38:39.963000+00:00"
     },
     {
         "title": "🧸 Explore Tambo Queensland ~ Things to do in and around Tambo",

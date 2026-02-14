@@ -1,8 +1,8 @@
-﻿# backend REFERENCE
+# backend REFERENCE
 
 Extended backend diagnostics and validation playbook for this repo.
 
-Use with `SKILL.md`. Do not override `$cres-triage`.
+Use with `SKILL.md`. Do not override `$triage`.
 
 ## 1) Responsibility Map
 

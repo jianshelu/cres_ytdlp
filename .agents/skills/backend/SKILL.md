@@ -7,7 +7,7 @@ description: APIs, Temporal workflows, queue routing, and control-plane backend 
 
 Apply this skill for backend-domain tasks: Control API behavior, workflow orchestration, queue routing logic, and control-plane service operations.
 
-Always apply `$cres-triage` first. This skill does not override topology, NAT, endpoint, queue, or runtime constraints defined there.
+Always apply `$triage` first. This skill does not override topology, NAT, endpoint, queue, or runtime constraints defined there.
 
 ## 1) Scope
 

@@ -31,6 +31,7 @@ build/
 
 # Docker logs
 *.log
+log/
 
 #Cache
 .cache/
@@ -69,4 +70,5 @@ scripts/_tmp_*.sh
 docs/Implementation
 .agent/artifacts/google_ai_pipeline_report.json
 
-
+# Instance collection artifacts
+log/instance_collect_*/

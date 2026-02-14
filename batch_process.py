@@ -4,7 +4,13 @@ import whisper
 import json
 import re
 
-DOWNLOAD_DIR = "/home/rama/cres_ytdlp/web/public/downloads"
+DEFAULT_DOWNLOAD_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "web",
+    "public",
+    "downloads",
+)
+DOWNLOAD_DIR = os.path.expanduser(os.getenv("DOWNLOAD_DIR", DEFAULT_DOWNLOAD_DIR))
 TARGET_COUNT = 10
 SEARCH_QUERY = "Google antigravity"
 
@@ -89,7 +95,7 @@ def process():
         # Download 360p
         dl_opts = {
             'format': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
-            'outtmpl': f'{DOWNLOAD_DIR}/%(title)s.%(ext)s',
+            'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
             'noplaylist': True,
         }
         

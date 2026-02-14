@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = "C:\Users\rama\cres_ytdlp_norfolk"
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $LogDir = Join-Path $RepoRoot ".tmp\control-plane"
 $StartupLog = Join-Path $LogDir "startup.log"
 $TemporalExe = "D:\soft\temporal.exe"

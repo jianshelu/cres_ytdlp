@@ -36,6 +36,9 @@ AUTO_START_WORKERS_ON_BATCH = os.getenv("AUTO_START_WORKERS_ON_BATCH", "true").l
 SCHEDULER_ACTIVE_INSTANCE = os.getenv("SCHEDULER_ACTIVE_INSTANCE", "true").lower() in {"1", "true", "yes"}
 SCHEDULER_ACTIVE_MAX_PARALLELISM = max(1, int(os.getenv("SCHEDULER_ACTIVE_MAX_PARALLELISM", "2")))
 DEFAULT_YOUTUBE_CATEGORY = os.getenv("YOUTUBE_DEFAULT_CATEGORY", "Science & Technology").strip() or "Science & Technology"
+API_ROLE = os.getenv("API_ROLE", "control").strip().lower()
+if API_ROLE not in {"control", "compute"}:
+    API_ROLE = "control"
 _reindex_task: asyncio.Task | None = None
 _reindex_lock = asyncio.Lock()
 
@@ -107,6 +110,14 @@ async def _auto_reindex_loop() -> None:
 def _minio_health_url() -> str:
     scheme = "https" if MINIO_SECURE else "http"
     return f"{scheme}://{MINIO_ENDPOINT}/minio/health/live"
+
+
+def _require_control_api(endpoint: str) -> None:
+    if API_ROLE != "control":
+        raise HTTPException(
+            status_code=403,
+            detail=f"{endpoint} is disabled when API_ROLE={API_ROLE}",
+        )
 
 
 class ProcessRequest(BaseModel):
@@ -199,6 +210,7 @@ async def _shutdown_tasks():
 
 @app.post("/process")
 async def process_video(request: ProcessRequest):
+    _require_control_api("/process")
     try:
         await _maybe_start_workers_on_demand()
         client = await Client.connect(TEMPORAL_ADDRESS)
@@ -212,6 +224,8 @@ async def process_video(request: ProcessRequest):
         )
 
         return {"status": "started", "workflow_id": handle.id, "run_id": handle.run_id}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error starting workflow: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -219,6 +233,7 @@ async def process_video(request: ProcessRequest):
 
 @app.post("/batch")
 async def batch_process(request: BatchRequest):
+    _require_control_api("/batch")
     try:
         await _maybe_start_workers_on_demand()
         client = await Client.connect(TEMPORAL_ADDRESS)
@@ -246,7 +261,8 @@ async def batch_process(request: BatchRequest):
             "max_duration_minutes": max_duration_minutes,
             "youtube_category": youtube_category,
         }
-
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error starting batch workflow: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -263,19 +279,23 @@ async def health():
     from fastapi.responses import JSONResponse
 
     checks = {
+        "role": API_ROLE,
         "api": "ok",
-        "llama": "unknown",
         "temporal": "unknown",
         "minio": "unknown",
     }
 
-    # Check llama-server (port 8081)
-    try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            resp = await client.get(LLAMA_HEALTH_URL)
-            checks["llama"] = "ok" if resp.status_code == 200 else "down"
-    except Exception:
-        checks["llama"] = "down"
+    if API_ROLE == "compute":
+        checks["llama"] = "unknown"
+        # Check llama-server (port 8081) on compute host only.
+        try:
+            async with httpx.AsyncClient(timeout=2.0) as client:
+                resp = await client.get(LLAMA_HEALTH_URL)
+                checks["llama"] = "ok" if resp.status_code == 200 else "down"
+        except Exception:
+            checks["llama"] = "down"
+    else:
+        checks["llama"] = "n/a"
 
     # Check Temporal via gRPC connection test.
     try:
@@ -292,7 +312,10 @@ async def health():
     except Exception:
         checks["minio"] = "down"
 
-    all_healthy = all(v == "ok" for v in checks.values())
+    required_checks = [checks["api"], checks["temporal"], checks["minio"]]
+    if API_ROLE == "compute":
+        required_checks.append(checks["llama"])
+    all_healthy = all(v == "ok" for v in required_checks)
     return JSONResponse(
         content=checks,
         status_code=status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -301,6 +324,7 @@ async def health():
 
 @app.post("/admin/reindex")
 async def admin_reindex():
+    _require_control_api("/admin/reindex")
     try:
         result = await _rebuild_index_once()
         return {"status": "ok", "message": result}

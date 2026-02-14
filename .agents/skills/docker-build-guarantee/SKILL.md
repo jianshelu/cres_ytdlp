@@ -25,7 +25,7 @@ Stabilize image build and boot flow for this repository:
 1. No Docker-in-Docker.
 2. Never commit secrets/tokens.
 3. Keep minimal diffs.
-4. Respect control-plane/compute split and queue routing constraints from `$cres-triage`.
+4. Respect control-plane/compute split and queue routing constraints from `$triage`.
 
 ## Workflow
 

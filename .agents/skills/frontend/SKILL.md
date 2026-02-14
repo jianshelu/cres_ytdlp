@@ -7,7 +7,7 @@ description: UI and web integration for the Next.js frontend in this repo.
 
 Apply this skill for frontend tasks: routes, pages, components, styles, and frontend API integration.
 
-Always apply `$cres-triage` first. This skill does not override topology, routing, or runtime constraints from triage.
+Always apply `$triage` first. This skill does not override topology, routing, or runtime constraints from triage.
 
 ## 1) Scope
 

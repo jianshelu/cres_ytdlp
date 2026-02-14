@@ -21,7 +21,7 @@ Use this reference only when deeper planning detail is needed.
 
 ## Risk Review Checklist
 
-- Violates `$cres-triage` constraints? (must be no)
+- Violates `$triage` constraints? (must be no)
 - Changes endpoint exposure? (must be explicit)
 - Affects queue suffix routing (`@cpu`/`@gpu`)? (must stay compliant)
 - Requires `docs/PLAN.md` update?
