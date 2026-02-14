@@ -53,6 +53,7 @@ async def main():
     # Determine identity
     import socket
     hostname = socket.gethostname()
+    instance_name = os.getenv("WORKER_INSTANCE_NAME", hostname).strip() or hostname
     worker_mode = os.getenv("WORKER_MODE", "both").strip().lower()
     if worker_mode not in {"cpu", "gpu", "both"}:
         worker_mode = "both"
@@ -73,7 +74,8 @@ async def main():
                 print("GPU worker disabled: CUDA is not available; continuing with cpu worker only.")
                 worker_mode = "cpu"
     device_type = "gpu" if (worker_mode in {"gpu", "both"} and cuda_available) else "cpu"
-    print(f"Worker Identity (auto-detected device): {hostname}@{device_type}")
+    print(f"Worker Instance Name: {instance_name}")
+    print(f"Worker Identity (auto-detected device): {device_type}@{instance_name}")
     print(f"Worker Mode: {worker_mode}")
 
     cpu_workers = max(1, int(os.getenv("WORKER_CPU_THREADS", "4")))
@@ -103,7 +105,7 @@ async def main():
                     build_batch_combined_output,
                 ],
                 activity_executor=cpu_executor,
-                identity=f"{hostname}@cpu",
+                identity=f"cpu@{instance_name}",
             )
         )
         print(f"CPU queue worker attached to '{CPU_TASK_QUEUE}' with threads={cpu_workers}")
@@ -121,7 +123,7 @@ async def main():
                     summarize_content,
                 ],
                 activity_executor=gpu_executor,
-                identity=f"{hostname}@gpu",
+                identity=f"gpu@{instance_name}",
             )
         )
         print(f"GPU queue worker attached to '{GPU_TASK_QUEUE}' with threads={gpu_workers}")

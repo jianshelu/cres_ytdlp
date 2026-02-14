@@ -1,4 +1,70 @@
 # PLAN
+## 2026-02-14 - Worker Identity Uses `role@instance_name`
+
+- Objective: make poller identity easier to read and align with operator expectation (`cpu@instance`, `gpu@instance`).
+- Root cause:
+  - Worker identity format was `<host>@cpu` / `<host>@gpu`, which made role-first scanning harder in Temporal poller views.
+- Changes:
+  - `src/backend/worker.py`
+    - Changed identity format to:
+      - `cpu@<instance_name>`
+      - `gpu@<instance_name>`
+    - Added optional env override:
+      - `WORKER_INSTANCE_NAME` (defaults to hostname when unset).
+  - `.env.example`
+    - Added optional `WORKER_INSTANCE_NAME` comment.
+
+### Validation
+
+- Restart workers on control-plane/instance.
+- Check Temporal pollers:
+  - `video-processing@cpu` should show identities like `cpu@huihuang` or `cpu@<instance>`.
+  - `video-processing@gpu` should show identities like `gpu@<instance>`.
+- Optional override test:
+  - Set `WORKER_INSTANCE_NAME=my-instance`, restart worker, confirm identity becomes `cpu@my-instance`/`gpu@my-instance`.
+
+### Rollback
+
+1. Revert identity strings in `src/backend/worker.py` to `<hostname>@cpu` / `<hostname>@gpu`.
+2. Remove optional `WORKER_INSTANCE_NAME` comment from `.env.example`.
+
+## 2026-02-14 - Move `@cpu` Worker Ownership to Instance by Default
+
+- Objective: enforce compute topology so both `@cpu` and `@gpu` workers run on the Vast instance, while `huihuang` remains control-plane only.
+- Root cause:
+  - `scripts/start_control_plane_boot.ps1` auto-started local `WORKER_MODE=cpu` on `huihuang`, producing `huihuang@cpu` pollers.
+  - Instance supervisor default had `worker-cpu` disabled in main image config.
+- Changes:
+  - `scripts/start_control_plane_boot.ps1`
+    - Added `CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER` gate (default `false` when absent).
+    - When disabled, script stops any existing local CPU worker and skips local worker startup.
+  - `scripts/supervisord.conf`
+    - Set `[program:worker-cpu] autostart=true` so instance starts `@cpu` worker automatically.
+  - `scripts/supervisord_remote.conf`
+    - Set `[program:worker-cpu] autostart=true`.
+    - Set `[program:worker-gpu] autostart=true` to keep both queues managed by supervisor on remote path.
+  - `.env.example`
+    - Added `CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER=false`.
+
+### Validation
+
+- Local control plane:
+  - `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start_control_plane_boot.ps1`
+  - Confirm no local worker process:
+    - `Get-CimInstance Win32_Process | ? { $_.CommandLine -match "src\\.backend\\.worker" }`
+- Instance:
+  - `supervisorctl -s unix:///tmp/supervisor.sock status`
+  - Expect `worker-cpu` and `worker-gpu` in `RUNNING`.
+- Temporal:
+  - `video-processing@cpu` pollers should be instance identities only (no `huihuang@cpu`).
+
+### Rollback
+
+1. Revert `scripts/start_control_plane_boot.ps1` worker gating block.
+2. Revert `autostart` values in `scripts/supervisord.conf` and `scripts/supervisord_remote.conf`.
+3. Remove `CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER` from `.env.example`.
+4. Re-run control-plane boot and verify `huihuang@cpu` returns if desired.
+
 ## 2026-02-14 - Harden Vast On-Start MinIO Credential Handling
 
 - Objective: prevent silent GPU activity retry loops when Vast template env uses inconsistent AWS/MinIO key names.
