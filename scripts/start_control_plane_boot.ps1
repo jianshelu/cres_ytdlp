@@ -164,22 +164,7 @@ if (-not (Wait-Port -Port 8000 -TimeoutSeconds 60)) {
     exit 1
 }
 
-if ($envConfig.ContainsKey("CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER")) {
-    $enableLocalCpuWorker = @("1", "true", "yes", "on") -contains ([string]$envConfig["CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER"]).Trim().ToLowerInvariant()
-}
-else {
-    $enableLocalCpuWorker = $false
-}
-
-if (-not $enableLocalCpuWorker) {
-    $runningWorker = Get-WorkerProcess
-    if ($null -ne $runningWorker) {
-        Stop-Process -Id $runningWorker.ProcessId -Force -ErrorAction SilentlyContinue
-        Write-Log "Stopped local CPU worker PID=$($runningWorker.ProcessId) because CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER=false"
-    }
-    Write-Log "Local CPU worker disabled on control-plane host; expecting @cpu worker on instance"
-}
-elseif ($null -ne (Get-WorkerProcess)) {
+if ($null -ne (Get-WorkerProcess)) {
     Write-Log "CPU worker already running"
 }
 else {
@@ -226,7 +211,7 @@ else {
     if ($null -eq $oldAwsSecret) { Remove-Item Env:AWS_SECRET_ACCESS_KEY -ErrorAction SilentlyContinue } else { $env:AWS_SECRET_ACCESS_KEY = $oldAwsSecret }
 }
 
-if ($enableLocalCpuWorker -and -not (Wait-Worker -TimeoutSeconds 30)) {
+if (-not (Wait-Worker -TimeoutSeconds 30)) {
     Write-Log "ERROR: CPU worker did not stay running"
     exit 1
 }

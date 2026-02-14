@@ -1,4 +1,31 @@
 # PLAN
+## 2026-02-14 - Rollback: Keep CPU Worker on `huihuang` by Default
+
+- Objective: revert the topology change that moved `@cpu` worker ownership to instance-only.
+- Changes:
+  - `scripts/start_control_plane_boot.ps1`
+    - Removed `CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER` gating logic.
+    - Restored default behavior: start/keep local CPU worker on `huihuang`.
+  - `scripts/supervisord.conf`
+    - Restored `[program:worker-cpu] autostart=false`.
+  - `scripts/supervisord_remote.conf`
+    - Restored `[program:worker-cpu] autostart=false`.
+  - `.env.example`
+    - Removed `CONTROL_PLANE_ENABLE_LOCAL_CPU_WORKER` example entry.
+
+### Validation
+
+- Run control-plane boot:
+  - `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start_control_plane_boot.ps1`
+- Confirm local worker exists:
+  - `Get-CimInstance Win32_Process | ? { $_.CommandLine -match "src\\.backend\\.worker" }`
+- Confirm Temporal pollers include `cpu@huihuang` on `video-processing@cpu`.
+
+### Rollback
+
+1. Re-apply instance-only CPU ownership change if needed (local CPU disable gate + instance CPU autostart).
+2. Re-run boot/startup scripts and verify pollers.
+
 ## 2026-02-14 - Worker Identity Uses `role@instance_name`
 
 - Objective: make poller identity easier to read and align with operator expectation (`cpu@instance`, `gpu@instance`).
