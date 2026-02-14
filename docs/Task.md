@@ -1,15 +1,36 @@
 # Tasks
 
+## 2026-02-14 (Saturday)
+### Docs & Ops (Runbook / Validation / Architecture)
+- [x] Fix `Dockerfile.base` first-stage `apt-get install` to enforce non-interactive `dpkg` behavior (`DEBIAN_FRONTEND=noninteractive` with `--force-confdef/--force-confold`).
+- [x] Implement app-image layout validation gate in `.github/workflows/ci-minimal-image.yml` and `.github/workflows/deploy.yml` to fail fast when `/workspace/src` files are missing.
+- [x] Implement digest-pinned `APP_BASE_IMAGE` resolution in `.github/workflows/deploy.yml` and keep source tag trace as `APP_BASE_IMAGE_TAG`.
+- [x] Refactor frontend-builder dependency install in `Dockerfile` from `npm install` to lockfile-strict `npm ci`.
+- [ ] Verify local Docker build/smoke on `huihuang` host with Docker CLI: `docker build -f Dockerfile.base -t cres-base-local .`, `docker run --rm cres-base-local python3 -c "import torch; print(torch.__version__)"`, and `docker run --rm cres-base-local /bin/bash /workspace/scripts/container_smoke.sh`.
+- [ ] Verify `CI Minimal Image Boot` and `Build and Push to GHCR` both pass with new app-layout gates and digest-pinned app base selection.
+
+### Control API
+- [x] Implement role-aware API behavior in `src/api/main.py` using `API_ROLE` so compute hosts reject control-only routes (`/process`, `/batch`, `/admin/reindex`) with `403`.
+- [x] Fix `/health` role semantics so `API_ROLE=control` reports `llama: n/a` and does not fail control-plane health when llama is absent.
+- [x] Configure compute FastAPI role in `scripts/supervisord.conf` and `scripts/supervisord_remote.conf` with `API_ROLE="compute"` and document default `API_ROLE=control` in `.env.example`.
+- [x] Verify role-gate and health behavior using `fastapi.testclient` (`compute` returns `403` on `/process`/`/batch`; `control` returns `200` with `llama: n/a` on `/health`).
+
+### Compute API
+- [x] Fix `start_remote.sh` to disable default entrypoint fallback and fail fast when supervisor backend is unavailable, preventing duplicate startup chains.
+- [x] Configure fallback guard in `.env.example` with `ALLOW_ENTRYPOINT_FALLBACK=false` and emergency-rollback guidance.
+- [x] Verify live instance evidence of duplicate startup chain (`supervisor` + `entrypoint`) and map `cpu@e400b4a529b6` identity to instance host before applying the guard.
+
 ## 2026-02-13 (Friday)
 ### Compute API
 - [ ] Verify FastAPI crash root cause on GPU instance by collecting `/var/log/fastapi.err` and confirming `src.api.main` import path availability.
 - [ ] Fix Vast runtime image target to deploy the app image (with `/workspace/src`) instead of base `.../jupyter` image for compute startup.
+- [x] Implement compute boot preflight in `start_remote.sh` to fail fast with explicit diagnostics when `/workspace/src` app files are missing.
 - [ ] Test Compute API health on GPU node (`/health`) and confirm dependency checks (`temporal`, `minio`, `llama`) return healthy.
 
 ### llama
 - [ ] Verify Google Drive model sync postcondition by checking `/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` as a regular readable file with stable non-zero size.
 - [ ] Fix model sync flow to download to temporary file and perform atomic rename to `Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` only after transfer completion.
-- [ ] Configure llama startup preflight to fail fast on model-dir write anomalies and emit explicit diagnostics when file checks return inconsistent `exists` states.
+- [x] Configure llama startup preflight to fail fast on model-dir write anomalies and emit explicit diagnostics when file checks return inconsistent `exists` states.
 
 ### Docs & Ops (Runbook / Validation / Architecture)
 - [x] Fix `CI Minimal Image Boot` prebuilt-base resolution to prefer `llama-prebuilt-latest` and fall back through valid GHCR tags before local build.
@@ -21,7 +42,7 @@
 - [ ] Verify `CI Minimal Image Boot` and `Build and Push to GHCR` pass after GHCR base-selection and Buildx-driver updates.
 - [ ] Verify `Build and Push to GHCR` no longer fails with `write /var/lib/buildkit/... no space left on device` in `build-app`.
 - [x] Configure Vast SSH endpoint rotation in `.env`, `.env.example`, and `docs/Perimeter.md` using the new running instance host/port.
-- [x] Verify public-key authentication for the rotated Vast endpoint and keep `VAST_SSH_KEY=~/.ssh/id_huihuang2vastai`.
+- [x] Verify public-key authentication for the rotated Vast endpoint and keep `VAST_SSH_KEY=~/.ssh/id_huihuang92vastai`.
 - [x] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs for the new instance.
 
 ## 2026-02-12 (Thursday)
@@ -37,13 +58,13 @@
 - [ ] Document rollout and rollback steps for the audio page in `docs/PLAN.md` only if API contract or ops behavior changes.
 - [x] Collect Vast instance specs via SSH and refresh `raw_vast.json` observed specs.
 - [x] Document source-of-truth precedence from `AGENTS.md` `Where the truth lives vividly` in `docs/PLAN.md`.
-- [x] Update daily task tracking source references to follow `.agents/skills/cres-triage/SKILL.md` -> `docs/PLAN.md` -> `docs/Task.md` -> `docs/DECISIONS.md`.
+- [x] Update daily task tracking source references to follow `.agents/skills/triage/SKILL.md` -> `docs/PLAN.md` -> `docs/Task.md` -> `docs/DECISIONS.md`.
 - [x] Document Where the truth lives vividly color+emoji interaction requirement for `docs/PLAN.md` and `docs/Task.md` updates (HCI docs scope only).
 - [x] Verify `docs/PLAN.md` and `docs/Task.md` vivid formatting standard conformance and update inconsistent wording.
 - [x] Archive legacy deploy scripts (`deploy_vast.sh`, `deploy_vast.py`) and block invocation from root stubs.
 - [x] Document `docker run` ownership boundaries in `docs/vast_deployment.md` (Vast runtime vs CI smoke only).
 - [x] Document immutable single-flow incident handling for instance operations in `docs/vast_deployment.md`.
-- [x] Configure SSH access for `ssh2.vast.ai:27139` by setting `VAST_SSH_KEY=~/.ssh/id_huihuang2vastai` in `.env`.
+- [x] Configure SSH access for `ssh2.vast.ai:27139` by setting `VAST_SSH_KEY=~/.ssh/id_huihuang92vastai` in `.env`.
 - [x] Implement unified boot script `scripts/start_control_plane_boot.ps1` for Temporal/MinIO/FastAPI startup.
 - [x] Configure Task Scheduler `CRES-ControlPlane-Boot` and disable stale split boot tasks.
 - [x] Fix committed secret exposure in `scripts/supervisord_remote.conf` by switching to runtime env interpolation.
@@ -131,4 +152,5 @@
 - [ ] Deploy re-trigger of failed "Oracle" workflows.
 - [ ] Verify successful download and transcription for retried Oracle workflows.
 - [x] Document migration of legacy ledger items into structured Task.md sections.
+
 

@@ -1,4 +1,195 @@
 # PLAN
+## 2026-02-14 - Docker App Build Reproducibility Guards (Layout Gate + Base Digest Pin + npm ci)
+
+- Objective: prevent wrong-image runtime boots, reduce base-tag drift, and make frontend dependency install deterministic during image builds.
+- Root cause:
+  - App image build/smoke flow did not explicitly verify required app-source files inside the built image.
+  - Deploy workflow selected base image by tag only (`latest`/route tags), which allows mutable-tag drift between runs.
+  - `Dockerfile` frontend builder used `npm install` instead of lockfile-strict `npm ci`.
+- Changes:
+  - `.github/workflows/ci-minimal-image.yml`
+    - Added `Validate app image layout` step after local app build.
+    - Enforced checks for:
+      - `/workspace/src/api/main.py`
+      - `/workspace/src/backend/worker.py`
+  - `.github/workflows/deploy.yml`
+    - In `Select app base image route`, resolve selected base tag to immutable digest via `docker buildx imagetools inspect`.
+    - Export digest-pinned app base reference:
+      - `APP_BASE_IMAGE=<repo>@sha256:...`
+      - keep source tag as `APP_BASE_IMAGE_TAG=<repo>:<tag>` for traceability.
+    - Added `Validate app image layout (smoke)` step after smoke image build.
+  - `Dockerfile`
+    - Switched frontend builder dependency install from `npm install` to `npm ci`.
+
+### Validation
+
+- Static checks:
+  - `rg --line-number "Validate app image layout|/workspace/src/api/main.py|/workspace/src/backend/worker.py" .github/workflows/ci-minimal-image.yml .github/workflows/deploy.yml`
+  - `rg --line-number "resolved_digest|resolved_pinned|APP_BASE_IMAGE_TAG|APP_BASE_IMAGE=" .github/workflows/deploy.yml`
+  - `rg --line-number "RUN npm ci" Dockerfile`
+- CI validation:
+  - Run `CI Minimal Image Boot` and confirm layout-gate step passes before smoke boot.
+  - Run `Build and Push to GHCR` and confirm:
+    - `APP_BASE_IMAGE` log shows `@sha256:` digest form.
+    - smoke layout-gate step passes.
+    - app publish build still succeeds with `BASE_IMAGE=${{ env.APP_BASE_IMAGE }}`.
+
+### Rollback
+
+1. Remove both layout-gate steps from:
+   - `.github/workflows/ci-minimal-image.yml`
+   - `.github/workflows/deploy.yml`
+2. Revert deploy base resolution block to previous tag-only export:
+   - `echo "APP_BASE_IMAGE=$resolved" >> "$GITHUB_ENV"`
+3. Revert frontend install line in `Dockerfile` from `npm ci` to `npm install`.
+4. Re-run both workflows to confirm restored behavior.
+
+## 2026-02-14 - Disable Default Entrypoint Fallback to Prevent Dual Startup Chains
+
+- Objective: prevent duplicate `uvicorn`/`llama-server`/worker process trees caused by concurrent supervisor + entrypoint startup paths.
+- Root cause:
+  - When supervisor bootstrap was not confirmed in time, `start_remote.sh` could fall back to entrypoint startup path.
+  - This could create a second service tree while supervisor-managed programs were already running, triggering `:8000` bind conflicts and unstable FastAPI health.
+- Changes:
+  - `start_remote.sh`
+    - Added `ALLOW_ENTRYPOINT_FALLBACK` guard (default `false`).
+    - If supervisor backend is unavailable and fallback is not explicitly enabled, startup now fails fast with clear diagnostics.
+    - Entrypoint fallback path remains available only when `ALLOW_ENTRYPOINT_FALLBACK=true` (emergency rollback mode).
+  - `.env.example`
+    - Added `ALLOW_ENTRYPOINT_FALLBACK=false` with usage notes.
+
+### Validation
+
+- Syntax check:
+  - `bash -n start_remote.sh`
+- Static checks:
+  - `rg --line-number "ALLOW_ENTRYPOINT_FALLBACK|Refusing fallback startup|Entrypoint fallback explicitly enabled" start_remote.sh .env.example`
+- Runtime checks on instance:
+  - `tail -n 120 /var/log/onstart.log`
+    - should not show fallback path unless explicitly enabled.
+  - `ss -ltnp | grep -E ":8000|:8081"`
+    - should show a single service owner chain.
+  - `supervisorctl -s unix:///tmp/supervisor.sock status`
+    - `fastapi/llama/worker-gpu` should be supervisor-managed only.
+
+### Rollback
+
+1. Restore previous fallback behavior in `start_remote.sh` (remove `ALLOW_ENTRYPOINT_FALLBACK` fail-fast guard).
+2. Remove `ALLOW_ENTRYPOINT_FALLBACK` documentation from `.env.example`.
+3. Redeploy/restart instance and re-check startup logs and port ownership.
+
+## 2026-02-14 - Compute Startup Preflight Hardening (Image Layout + Model Path Diagnostics)
+
+- Objective: fail fast with explicit diagnostics for two high-frequency compute boot issues: wrong runtime image target and llama model-path anomalies.
+- Root cause:
+  - Compute startup could proceed even when app source files were missing in `/workspace/src`, resulting in repeated FastAPI import/start failures with low-signal logs.
+  - `scripts/start-llama.sh` only waited for model existence/size and lacked explicit checks for model-dir writability or inconsistent file-visibility states.
+- Changes:
+  - `start_remote.sh`
+    - Added `validate_compute_image_layout()` preflight.
+    - Require `/workspace/src/api/main.py` and `/workspace/src/backend/worker.py` before restart path continues.
+    - Emit explicit "wrong runtime image target" diagnostics and abort restart when required files are missing.
+  - `scripts/start-llama.sh`
+    - Added model preflight helpers (`log`, `die`, `print_model_diagnostics`, `validate_model_path_state`).
+    - Added model-dir writability probe (`.llama_write_probe.$$`) with fail-fast behavior.
+    - Added explicit inconsistent-state guard when directory scan and direct path checks disagree.
+    - Added diagnostic dump before timeout exits.
+
+### Validation
+
+- Syntax checks:
+  - `bash -n start_remote.sh`
+  - `bash -n scripts/start-llama.sh`
+- Static checks:
+  - `rg --line-number "validate_compute_image_layout|wrong runtime image target|Missing required app file" start_remote.sh`
+  - `rg --line-number "validate_model_path_state|llama_write_probe|Inconsistent exists state|Model path diagnostics" scripts/start-llama.sh`
+- Runtime checks on GPU instance:
+  - `./start_remote.sh --restart` should abort early with explicit diagnostics if `/workspace/src` is missing.
+  - `supervisorctl -s unix:///tmp/supervisor.sock status`
+  - `tail -n 120 /var/log/llama.err /var/log/llama.log`
+
+### Rollback
+
+1. Remove `validate_compute_image_layout()` and its invocation in `start_remote.sh`.
+2. Remove the added preflight/diagnostic helpers and writability probe in `scripts/start-llama.sh`.
+3. Restart compute runtime and re-check FastAPI/llama supervisor status.
+
+## 2026-02-14 - Enforce Control/Compute API Role Semantics in Backend
+
+- Objective: align backend API behavior with dual FastAPI responsibilities so control-plane health and trigger endpoints do not drift on compute hosts.
+- Root cause:
+  - `src/api/main.py` treated llama as required in `/health` for all hosts, which made control API return `503` whenever llama was absent.
+  - Workflow trigger/admin endpoints (`/process`, `/batch`, `/admin/reindex`) were callable on compute-host FastAPI because the app had no explicit role gating.
+  - Supervisor runtime config did not set an explicit API role for compute-host FastAPI.
+- Changes:
+  - `src/api/main.py`
+    - Added `API_ROLE` (`control` default, `compute` override).
+    - Added control-only guards for:
+      - `POST /process`
+      - `POST /batch`
+      - `POST /admin/reindex`
+    - Made `/health` role-aware:
+      - `control`: skip llama dependency (`llama: "n/a"`), require `api/temporal/minio`.
+      - `compute`: require `api/temporal/minio/llama`.
+      - include `role` in health payload for diagnostics.
+  - `scripts/supervisord.conf`
+    - Added `API_ROLE="compute"` to FastAPI program environment.
+  - `scripts/supervisord_remote.conf`
+    - Added `API_ROLE="compute"` to FastAPI program environment.
+  - `.env.example`
+    - Added documented default `API_ROLE=control`.
+
+### Validation
+
+- Static checks:
+  - `rg --line-number "API_ROLE|_require_control_api|llama\\\": \\\"n/a\\\"" src/api/main.py scripts/supervisord.conf scripts/supervisord_remote.conf .env.example`
+- Control-plane behavior:
+  - `curl -s http://127.0.0.1:8000/health`
+  - Expect payload includes `"role":"control"` and `"llama":"n/a"`; status should depend on Temporal/MinIO only.
+- Compute-host behavior (supervisor-managed FastAPI):
+  - `curl -s http://<compute-host>:8000/health`
+  - Expect payload includes `"role":"compute"` and llama check result.
+  - `curl -s -X POST http://<compute-host>:8000/process -H "content-type: application/json" -d "{\"url\":\"https://youtu.be/dQw4w9WgXcQ\"}"`
+  - Expect HTTP `403` with role-disabled message.
+
+### Rollback
+
+1. Revert role-gating and role-aware health logic in `src/api/main.py`.
+2. Remove `API_ROLE="compute"` from:
+   - `scripts/supervisord.conf`
+   - `scripts/supervisord_remote.conf`
+3. Remove `API_ROLE` line/comment block from `.env.example`.
+4. Restart FastAPI services and re-run the same health/endpoint checks.
+
+## 2026-02-14 - Docker Base Builder Non-Interactive APT Guard
+
+- Objective: remove remaining interactive `apt/dpkg` risk in the llama.cpp builder stage to keep base-image builds deterministic in CI.
+- Root cause:
+  - `Dockerfile.base` first-stage package install did not set `DEBIAN_FRONTEND=noninteractive` and did not force conffile policy options.
+  - Other install layers already enforced non-interactive behavior, so this stage was an inconsistency.
+- Changes:
+  - `Dockerfile.base`
+    - Updated first-stage `apt-get install` to:
+      - use `DEBIAN_FRONTEND=noninteractive`
+      - include `-o Dpkg::Options::="--force-confdef"` and `-o Dpkg::Options::="--force-confold"`.
+
+### Validation
+
+- Verify no invalid Docker `FROM` references:
+  - `rg --line-number "^[[:space:]]*FROM[[:space:]]+[^ ]*:@|^[[:space:]]*FROM[[:space:]]+[^ ]+:([[:space:]]+|$)" Dockerfile Dockerfile.base Dockerfile.base.prebuilt`
+- Verify all `apt-get install` lines in base Dockerfiles are non-interactive:
+  - `rg --line-number "apt-get install" Dockerfile.base Dockerfile.base.prebuilt`
+  - confirm each matched install line contains `DEBIAN_FRONTEND=noninteractive`.
+- Local runtime validation (when Docker CLI is available):
+  - `docker build -f Dockerfile.base -t cres-base-local .`
+  - `docker run --rm cres-base-local python3 -c "import torch; print(torch.__version__)"`
+  - `docker run --rm cres-base-local /bin/bash /workspace/scripts/container_smoke.sh`
+
+### Rollback
+
+1. Revert only the edited first-stage `RUN apt-get ... install ...` lines in `Dockerfile.base`.
+2. Re-run Docker base build and smoke checks to confirm rollback behavior.
+
 ## 2026-02-14 - MinIO Credential Contract Cleanup (Single Source + Safe Alias)
 
 - Objective: keep runtime credential input unambiguous by using `MINIO_*` as the only externally injected keys.
@@ -264,7 +455,7 @@
     - `VAST_PORT=17568`
 - Validation:
   - SSH connectivity:
-    - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang2vastai -p 17568 root@ssh7.vast.ai "hostname; whoami"`
+    - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang92vastai -p 17568 root@ssh7.vast.ai "hostname; whoami"`
   - GPU activity poller recovered on Temporal:
     - `D:\soft\temporal.exe task-queue describe --address 127.0.0.1:7233 --namespace default --task-queue video-processing@gpu --task-queue-type activity`
     - Observed poller identity: `61f9310790fb@gpu`
@@ -439,9 +630,9 @@
 - Verify endpoint rotation in config/docs:
   - `rg --line-number "VAST_HOST=|VAST_PORT=|ssh3\.vast\.ai|15307" .env .env.example docs/Perimeter.md raw_vast.json`
 - Verify SSH authentication:
-  - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang2vastai -p 15307 root@ssh3.vast.ai "hostname; whoami"`
+  - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang92vastai -p 15307 root@ssh3.vast.ai "hostname; whoami"`
 - Verify refreshed runtime specs:
-  - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang2vastai -p 15307 root@ssh3.vast.ai "nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader; nproc; free -m | sed -n '2p'; df -BG / | tail -n 1; grep PRETTY_NAME /etc/os-release"`
+  - `ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i ~/.ssh/id_huihuang92vastai -p 15307 root@ssh3.vast.ai "nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader; nproc; free -m | sed -n '2p'; df -BG / | tail -n 1; grep PRETTY_NAME /etc/os-release"`
 
 ### Rollback
 
@@ -955,13 +1146,13 @@
 - Changes:
   - `docs/PLAN.md`
     - Added this governance entry to formalize source precedence:
-      - `.agents/skills/cres-triage/SKILL.md` (authoritative)
+      - `.agents/skills/triage/SKILL.md` (authoritative)
       - `docs/PLAN.md` (current status)
       - `docs/Task.md` (task execution list)
       - `docs/DECISIONS.md` (optional tradeoffs)
     - Preserved existing source-of-truth hierarchy content while aligning wording to `Where the truth lives vividly`.
     - Added `Where the truth lives vividly` formatting note for updates:
-      - `&#128994;&#128736; Skills` -> `.agents/skills/cres-triage/SKILL.md` (Rule Source)
+      - `&#128994;&#128736; Skills` -> `.agents/skills/triage/SKILL.md` (Rule Source)
       - `&#128309;&#128214; Plan` -> `docs/PLAN.md` (Live Progress)
       - `&#128992;&#128450; Task List` -> `docs/Task.md` (Actionable Items)
       - `&#128995;&#9888; Decisions` -> `docs/DECISIONS.md` (Tradeoff Records)
@@ -974,7 +1165,7 @@
 ### Validation
 
 - Verify `PLAN.md` contains this alignment entry:
-  - `rg --line-number "Source-of-Truth Order Alignment|Where the truth lives vividly|vivid formatting standard|updated when inconsistent|cres-triage/SKILL\.md|docs/Task\.md|docs/DECISIONS\.md|Rule Source|Live Progress|Actionable Items|Tradeoff Records" docs/PLAN.md`
+  - `rg --line-number "Source-of-Truth Order Alignment|Where the truth lives vividly|vivid formatting standard|updated when inconsistent|triage/SKILL\.md|docs/Task\.md|docs/DECISIONS\.md|Rule Source|Live Progress|Actionable Items|Tradeoff Records" docs/PLAN.md`
 - Verify `Task.md` includes today's completed alignment tasks:
   - `rg --line-number "Where the truth lives vividly|Update daily task tracking source references|vivid color\\+emoji interaction requirement|vivid formatting standard" docs/Task.md`
 
@@ -1284,7 +1475,7 @@
   - CPU-only worker import path required `torch` at module import time, causing CPU worker startup failure when `torch` is absent.
 - Changes:
   - `.env`
-    - Updated `VAST_SSH_KEY` to `~/.ssh/id_huihuang2vastai`.
+    - Updated `VAST_SSH_KEY` to `~/.ssh/id_huihuang92vastai`.
   - `src/backend/activities.py`
     - Hardened temp cleanup behavior to avoid deleting active transfer artifacts:
       - Added minimum-age guard for cleanup candidates.
@@ -1571,7 +1762,7 @@
 
 ## 2026-02-12 - Queue Routing, Secret Hygiene, and Active-Instance Scheduling
 
-- Objective: align runtime behavior with `cres-triage` hard constraints for queue routing, secret handling, and GPU-node resource limits.
+- Objective: align runtime behavior with `triage` hard constraints for queue routing, secret handling, and GPU-node resource limits.
 - Changes:
   - Queue names now derive from `BASE_TASK_QUEUE` and route with suffixes:
     - CPU: `<base>@cpu`
@@ -1645,6 +1836,7 @@
 4. Re-run launchers:
    - `C:\Users\rama\start_web_huihuang.ps1`
    - `C:\Users\rama\run_fastapi_norfolk.cmd`
+
 
 
 

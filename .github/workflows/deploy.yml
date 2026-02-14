@@ -409,8 +409,24 @@ jobs:
             exit 1
           fi
 
-          echo "APP_BASE_IMAGE=$resolved" >> "$GITHUB_ENV"
-          echo "Using APP_BASE_IMAGE=$resolved"
+          resolved_digest="$(docker buildx imagetools inspect "$resolved" | sed -n 's/^Digest:[[:space:]]*//p' | head -n 1)"
+          if [ -z "$resolved_digest" ]; then
+            echo "Failed to resolve base image digest for $resolved"
+            exit 1
+          fi
+
+          resolved_no_digest="${resolved%@*}"
+          resolved_tail="${resolved_no_digest##*/}"
+          if [[ "$resolved_tail" == *:* ]]; then
+            resolved_repo="${resolved_no_digest%:*}"
+          else
+            resolved_repo="$resolved_no_digest"
+          fi
+          resolved_pinned="${resolved_repo}@${resolved_digest}"
+
+          echo "APP_BASE_IMAGE=$resolved_pinned" >> "$GITHUB_ENV"
+          echo "APP_BASE_IMAGE_TAG=$resolved" >> "$GITHUB_ENV"
+          echo "Using APP_BASE_IMAGE=$resolved_pinned (from $resolved)"
 
       - name: Build App image (smoke, no push)
         uses: docker/build-push-action@v5
@@ -423,6 +439,12 @@ jobs:
           push: false
           load: true
           tags: cres-smoke:${{ github.sha }}
+
+      - name: Validate app image layout (smoke)
+        run: |
+          set -euxo pipefail
+          docker run --rm --entrypoint test cres-smoke:${{ github.sha }} -f /workspace/src/api/main.py
+          docker run --rm --entrypoint test cres-smoke:${{ github.sha }} -f /workspace/src/backend/worker.py
 
       - name: Start smoke dependencies
         run: |

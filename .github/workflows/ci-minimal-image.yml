@@ -176,6 +176,12 @@ jobs:
           load: true
           tags: cres-app-ci:${{ github.sha }}
 
+      - name: Validate app image layout
+        run: |
+          set -euxo pipefail
+          docker run --rm --entrypoint test cres-app-ci:${{ github.sha }} -f /workspace/src/api/main.py
+          docker run --rm --entrypoint test cres-app-ci:${{ github.sha }} -f /workspace/src/backend/worker.py
+
       - name: Start minimal dependencies
         run: |
           set -euxo pipefail
