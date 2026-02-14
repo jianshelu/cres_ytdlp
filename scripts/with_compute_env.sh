@@ -8,13 +8,13 @@ export MINIO_SECURE="${MINIO_SECURE:-false}"
 
 # Prefer explicit MinIO vars; fall back to AWS aliases if provided.
 if [ -z "${MINIO_ACCESS_KEY:-}" ]; then
-  export MINIO_ACCESS_KEY="${AWS_ACCESS_KEY_ID:-minioadmin}"
+  export MINIO_ACCESS_KEY="${AWS_ACCESS_KEY_ID:-}"
 fi
 if [ -z "${MINIO_SECRET_KEY:-}" ]; then
   if [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
     export MINIO_SECRET_KEY="${AWS_SECRET_ACCESS_KEY}"
   else
-    export MINIO_SECRET_KEY="${AWS_SECRET_KEY_ID:-minioadmin}"
+    export MINIO_SECRET_KEY="${AWS_SECRET_KEY_ID:-}"
   fi
 fi
 
@@ -22,6 +22,12 @@ fi
 export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$MINIO_ACCESS_KEY}"
 if [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
   export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_KEY_ID:-$MINIO_SECRET_KEY}"
+fi
+
+# Avoid silently using wrong defaults on GPU instance.
+if [ -z "${MINIO_ACCESS_KEY:-}" ] || [ -z "${MINIO_SECRET_KEY:-}" ]; then
+  echo "[with_compute_env] ERROR: missing MINIO_ACCESS_KEY/MINIO_SECRET_KEY (or AWS aliases)" >&2
+  exit 1
 fi
 
 exec "$@"

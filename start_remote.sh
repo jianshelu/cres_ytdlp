@@ -14,12 +14,40 @@ mkdir -p "$PID_DIR"
 # Load runtime env from .env when present so restart/status use the same endpoints/credentials.
 load_workspace_env() {
     local env_file="$WORKSPACE_ROOT/.env"
+    local snapshot_file
+    local sensitive_keys=(
+        MINIO_ACCESS_KEY
+        MINIO_SECRET_KEY
+        AWS_ACCESS_KEY_ID
+        AWS_SECRET_ACCESS_KEY
+        AWS_SECRET_KEY_ID
+        TEMPORAL_ADDRESS
+        MINIO_ENDPOINT
+        MINIO_SECURE
+    )
+    snapshot_file="$(mktemp)"
+
+    # Preserve runtime-injected env so stale /workspace/.env does not override it.
+    for k in "${sensitive_keys[@]}"; do
+        if [ -n "${!k+x}" ]; then
+            printf '%s=%q\n' "$k" "${!k}" >> "$snapshot_file"
+        fi
+    done
+
     if [ -f "$env_file" ]; then
         set -a
         # shellcheck disable=SC1090
         . "$env_file"
         set +a
     fi
+
+    if [ -s "$snapshot_file" ]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "$snapshot_file"
+        set +a
+    fi
+    rm -f "$snapshot_file"
 }
 
 load_workspace_env

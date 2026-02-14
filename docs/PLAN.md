@@ -1,4 +1,38 @@
 # PLAN
+## 2026-02-14 - Fix MinIO Credential Drift Between Template Env and /workspace/.env
+
+- Objective: prevent GPU worker from starting with wrong MinIO credentials due to silent fallback or stale `.env` overrides.
+- Root cause:
+  - `scripts/with_compute_env.sh` allowed fallback to `minioadmin` when `MINIO_*` and AWS aliases were absent, causing wrong-key runtime behavior instead of explicit failure.
+  - `start_remote.sh` sourced `/workspace/.env` unconditionally, which could override runtime-injected credentials from Vast template env.
+- Changes:
+  - `scripts/with_compute_env.sh`
+    - Removed `minioadmin` default fallback for `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY`.
+    - Kept AWS alias mapping (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_KEY_ID`) as fallback source only.
+    - Added fail-fast guard: exit with clear error when resolved `MINIO_*` credentials are missing.
+  - `start_remote.sh`
+    - Updated `load_workspace_env()` to preserve runtime-injected sensitive keys while sourcing `/workspace/.env`.
+    - Preserved keys:
+      - `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`
+      - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_KEY_ID`
+      - `TEMPORAL_ADDRESS`, `MINIO_ENDPOINT`, `MINIO_SECURE`
+
+### Validation
+
+- Verify no default `minioadmin` fallback remains:
+  - `rg --line-number "minioadmin|missing MINIO_ACCESS_KEY" scripts/with_compute_env.sh`
+- Verify env-preserve logic in `start_remote.sh`:
+  - `rg --line-number "snapshot_file|sensitive_keys|Preserve runtime-injected env" start_remote.sh`
+- Runtime check on instance (redacted):
+  - Compare worker-gpu env vs `/workspace/.env` by hash only (no secret output).
+  - Confirm worker does not start with default `minioadmin` unless explicitly configured.
+
+### Rollback
+
+1. Restore previous `minioadmin` fallback lines in `scripts/with_compute_env.sh`.
+2. Revert `load_workspace_env()` preservation block in `start_remote.sh`.
+3. Rebuild and redeploy previous app image tag.
+
 ## 2026-02-14 - Prevent False Supervisor-Healthy Detection on Cold Boot
 
 - Objective: avoid startup drift where `start_remote.sh` skips supervisor bootstrap due to false-positive backend detection.
