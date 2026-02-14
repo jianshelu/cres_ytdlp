@@ -1,0 +1,119 @@
+# Dockerfile.base (supervisord-enabled, single-container multi-service)
+# Build llama.cpp from source (CUDA) so runtime keeps /app/llama-server.
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS llama_cpp_builder
+ARG LLAMA_CPP_REF=
+ARG LLAMA_CUDA_ARCH=86
+ARG LLAMA_BUILD_JOBS=2
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    build-essential \
+    cmake \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/llama.cpp
+RUN set -eux; \
+    git clone --depth 1 https://github.com/ggml-org/llama.cpp.git .; \
+    if [ -n "${LLAMA_CPP_REF}" ]; then \
+      git fetch --depth 1 origin "${LLAMA_CPP_REF}"; \
+      git checkout "${LLAMA_CPP_REF}"; \
+    fi; \
+    CUDA_STUB_FLAGS=""; \
+    for d in /usr/local/cuda/lib64/stubs /usr/local/cuda/targets/x86_64-linux/lib/stubs; do \
+      if [ -f "$d/libcuda.so" ]; then \
+        ln -sf "$d/libcuda.so" "$d/libcuda.so.1"; \
+        CUDA_STUB_FLAGS="${CUDA_STUB_FLAGS} -Wl,-rpath-link,${d}"; \
+      fi; \
+    done; \
+    export LIBRARY_PATH="/usr/local/cuda/lib64/stubs:/usr/local/cuda/targets/x86_64-linux/lib/stubs:${LIBRARY_PATH:-}"; \
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64/stubs:/usr/local/cuda/targets/x86_64-linux/lib/stubs:${LD_LIBRARY_PATH:-}"; \
+    cmake -S . -B build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_CUDA_ARCHITECTURES="${LLAMA_CUDA_ARCH}" \
+      -DGGML_CUDA=ON \
+      -DGGML_NATIVE=OFF \
+      -DBUILD_SHARED_LIBS=ON \
+      -DLLAMA_BUILD_SERVER=ON \
+      -DLLAMA_BUILD_TESTS=OFF \
+      -DLLAMA_BUILD_EXAMPLES=OFF \
+      -DCMAKE_EXE_LINKER_FLAGS="${CUDA_STUB_FLAGS}" \
+      -DCMAKE_SHARED_LINKER_FLAGS="${CUDA_STUB_FLAGS}"; \
+    if ! cmake --build build --config Release --target llama-server -j"${LLAMA_BUILD_JOBS}"; then \
+      echo "llama-server target build failed, retrying with full build"; \
+      cmake --build build --config Release -j"${LLAMA_BUILD_JOBS}"; \
+    fi; \
+    mkdir -p /opt/llama-artifacts; \
+    LLAMA_BIN="$(find /opt/llama.cpp/build -type f -name llama-server | head -n 1)"; \
+    test -n "${LLAMA_BIN}"; \
+    cp -a "${LLAMA_BIN}" /opt/llama-artifacts/llama-server; \
+    find /opt/llama.cpp/build \( -type f -o -type l \) -name 'libllama.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    find /opt/llama.cpp/build \( -type f -o -type l \) -name 'libggml*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    find /opt/llama.cpp/build \( -type f -o -type l \) -name 'libmtmd*.so*' -exec cp -a {} /opt/llama-artifacts/ \; || true; \
+    strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* /opt/llama-artifacts/libmtmd*.so* || true
+
+# Use explicit Vast.ai CUDA base tag (auto placeholder format is invalid in Docker FROM).
+FROM vastai/base-image:cuda-12.4.1-auto
+ARG TORCH_VERSION=2.6.0+cu124
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
+
+WORKDIR /workspace
+
+# Keep compiled llama-server available in the runtime image.
+COPY --from=llama_cpp_builder /opt/llama-artifacts/ /app/
+RUN test -x /app/llama-server \
+ && ln -sf /app/llama-server /usr/local/bin/llama-server
+
+# Install system dependencies (+ supervisor)
+# Vast.ai base can already carry a supervisord conffile; force non-interactive dpkg behavior.
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ffmpeg \
+    curl \
+    wget \
+    git \
+    ca-certificates \
+    gnupg \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 (NodeSource)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
+# Default model/cache paths
+ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
+    XDG_CACHE_HOME=/workspace/.cache
+
+RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
+
+# Install instance runtime Python dependencies in base image
+COPY requirements.instance.txt /tmp/requirements.instance.txt
+RUN pip3 install --upgrade pip \
+ && pip3 install --no-cache-dir -r /tmp/requirements.instance.txt \
+ && if ! python3 -c "import torch" >/dev/null 2>&1; then \
+      pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
+    fi \
+ && python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)" \
+ && rm -f /tmp/requirements.instance.txt \
+ && rm -rf /root/.cache/pip \
+ && (find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true) \
+ && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete 2>/dev/null || true) \
+ && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete 2>/dev/null || true)
+
+# Supervisor config + llama wrapper
+COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf
+COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh
+COPY scripts/with_compute_env.sh /workspace/scripts/with_compute_env.sh
+RUN chmod +x /usr/local/bin/start-llama.sh /workspace/scripts/with_compute_env.sh

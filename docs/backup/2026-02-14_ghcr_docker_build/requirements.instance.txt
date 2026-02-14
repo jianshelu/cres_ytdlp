@@ -1,0 +1,13 @@
+yt-dlp
+faster-whisper
+# torch is installed in Dockerfile.base from the PyTorch cu124 index when absent.
+# This avoids pulling large split CUDA dependency wheels from default PyPI.
+numpy
+requests
+temporalio
+fastapi
+uvicorn
+httpx
+python-multipart
+minio
+pypinyin

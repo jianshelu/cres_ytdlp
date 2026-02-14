@@ -1,5 +1,110 @@
 # PLAN
+
+## Table of Contents
+
+Time Zone Standard: `America/Toronto`.
+
+| Date | Models/Systems | Plans | Status | Completion Time (America/Toronto) |
+| :--- | :--- | :--- | :--- | :--- |
+| 2026-02-14 | Docker/DockerHub | [Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)](#2026-02-14-docker-hub-publish-pipeline-backup-ghcr-docker-hub-migration) | `[IN PROGRESS]` | - |
+| 2026-02-14 | Docker/GHCR | [Docker App Build Reproducibility Guards (Layout Gate + Base Digest Pin + npm ci)](#2026-02-14-docker-app-build-reproducibility-guards-layout-gate-base-digest-pin-npm-ci) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Platform | [Disable Default Entrypoint Fallback to Prevent Dual Startup Chains](#2026-02-14-disable-default-entrypoint-fallback-to-prevent-dual-startup-chains) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Docker/GHCR | [Compute Startup Preflight Hardening (Image Layout + Model Path Diagnostics)](#2026-02-14-compute-startup-preflight-hardening-image-layout-model-path-diagnostics) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | FastAPI/API | [Enforce Control/Compute API Role Semantics in Backend](#2026-02-14-enforce-controlcompute-api-role-semantics-in-backend) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Docker/GHCR | [Docker Base Builder Non-Interactive APT Guard](#2026-02-14-docker-base-builder-non-interactive-apt-guard) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | MinIO | [MinIO Credential Contract Cleanup (Single Source + Safe Alias)](#2026-02-14-minio-credential-contract-cleanup-single-source-safe-alias) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Docker/GHCR | [Docker Build Pipeline Guard Rails (Deterministic + Non-Interactive)](#2026-02-14-docker-build-pipeline-guard-rails-deterministic-non-interactive) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | MinIO | [Fix MinIO Credential Drift Between Template Env and /workspace/.env](#2026-02-14-fix-minio-credential-drift-between-template-env-and-workspaceenv) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Platform | [Prevent False Supervisor-Healthy Detection on Cold Boot](#2026-02-14-prevent-false-supervisor-healthy-detection-on-cold-boot) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Workers/Queues | [Rollback: Keep CPU Worker on `huihuang` by Default](#2026-02-14-rollback-keep-cpu-worker-on-huihuang-by-default) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Workers/Queues | [Worker Identity Uses `role@instance_name`](#2026-02-14-worker-identity-uses-roleinstance_name) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Workers/Queues | [Move `@cpu` Worker Ownership to Instance by Default](#2026-02-14-move-cpu-worker-ownership-to-instance-by-default) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | MinIO + Vast.ai/SSH | [Harden Vast On-Start MinIO Credential Handling](#2026-02-14-harden-vast-on-start-minio-credential-handling) | `[DONE]` | 16:06:22 |
+| 2026-02-14 | Vast.ai/SSH | [Rotate Vast SSH Endpoint to `ssh7.vast.ai:17568` (Recreated Instance)](#2026-02-14-rotate-vast-ssh-endpoint-to-ssh7vastai17568-recreated-instance) | `[DONE]` | 16:06:22 |
+| 2026-02-13 | Vast.ai/SSH | [Make Vast Startup Prefer Supervisor Backend and Remove Entry Drift](#2026-02-13-make-vast-startup-prefer-supervisor-backend-and-remove-entry-drift) | `[PENDING]` | - |
+| 2026-02-13 | llama.cpp/GPU + Vast.ai/SSH | [Harden Vast Startup and llama Runtime Lib Packaging for New Instance Boot](#2026-02-13-harden-vast-startup-and-llama-runtime-lib-packaging-for-new-instance-boot) | `[PENDING]` | - |
+| 2026-02-13 | Docker/GHCR | [Keep Compute Env Wrapper Coherent with Docker Base/App Build Triggers](#2026-02-13-keep-compute-env-wrapper-coherent-with-docker-baseapp-build-triggers) | `[PENDING]` | - |
+| 2026-02-13 | llama.cpp/GPU + Workers/Queues | [Persist GPU Worker Endpoint Defaults and Autostart in Local Codebase](#2026-02-13-persist-gpu-worker-endpoint-defaults-and-autostart-in-local-codebase) | `[PENDING]` | - |
+| 2026-02-13 | Vast.ai/SSH | [Rotate Vast SSH Endpoint to `ssh3.vast.ai:15307` and Refresh Live Specs](#2026-02-13-rotate-vast-ssh-endpoint-to-ssh3vastai15307-and-refresh-live-specs) | `[PENDING]` | - |
+| 2026-02-13 | Docker/GHCR | [Fix build-app Disk Exhaustion in BuildKit Snapshot Stage](#2026-02-13-fix-build-app-disk-exhaustion-in-buildkit-snapshot-stage) | `[PENDING]` | - |
+| 2026-02-13 | Docker/GHCR | [Align CI Minimal GHCR Base Selection with Prebuilt Tags](#2026-02-13-align-ci-minimal-ghcr-base-selection-with-prebuilt-tags) | `[PENDING]` | - |
+| 2026-02-13 | Platform | [Reduce build-app Disk Pressure on Runner](#2026-02-13-reduce-build-app-disk-pressure-on-runner) | `[PENDING]` | - |
+| 2026-02-13 | Platform | [Stabilize Push Path by Building Prebuilt Base Every Push and Pinning SHA Tag](#2026-02-13-stabilize-push-path-by-building-prebuilt-base-every-push-and-pinning-sha-tag) | `[PENDING]` | - |
+| 2026-02-13 | Platform | [Reject Stale Base Tags Missing Runtime Dependencies in build-app](#2026-02-13-reject-stale-base-tags-missing-runtime-dependencies-in-build-app) | `[PENDING]` | - |
+| 2026-02-13 | Platform | [Fix build-app Base Tag Bootstrap Failure on Push](#2026-02-13-fix-build-app-base-tag-bootstrap-failure-on-push) | `[PENDING]` | - |
+| 2026-02-13 | llama.cpp/GPU | [Fix Dual-Route Failures (Runner Disk + Missing llama-src-latest)](#2026-02-13-fix-dual-route-failures-runner-disk-missing-llama-src-latest) | `[PENDING]` | - |
+| 2026-02-13 | Platform | [Split Trigger Policy by Base Route (Prebuilt Auto on Push, Source Compile Manual)](#2026-02-13-split-trigger-policy-by-base-route-prebuilt-auto-on-push-source-compile-manual) | `[PENDING]` | - |
+| 2026-02-13 | Docker/GHCR | [Make Compiled-Image Build Manual-Only and Disable Push-Triggered Image Builds](#2026-02-13-make-compiled-image-build-manual-only-and-disable-push-triggered-image-builds) | `[PENDING]` | - |
+| 2026-02-13 | llama.cpp/GPU + Vast.ai/SSH | [Dual Base Build Routes on Vast.ai Base (llama-src vs llama-prebuilt)](#2026-02-13-dual-base-build-routes-on-vastai-base-llama-src-vs-llama-prebuilt) | `[PENDING]` | - |
+| 2026-02-13 | llama.cpp/GPU | [Correct Torch Availability Assumption and Install from PyTorch cu124 Index](#2026-02-13-correct-torch-availability-assumption-and-install-from-pytorch-cu124-index) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [Prevent Disk Exhaustion During Python Dependency Layer](#2026-02-12-prevent-disk-exhaustion-during-python-dependency-layer) | `[PENDING]` | - |
+| 2026-02-12 | Docker/GHCR | [Fix Non-Interactive Supervisor Install in Dockerfile.base](#2026-02-12-fix-non-interactive-supervisor-install-in-dockerfilebase) | `[PENDING]` | - |
+| 2026-02-12 | llama.cpp/GPU | [Fix CUDA Driver Stub Link for llama.cpp Build](#2026-02-12-fix-cuda-driver-stub-link-for-llamacpp-build) | `[PENDING]` | - |
+| 2026-02-12 | llama.cpp/GPU | [Harden llama.cpp Build Step for CI Target Drift](#2026-02-12-harden-llamacpp-build-step-for-ci-target-drift) | `[PENDING]` | - |
+| 2026-02-12 | Docker/GHCR + Vast.ai/SSH | [Fix Invalid Vast.ai Base Image Reference Format](#2026-02-12-fix-invalid-vastai-base-image-reference-format) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [Source-of-Truth Order Alignment (AGENTS.md)](#2026-02-12-source-of-truth-order-alignment-agentsmd) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [CI Prebuilt Base Dependency Probe Before Reuse](#2026-02-12-ci-prebuilt-base-dependency-probe-before-reuse) | `[PENDING]` | - |
+| 2026-02-12 | Docker/GHCR | [Fix CI Base/App Build Cache Backend Mismatch (docker driver)](#2026-02-12-fix-ci-baseapp-build-cache-backend-mismatch-docker-driver) | `[PENDING]` | - |
+| 2026-02-12 | llama.cpp/GPU + Docker/GHCR | [GHCR Base Build Guardrails for llama.cpp Source Compile](#2026-02-12-ghcr-base-build-guardrails-for-llamacpp-source-compile) | `[PENDING]` | - |
+| 2026-02-12 | llama.cpp/GPU + Docker/GHCR + Vast.ai/SSH | [Switch Runtime Base to Vast.ai Auto CUDA Image Tag (Keep llama.cpp Source Build)](#2026-02-12-switch-runtime-base-to-vastai-auto-cuda-image-tag-keep-llamacpp-source-build) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [CI Minimal Build-and-Boot Base Reuse Optimization](#2026-02-12-ci-minimal-build-and-boot-base-reuse-optimization) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [CI Minimal Boot Disk-Pressure Guardrails](#2026-02-12-ci-minimal-boot-disk-pressure-guardrails) | `[PENDING]` | - |
+| 2026-02-12 | llama.cpp/GPU + Workers/Queues | [CI Smoke Queue Check Respects No-GPU Environments](#2026-02-12-ci-smoke-queue-check-respects-no-gpu-environments) | `[PENDING]` | - |
+| 2026-02-12 | Next.js/Web | [Transcriptions Hot-Path Optimization (AI programming / limit=30)](#2026-02-12-transcriptions-hot-path-optimization-ai-programming-limit30) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [Archive Legacy Code-Sync Deploy Scripts and Enforce Immutable Instance Flow](#2026-02-12-archive-legacy-code-sync-deploy-scripts-and-enforce-immutable-instance-flow) | `[PENDING]` | - |
+| 2026-02-12 | llama.cpp/GPU + Workers/Queues + Vast.ai/SSH | [GPU Worker Recovery on ssh2 and Remote Runtime Bootstrap](#2026-02-12-gpu-worker-recovery-on-ssh2-and-remote-runtime-bootstrap) | `[PENDING]` | - |
+| 2026-02-12 | Docker/GHCR | [GHCR Base Image Pre-bakes Instance Python Dependencies](#2026-02-12-ghcr-base-image-pre-bakes-instance-python-dependencies) | `[PENDING]` | - |
+| 2026-02-12 | Workers/Queues + Control Plane + Docs/Ops | [Control Plane Boot Unification and CPU Worker Availability](#2026-02-12-control-plane-boot-unification-and-cpu-worker-availability) | `[PENDING]` | - |
+| 2026-02-12 | Vast.ai/SSH | [Vast Instance SSH Endpoint Rotation (ssh2)](#2026-02-12-vast-instance-ssh-endpoint-rotation-ssh2) | `[PENDING]` | - |
+| 2026-02-12 | Vast.ai/SSH | [Vast Instance SSH Endpoint Rotation](#2026-02-12-vast-instance-ssh-endpoint-rotation) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [CI Smoke IP Readiness Guard](#2026-02-12-ci-smoke-ip-readiness-guard) | `[PENDING]` | - |
+| 2026-02-12 | Platform | [CI Smoke Endpoint Resolution Hardening](#2026-02-12-ci-smoke-endpoint-resolution-hardening) | `[PENDING]` | - |
+| 2026-02-12 | Temporal + Workers/Queues | [CI Temporal DNS/Worker Spawn Resilience](#2026-02-12-ci-temporal-dnsworker-spawn-resilience) | `[PENDING]` | - |
+| 2026-02-12 | Docker/GHCR | [CI Minimal Image Base Reuse Fix](#2026-02-12-ci-minimal-image-base-reuse-fix) | `[PENDING]` | - |
+| 2026-02-12 | Workers/Queues | [Queue Routing, Secret Hygiene, and Active-Instance Scheduling](#2026-02-12-queue-routing-secret-hygiene-and-active-instance-scheduling) | `[PENDING]` | - |
+| 2026-02-11 | Platform | [Root Cleanup and Source-of-Truth Normalization](#2026-02-11-root-cleanup-and-source-of-truth-normalization) | `[PENDING]` | - |
+
+## 2026-02-14 - Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)
+
+- Objective: migrate publish targets from GHCR to Docker Hub and keep a point-in-time backup of GHCR build inputs for rollback.
+- Constraints:
+  - Never commit secrets/tokens (Docker Hub PAT must be stored in GitHub Secrets).
+  - No Docker-in-Docker.
+- Changes:
+  - Backup created at:
+    - `docs/backup/2026-02-14_ghcr_docker_build/`
+  - Added Docker Hub publish workflow:
+    - `.github/workflows/deploy-dockerhub.yml`
+  - Updated default base-image references for local/manual builds:
+    - `Dockerfile` default `BASE_IMAGE=reywang/cres_ytdlp_norfolk:base-llama-prebuilt-latest`
+    - `Dockerfile.base.prebuilt` default `LLAMA_ARTIFACT_IMAGE=reywang/cres_ytdlp_norfolk:base-llama-src-latest`
+
+### Docker Hub Setup (Required)
+
+- Create GitHub Secrets in the repo:
+  - `DOCKERHUB_USERNAME`
+  - `DOCKERHUB_TOKEN`
+
+### Validation
+
+- Static checks:
+  - `rg --line-number "DOCKERHUB_REPO|docker/login-action|registry: docker\\.io|base-llama-(src|prebuilt)-latest" .github/workflows/deploy-dockerhub.yml Dockerfile Dockerfile.base.prebuilt`
+- Publish bootstrap (first run):
+  - Run workflow `Build and Push to Docker Hub` with `base_variant=llama-src` once to seed:
+    - `reywang/cres_ytdlp_norfolk:base-llama-src-latest`
+    - `reywang/cres_ytdlp_norfolk:base-latest`
+  - Then run again with `base_variant=llama-prebuilt` (or push to `main`) to publish:
+    - `reywang/cres_ytdlp_norfolk:base-llama-prebuilt-latest`
+    - `reywang/cres_ytdlp_norfolk:canary` (and optional `stable`)
+
+### Rollback
+
+1. Remove `.github/workflows/deploy-dockerhub.yml` (or stop using it).
+2. Restore GHCR-based files from `docs/backup/2026-02-14_ghcr_docker_build/`.
+3. Re-run the last known green GHCR workflow (when billing permits) or rebuild locally.
+
 ## 2026-02-14 - Docker App Build Reproducibility Guards (Layout Gate + Base Digest Pin + npm ci)
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: prevent wrong-image runtime boots, reduce base-tag drift, and make frontend dependency install deterministic during image builds.
 - Root cause:
@@ -45,6 +150,7 @@
 4. Re-run both workflows to confirm restored behavior.
 
 ## 2026-02-14 - Disable Default Entrypoint Fallback to Prevent Dual Startup Chains
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: prevent duplicate `uvicorn`/`llama-server`/worker process trees caused by concurrent supervisor + entrypoint startup paths.
 - Root cause:
@@ -79,6 +185,7 @@
 3. Redeploy/restart instance and re-check startup logs and port ownership.
 
 ## 2026-02-14 - Compute Startup Preflight Hardening (Image Layout + Model Path Diagnostics)
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: fail fast with explicit diagnostics for two high-frequency compute boot issues: wrong runtime image target and llama model-path anomalies.
 - Root cause:
@@ -115,6 +222,7 @@
 3. Restart compute runtime and re-check FastAPI/llama supervisor status.
 
 ## 2026-02-14 - Enforce Control/Compute API Role Semantics in Backend
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: align backend API behavior with dual FastAPI responsibilities so control-plane health and trigger endpoints do not drift on compute hosts.
 - Root cause:
@@ -162,6 +270,7 @@
 4. Restart FastAPI services and re-run the same health/endpoint checks.
 
 ## 2026-02-14 - Docker Base Builder Non-Interactive APT Guard
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: remove remaining interactive `apt/dpkg` risk in the llama.cpp builder stage to keep base-image builds deterministic in CI.
 - Root cause:
@@ -191,6 +300,7 @@
 2. Re-run Docker base build and smoke checks to confirm rollback behavior.
 
 ## 2026-02-14 - MinIO Credential Contract Cleanup (Single Source + Safe Alias)
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: keep runtime credential input unambiguous by using `MINIO_*` as the only externally injected keys.
 - Root cause:
@@ -218,6 +328,7 @@
 3. Re-run smoke workflow to confirm restored behavior.
 
 ## 2026-02-14 - Docker Build Pipeline Guard Rails (Deterministic + Non-Interactive)
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: reduce CI image build regressions by enforcing Docker reference preflight checks and fully non-interactive apt installs.
 - Root cause:
@@ -252,6 +363,7 @@
 3. Re-run CI minimal image workflow to confirm rollback behavior.
 
 ## 2026-02-14 - Fix MinIO Credential Drift Between Template Env and /workspace/.env
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: prevent GPU worker from starting with wrong MinIO credentials due to silent fallback or stale `.env` overrides.
 - Root cause:
@@ -289,6 +401,7 @@
 3. Rebuild and redeploy previous app image tag.
 
 ## 2026-02-14 - Prevent False Supervisor-Healthy Detection on Cold Boot
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: avoid startup drift where `start_remote.sh` skips supervisor bootstrap due to false-positive backend detection.
 - Root cause:
@@ -321,6 +434,7 @@
 3. Redeploy previous app image tag.
 
 ## 2026-02-14 - Rollback: Keep CPU Worker on `huihuang` by Default
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: revert the topology change that moved `@cpu` worker ownership to instance-only.
 - Changes:
@@ -348,6 +462,7 @@
 2. Re-run boot/startup scripts and verify pollers.
 
 ## 2026-02-14 - Worker Identity Uses `role@instance_name`
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: make poller identity easier to read and align with operator expectation (`cpu@instance`, `gpu@instance`).
 - Root cause:
@@ -377,6 +492,7 @@
 2. Remove optional `WORKER_INSTANCE_NAME` comment from `.env.example`.
 
 ## 2026-02-14 - Move `@cpu` Worker Ownership to Instance by Default
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: enforce compute topology so both `@cpu` and `@gpu` workers run on the Vast instance, while `huihuang` remains control-plane only.
 - Root cause:
@@ -414,6 +530,7 @@
 4. Re-run control-plane boot and verify `huihuang@cpu` returns if desired.
 
 ## 2026-02-14 - Harden Vast On-Start MinIO Credential Handling
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: prevent silent GPU activity retry loops when Vast template env uses inconsistent AWS/MinIO key names.
 - Root cause:
@@ -444,6 +561,7 @@
 3. Restart instance and re-check `/var/log/onstart.log` plus GPU worker queue pollers.
 
 ## 2026-02-14 - Rotate Vast SSH Endpoint to `ssh7.vast.ai:17568` (Recreated Instance)
+- Executed time: 2026-02-14 16:06:22 -05:00
 
 - Objective: switch tooling to the recreated Vast.ai instance and restore GPU queue polling path.
 - Changes:

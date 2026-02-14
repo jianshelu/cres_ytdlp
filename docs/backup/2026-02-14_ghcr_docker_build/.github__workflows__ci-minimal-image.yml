@@ -1,0 +1,249 @@
+name: CI Minimal Image Boot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  minimal-build-and-boot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Vast.ai base and llama.cpp source build are configured
+        run: |
+          set -euxo pipefail
+          grep -n "FROM vastai/base-image:cuda-12.4.1-auto" Dockerfile.base
+          grep -nE "^FROM nvidia/cuda:.* AS llama_cpp_builder$" Dockerfile.base
+          grep -n "cmake --build build --config Release --target llama-server" Dockerfile.base
+
+      - name: Validate Dockerfile FROM references
+        run: |
+          set -euxo pipefail
+          FILES=(Dockerfile Dockerfile.base Dockerfile.base.prebuilt)
+          for f in "${FILES[@]}"; do
+            test -f "$f"
+            grep -nE '^[[:space:]]*FROM[[:space:]]+' "$f"
+          done
+          if grep -nE '^[[:space:]]*FROM[[:space:]]+[^ ]*:@' "${FILES[@]}"; then
+            echo "Invalid Docker FROM reference contains ':@'"
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*FROM[[:space:]]+[^ ]+:([[:space:]]+|$)' "${FILES[@]}"; then
+            echo "Invalid Docker FROM reference has empty tag"
+            exit 1
+          fi
+
+      - name: Lowercase image name
+        id: lowercase
+        run: |
+          echo "image_name_lower=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Detect base-image affecting changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            base:
+              - "Dockerfile.base"
+              - "requirements.instance.txt"
+              - "scripts/supervisord.conf"
+              - "scripts/start-llama.sh"
+              - "scripts/with_compute_env.sh"
+
+      - name: Reclaim disk space before build
+        run: |
+          set -euxo pipefail
+          echo "Disk before cleanup:"
+          df -h
+          docker system df || true
+
+          # Self-hosted runners can accumulate old diag logs between runs.
+          if [ -d /home/runner/actions-runner/cached/_diag ]; then
+            find /home/runner/actions-runner/cached/_diag -type f -name "*.log" -mtime +2 -delete || true
+          fi
+
+          docker container prune -f || true
+          docker image prune -af || true
+          docker builder prune -af || true
+          docker volume prune -f || true
+
+          echo "Disk after cleanup:"
+          df -h
+          docker system df || true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          # Required for local `load: true` image reuse in subsequent builds.
+          # Without this, BuildKit may try to pull `cres-base-ci:*` from Docker Hub.
+          driver: docker
+
+      - name: Log in to GHCR (best effort for base reuse)
+        continue-on-error: true
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve base image strategy
+        id: base_strategy
+        shell: bash
+        run: |
+          set -euxo pipefail
+          verify_base_runtime_deps() {
+            local image="$1"
+            printf '%s\n' \
+              'import importlib' \
+              'import sys' \
+              '' \
+              'mods = [' \
+              '    "fastapi",' \
+              '    "uvicorn",' \
+              '    "httpx",' \
+              '    "temporalio",' \
+              '    "minio",' \
+              '    "yt_dlp",' \
+              '    "faster_whisper",' \
+              '    "torch",' \
+              ']' \
+              'missing = []' \
+              'for m in mods:' \
+              '    try:' \
+              '        importlib.import_module(m)' \
+              '    except Exception as e:' \
+              '        missing.append(f"{m}: {e}")' \
+              'if missing:' \
+              '    print("prebuilt base dependency probe failed:")' \
+              '    print("\\n".join(missing))' \
+              '    sys.exit(1)' \
+              'print("prebuilt base dependency probe passed")' \
+            | docker run --rm -i "$image" python3 -
+          }
+
+          if [ "${{ steps.filter.outputs.base }}" = "true" ]; then
+            echo "Base-impacting files changed; build local base image."
+            echo "build_local=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PREBUILT_CANDIDATES=(
+            "ghcr.io/${{ steps.lowercase.outputs.image_name_lower }}-base:llama-prebuilt-latest"
+            "ghcr.io/${{ steps.lowercase.outputs.image_name_lower }}-base:latest"
+            "ghcr.io/${{ steps.lowercase.outputs.image_name_lower }}-base:llama-src-latest"
+          )
+
+          for PREBUILT_BASE in "${PREBUILT_CANDIDATES[@]}"; do
+            if docker pull "$PREBUILT_BASE" && verify_base_runtime_deps "$PREBUILT_BASE"; then
+              docker tag "$PREBUILT_BASE" "cres-base-ci:${{ github.sha }}"
+              echo "Using prebuilt GHCR base image: $PREBUILT_BASE"
+              echo "build_local=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          echo "No usable prebuilt GHCR base image found; fallback to local base build."
+          echo "build_local=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build base image (local, when required)
+        if: steps.base_strategy.outputs.build_local == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.base
+          build-args: |
+            LLAMA_BUILD_JOBS=2
+          push: false
+          load: true
+          tags: cres-base-ci:${{ github.sha }}
+
+      - name: Show selected base strategy
+        run: echo "build_local=${{ steps.base_strategy.outputs.build_local }}"
+
+      - name: Build app image (local)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            BASE_IMAGE=cres-base-ci:${{ github.sha }}
+          push: false
+          load: true
+          tags: cres-app-ci:${{ github.sha }}
+
+      - name: Validate app image layout
+        run: |
+          set -euxo pipefail
+          docker run --rm --entrypoint test cres-app-ci:${{ github.sha }} -f /workspace/src/api/main.py
+          docker run --rm --entrypoint test cres-app-ci:${{ github.sha }} -f /workspace/src/backend/worker.py
+
+      - name: Start minimal dependencies
+        run: |
+          set -euxo pipefail
+          docker network create cres-ci || true
+          docker run -d --name temporal-ci --network cres-ci temporalio/temporal:1.5.1 server start-dev --ip 0.0.0.0
+          docker run -d --name minio-ci --network cres-ci \
+            -e MINIO_ROOT_USER=cres \
+            -e MINIO_ROOT_PASSWORD='Qh@113113' \
+            quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
+
+          temporal_ip=""
+          for i in $(seq 1 60); do
+            temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "cres-ci" "IPAddress"}}' temporal-ci 2>/dev/null || true)"
+            if [ -n "$temporal_ip" ] && [ "$temporal_ip" != "<no value>" ]; then
+              break
+            fi
+            sleep 1
+          done
+
+          minio_ip=""
+          for i in $(seq 1 60); do
+            minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "cres-ci" "IPAddress"}}' minio-ci 2>/dev/null || true)"
+            if [ -n "$minio_ip" ] && [ "$minio_ip" != "<no value>" ]; then
+              break
+            fi
+            sleep 1
+          done
+
+          if [ -z "$temporal_ip" ] || [ -z "$minio_ip" ] || [ "$temporal_ip" = "<no value>" ] || [ "$minio_ip" = "<no value>" ]; then
+            echo "Failed to resolve dependency container IPs on cres-ci"
+            docker ps -a
+            docker logs temporal-ci || true
+            docker logs minio-ci || true
+            docker inspect temporal-ci || true
+            docker inspect minio-ci || true
+            exit 1
+          fi
+
+          echo "TEMPORAL_SMOKE_ADDR=${temporal_ip}:7233" >> "$GITHUB_ENV"
+          echo "MINIO_SMOKE_ENDPOINT=${minio_ip}:9000" >> "$GITHUB_ENV"
+          echo "Resolved smoke endpoints: temporal=${temporal_ip}:7233, minio=${minio_ip}:9000"
+
+      - name: Boot app container and run smoke
+        run: |
+          set -euxo pipefail
+          docker run -d --name app-ci --network cres-ci \
+            -e CONTROL_PLANE_MODE=external \
+            -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
+            -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
+            -e MINIO_SECURE=false \
+            -e MINIO_ACCESS_KEY=cres \
+            -e MINIO_SECRET_KEY='Qh@113113' \
+            -e ENABLE_WEB=false \
+            cres-app-ci:${{ github.sha }}
+          docker exec app-ci /bin/bash /workspace/scripts/container_smoke.sh
+
+      - name: Cleanup
+        if: always()
+        run: |
+          set -euxo pipefail
+          docker rm -f app-ci temporal-ci minio-ci || true
+          docker network rm cres-ci || true
+          docker image rm cres-app-ci:${{ github.sha }} cres-base-ci:${{ github.sha }} || true
+          docker builder prune -af || true
+          docker volume prune -f || true

@@ -1,0 +1,441 @@
+name: Build and Push to Docker Hub
+run-name: Build (dockerhub) ${{ inputs.note }} ${{ github.ref_name }} @ ${{ github.sha }}
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.base"
+      - "Dockerfile.base.prebuilt"
+      - "requirements.instance.txt"
+      - "scripts/supervisord.conf"
+      - "scripts/start-llama.sh"
+      - "scripts/with_compute_env.sh"
+      - "scripts/container_smoke.sh"
+      - "onstart.sh"
+      - "start_remote.sh"
+      - "src/**"
+      - "web/**"
+      - ".github/workflows/deploy-dockerhub.yml"
+  workflow_dispatch:
+    inputs:
+      note:
+        description: "Optional label (e.g., first seed / test build)"
+        required: false
+        default: ""
+      base_variant:
+        description: "Base route: llama-src (compile) or llama-prebuilt (import)"
+        required: false
+        type: choice
+        default: llama-prebuilt
+        options:
+          - llama-src
+          - llama-prebuilt
+      promote_stable:
+        description: "Also publish stable tag (manual promotion)"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  DOCKERHUB_REPO: reywang/cres_ytdlp_norfolk
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      base: ${{ steps.filter.outputs.base || 'false' }}
+      sha_short: ${{ steps.sha_short.outputs.sha_short }}
+    steps:
+      - name: Compute short SHA
+        id: sha_short
+        run: |
+          echo "sha_short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate Dockerfile FROM references
+        run: |
+          set -euxo pipefail
+          FILES=(Dockerfile Dockerfile.base Dockerfile.base.prebuilt)
+          for f in "${FILES[@]}"; do
+            test -f "$f"
+            grep -nE '^[[:space:]]*FROM[[:space:]]+' "$f"
+          done
+          if grep -nE '^[[:space:]]*FROM[[:space:]]+[^ ]*:@' "${FILES[@]}"; then
+            echo "Invalid Docker FROM reference contains ':@'"
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*FROM[[:space:]]+[^ ]+:([[:space:]]+|$)' "${FILES[@]}"; then
+            echo "Invalid Docker FROM reference has empty tag"
+            exit 1
+          fi
+
+      - name: Filter changed files
+        id: filter
+        if: github.event_name != 'workflow_dispatch'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            base:
+              - 'Dockerfile.base'
+              - 'Dockerfile.base.prebuilt'
+              - 'requirements.instance.txt'
+              - 'scripts/supervisord.conf'
+              - 'scripts/start-llama.sh'
+              - 'scripts/with_compute_env.sh'
+
+  build-base-llama-src:
+    needs: filter
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.base_variant == 'llama-src'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reclaim disk space before base build
+        run: |
+          set -euxo pipefail
+          df -h
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+          docker builder prune -af || true
+          df -h
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          driver-opts: network=host
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata for llama-src base image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_REPO }}
+          tags: |
+            type=raw,value=base-llama-src-latest
+            type=sha,prefix=base-llama-src-,format=short
+            type=raw,value=base-latest
+            type=sha,prefix=base-,format=short
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}-base
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ github.event.created_at }}
+
+      - name: Build and push llama-src base image (compile llama.cpp)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.base
+          platforms: linux/amd64
+          build-args: |
+            LLAMA_BUILD_JOBS=2
+            LLAMA_CUDA_ARCH=86
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=dockerhub-base
+          cache-to: type=gha,scope=dockerhub-base,mode=min
+          provenance: mode=max
+          sbom: true
+
+  build-base-llama-prebuilt:
+    needs: filter
+    if: >-
+      (github.event_name == 'push') ||
+      (github.event_name == 'workflow_dispatch' && inputs.base_variant == 'llama-prebuilt')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reclaim disk space before prebuilt base build
+        run: |
+          set -euxo pipefail
+          df -h
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+          docker builder prune -af || true
+          df -h
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          driver-opts: network=host
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Resolve llama artifact source image (seed required on first run)
+        id: resolve_llama_artifact
+        shell: bash
+        run: |
+          set -euxo pipefail
+          primary="${{ env.DOCKERHUB_REPO }}:base-llama-src-latest"
+          fallback="${{ env.DOCKERHUB_REPO }}:base-latest"
+
+          artifact="$primary"
+          if ! docker buildx imagetools inspect "$artifact" >/dev/null 2>&1; then
+            echo "Primary llama artifact image not found: $artifact"
+            artifact="$fallback"
+          fi
+
+          if ! docker buildx imagetools inspect "$artifact" >/dev/null 2>&1; then
+            echo "No valid llama artifact image found. Seed it by running workflow_dispatch with base_variant=llama-src."
+            exit 1
+          fi
+
+          echo "Using LLAMA_ARTIFACT_IMAGE=$artifact"
+          echo "llama_artifact_image=$artifact" >> "$GITHUB_OUTPUT"
+
+      - name: Extract metadata for llama-prebuilt base image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_REPO }}
+          tags: |
+            type=raw,value=base-llama-prebuilt-latest
+            type=sha,prefix=base-llama-prebuilt-,format=short
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}-base
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ github.event.created_at }}
+
+      - name: Build and push llama-prebuilt base image (no llama.cpp compile)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.base.prebuilt
+          platforms: linux/amd64
+          build-args: |
+            LLAMA_ARTIFACT_IMAGE=${{ steps.resolve_llama_artifact.outputs.llama_artifact_image }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=dockerhub-base-prebuilt
+          cache-to: type=gha,scope=dockerhub-base-prebuilt,mode=min
+          provenance: mode=max
+          sbom: true
+
+  build-app:
+    needs: [filter, build-base-llama-src, build-base-llama-prebuilt]
+    if: >-
+      always() &&
+      (needs.build-base-llama-src.result == 'success' || needs.build-base-llama-src.result == 'skipped') &&
+      (needs.build-base-llama-prebuilt.result == 'success' || needs.build-base-llama-prebuilt.result == 'skipped') &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reclaim disk space before app build
+        run: |
+          set -euxo pipefail
+          df -h
+          docker system df || true
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+          docker builder prune -af || true
+          docker image prune -af || true
+          docker volume prune -f || true
+          df -h
+          docker system df || true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Select app base image route (digest pinned)
+        run: |
+          set -euxo pipefail
+          verify_base_runtime_deps() {
+            local image="$1"
+            printf '%s\n' \
+              'import importlib' \
+              'import sys' \
+              '' \
+              'mods = [' \
+              '    "fastapi",' \
+              '    "uvicorn",' \
+              '    "httpx",' \
+              '    "temporalio",' \
+              '    "minio",' \
+              '    "yt_dlp",' \
+              '    "faster_whisper",' \
+              '    "torch",' \
+              ']' \
+              'missing = []' \
+              'for m in mods:' \
+              '    try:' \
+              '        importlib.import_module(m)' \
+              '    except Exception as e:' \
+              '        missing.append(f"{m}: {e}")' \
+              'if missing:' \
+              '    print("base dependency probe failed:")' \
+              '    print("\\n".join(missing))' \
+              '    sys.exit(1)' \
+              'print("base dependency probe passed")' \
+            | docker run --rm -i --entrypoint python3 "$image" -
+          }
+
+          variant="llama-prebuilt"
+          base_tag=""
+          if [ "${{ github.event_name }}" = "push" ]; then
+            base_tag="base-llama-prebuilt-${{ needs.filter.outputs.sha_short }}"
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.base_variant }}" ]; then
+            variant="${{ inputs.base_variant }}"
+            base_tag="base-${variant}-${{ needs.filter.outputs.sha_short }}"
+          fi
+          case "$variant" in
+            llama-src|llama-prebuilt) ;;
+            *)
+              echo "Invalid base variant: $variant"
+              exit 1
+              ;;
+          esac
+
+          repo="${{ env.DOCKERHUB_REPO }}"
+          candidates=()
+          if [ -n "$base_tag" ]; then
+            candidates+=("${repo}:${base_tag}")
+          fi
+
+          if [ "$variant" = "llama-prebuilt" ]; then
+            candidates+=("${repo}:base-llama-prebuilt-latest" "${repo}:base-latest" "${repo}:base-llama-src-latest")
+          else
+            candidates+=("${repo}:base-llama-src-latest" "${repo}:base-latest")
+          fi
+
+          resolved=""
+          for image in "${candidates[@]}"; do
+            if docker buildx imagetools inspect "$image" >/dev/null 2>&1 && verify_base_runtime_deps "$image"; then
+              resolved="$image"
+              break
+            fi
+          done
+
+          if [ -z "$resolved" ]; then
+            echo "No usable base image found. Candidates:"
+            printf ' - %s\n' "${candidates[@]}"
+            exit 1
+          fi
+
+          resolved_digest="$(docker buildx imagetools inspect "$resolved" | sed -n 's/^Digest:[[:space:]]*//p' | head -n 1)"
+          if [ -z "$resolved_digest" ]; then
+            echo "Failed to resolve base image digest for $resolved"
+            exit 1
+          fi
+
+          resolved_no_digest="${resolved%@*}"
+          resolved_tail="${resolved_no_digest##*/}"
+          if [[ "$resolved_tail" == *:* ]]; then
+            resolved_repo="${resolved_no_digest%:*}"
+          else
+            resolved_repo="$resolved_no_digest"
+          fi
+          resolved_pinned="${resolved_repo}@${resolved_digest}"
+
+          echo "APP_BASE_IMAGE=$resolved_pinned" >> "$GITHUB_ENV"
+          echo "APP_BASE_IMAGE_TAG=$resolved" >> "$GITHUB_ENV"
+          echo "Using APP_BASE_IMAGE=$resolved_pinned (from $resolved)"
+
+      - name: Build App image (smoke, no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          build-args: |
+            BASE_IMAGE=${{ env.APP_BASE_IMAGE }}
+          push: false
+          load: true
+          tags: cres-smoke:${{ github.sha }}
+
+      - name: Validate app image layout (smoke)
+        run: |
+          set -euxo pipefail
+          docker run --rm --entrypoint test cres-smoke:${{ github.sha }} -f /workspace/src/api/main.py
+          docker run --rm --entrypoint test cres-smoke:${{ github.sha }} -f /workspace/src/backend/worker.py
+
+      - name: Extract metadata for Docker Hub
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_REPO }}
+          tags: |
+            type=raw,value=canary
+            type=raw,value=stable,enable=${{ github.event_name == 'workflow_dispatch' && inputs.promote_stable }}
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ github.event.created_at }}
+
+      - name: Build and push App image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          build-args: |
+            BASE_IMAGE=${{ env.APP_BASE_IMAGE }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          sbom: false
+
