@@ -49,11 +49,7 @@ Rules:
 - Plan: `docs/PLAN.md` (current status)
 - Task List: `docs/Task.md`
 - Decisions: `docs/DECISIONS.md` (tradeoffs; optional)
-- Vivid content with with colors and emojis, for example:
-   - 📋 Plan: `docs/PLAN.md` (current status) <span style="color:#3498db">🔄 Live Progress</span>
-   - 📌 Task List: `docs/Task.md` <span style="color:#f39c12">🎯 Actionable Items</span>
-   - ⚖️ Decisions: `docs/DECISIONS.md` (tradeoffs; optional) <span style="color:#9b59b6">📝 Tradeoff Records</span>
-   - Vivid contents only for human-computer interaction documentation.
+- Vivid status markers and emojis.
 - `PLAN.md` and `Task.md` must conform to the vivid formatting standard.
 - If formatting is inconsistent, update the file.
 
