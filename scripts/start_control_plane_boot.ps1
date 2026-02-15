@@ -1,3 +1,7 @@
+param(
+    [switch]$ForceFastapiRestart
+)
+
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -68,6 +72,21 @@ function Wait-Port {
     return $false
 }
 
+function Wait-PortClosed {
+    param(
+        [int]$Port,
+        [int]$TimeoutSeconds
+    )
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        if (-not (Test-PortListening -Port $Port)) {
+            return $true
+        }
+        Start-Sleep -Seconds 1
+    }
+    return $false
+}
+
 function Get-WorkerProcess {
     Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -eq "python.exe" -and $_.CommandLine -match "src\.backend\.worker" } |
@@ -84,6 +103,20 @@ function Wait-Worker {
         Start-Sleep -Seconds 1
     }
     return $false
+}
+
+function Get-ListenerProcess {
+    param([int]$Port)
+    try {
+        $op = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($null -eq $op) {
+            return $null
+        }
+        return Get-CimInstance Win32_Process -Filter ("ProcessId={0}" -f $op.OwningProcess) -ErrorAction SilentlyContinue
+    }
+    catch {
+        return $null
+    }
 }
 
 Write-Log "=== control plane boot start ==="
@@ -148,10 +181,28 @@ if (-not (Wait-Port -Port 9000 -TimeoutSeconds 45)) {
     exit 1
 }
 
-if (Test-PortListening -Port 8000) {
+if ((Test-PortListening -Port 8000) -and (-not $ForceFastapiRestart)) {
     Write-Log "FastAPI already listening on 8000"
 }
 else {
+    if ($ForceFastapiRestart -and (Test-PortListening -Port 8000)) {
+        $listener = Get-ListenerProcess -Port 8000
+        if ($null -eq $listener) {
+            Write-Log "ERROR: ForceFastapiRestart requested but could not resolve port 8000 owner"
+            exit 1
+        }
+        if ($listener.CommandLine -notmatch 'uvicorn\s+src\.api\.main:app' -or $listener.CommandLine -notmatch '--port\s+8000') {
+            Write-Log ("ERROR: Refusing to kill unexpected port 8000 owner: {0}" -f $listener.CommandLine)
+            exit 1
+        }
+        Write-Log ("Force restarting FastAPI: stopping PID={0}" -f $listener.ProcessId)
+        Stop-Process -Id $listener.ProcessId -Force -ErrorAction SilentlyContinue
+        if (-not (Wait-PortClosed -Port 8000 -TimeoutSeconds 20)) {
+            Write-Log "ERROR: FastAPI did not release 8000 in time"
+            exit 1
+        }
+    }
+
     $fastapiOut = Join-Path $LogDir "fastapi.log"
     $fastapiErr = Join-Path $LogDir "fastapi.err.log"
     $cmdLine = "`"$CondaBat`" run -n cres python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000"

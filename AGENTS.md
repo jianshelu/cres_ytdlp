@@ -38,6 +38,11 @@ Rules:
 - Do not assume direct SSH from Norfolk to GPU.
 - All GPU management operations originate from huihuang.
 
+## GITHUB SSH ACCESS MODEL
+- GitHub access from huihuang uses SSH key: `id_huihuang2github`.
+- Key path on huihuang: `~/.ssh/id_huihuang2github`.
+- Preferred remote URL: `git@github.com:jianshelu/cres_ytdlp.git`.
+
 
 ## Where the truth lives vividly
 - Skills: `.agents/skills/triage/SKILL.md` (authoritative)
@@ -100,4 +105,4 @@ When proposing changes:
 - Provide validation steps
 - Provide rollback steps
 - Update `docs/PLAN.md` when changes affect architecture/ops
-- When generating dates (e.g., in `docs/Task.md`), use the timezone of host `huihuang`, unless the date is explicitly collected from an external instance.
+- When generating dates (e.g., in `docs/Task.md`), use the timezone of `(America/Toronto)`, unless the date is explicitly collected from an external instance.

@@ -1,16 +1,30 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 LLM_DIR="/workspace/packages/models/llm"
 WHISPER_DIR="/workspace/packages/models/whisper"
 
 mkdir -p "$LLM_DIR" "$WHISPER_DIR"
 
-echo "Downloading Gemma 3 1b IT Q4_K_M to $LLM_DIR/tmp_model.gguf..."
-if [ ! -f "$LLM_DIR/google_gemma-3-1b-it-Q4_K_M.gguf" ]; then
-    ls -la "$LLM_DIR"
-    curl -L "https://huggingface.co/bartowski/google_gemma-3-1b-it-GGUF/resolve/main/google_gemma-3-1b-it-Q4_K_M.gguf" -o "$LLM_DIR/tmp_model.gguf"
-    mv "$LLM_DIR/tmp_model.gguf" "$LLM_DIR/google_gemma-3-1b-it-Q4_K_M.gguf"
+MODEL_FILE="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+MODEL_URL="https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/${MODEL_FILE}"
+MODEL_PATH="${LLM_DIR}/${MODEL_FILE}"
+TMP_PATH="${MODEL_PATH}.part"
+
+echo "Downloading ${MODEL_FILE} to ${MODEL_PATH} (resume supported)..."
+if [ ! -f "$MODEL_PATH" ]; then
+  ls -la "$LLM_DIR" || true
+  curl -fL --retry 5 --retry-delay 2 --connect-timeout 15 -C - -o "$TMP_PATH" "$MODEL_URL"
+  size="$(stat -c%s "$TMP_PATH" 2>/dev/null || echo 0)"
+  if [ "${size}" -le 0 ]; then
+    rm -f "$TMP_PATH" || true
+    echo "ERROR: download produced empty file: ${TMP_PATH}" 1>&2
+    exit 1
+  fi
+  mv -f "$TMP_PATH" "$MODEL_PATH"
+  echo "Downloaded: ${MODEL_PATH} (${size} bytes)"
+else
+  echo "OK: already present: ${MODEL_PATH}"
 fi
 
 echo "Models download complete."

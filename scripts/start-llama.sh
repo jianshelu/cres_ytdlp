@@ -4,6 +4,7 @@ set -euo pipefail
 # Defaults: model sync happens after deploy
 LLM_MODEL_PATH="${LLM_MODEL_PATH:-/workspace/packages/models/llm}"
 LLM_MODEL_FILE="${LLM_MODEL_FILE:-Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
+LLM_MODEL_URL="${LLM_MODEL_URL:-https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"
 
 LLAMA_HOST="${LLAMA_HOST:-0.0.0.0}"
 LLAMA_PORT="${LLAMA_PORT:-8081}"
@@ -14,8 +15,9 @@ LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-4096}"
 LLAMA_PARALLEL="${LLAMA_PARALLEL:-1}"
 LLAMA_NGL="${LLAMA_NGL:-999}"
 
-# Wait for model sync (supervisor retry-friendly)
-LLAMA_WAIT_SECONDS="${LLAMA_WAIT_SECONDS:-1800}"   # 30 min
+# Wait for model sync (supervisor retry-friendly).
+# Default is intentionally long to accommodate post-boot model sync on Vast.
+LLAMA_WAIT_SECONDS="${LLAMA_WAIT_SECONDS:-21600}"   # 6 hours
 LLAMA_POLL_SECONDS="${LLAMA_POLL_SECONDS:-5}"
 
 MODEL_FULL_PATH="${LLM_MODEL_PATH%/}/${LLM_MODEL_FILE}"
@@ -71,11 +73,45 @@ if ! : > "${write_probe}" 2>/dev/null; then
 fi
 rm -f "${write_probe}"
 
+download_model_once() {
+  if [ -z "${LLM_MODEL_URL:-}" ]; then
+    return 1
+  fi
+  if ! command -v curl >/dev/null 2>&1; then
+    log "curl not available; cannot download model"
+    return 1
+  fi
+
+  local tmp="${MODEL_FULL_PATH}.part"
+  log "Model missing; downloading to ${tmp} from ${LLM_MODEL_URL}"
+  mkdir -p "${LLM_MODEL_PATH}"
+
+  # Resume if partial exists; only rename into place once fully downloaded.
+  if [ -f "${tmp}" ]; then
+    curl -fL --retry 5 --retry-delay 2 --connect-timeout 15 -C - -o "${tmp}" "${LLM_MODEL_URL}"
+  else
+    curl -fL --retry 5 --retry-delay 2 --connect-timeout 15 -o "${tmp}" "${LLM_MODEL_URL}"
+  fi
+
+  local size
+  size="$(stat -c%s "${tmp}" 2>/dev/null || echo 0)"
+  if [ "${size}" -le 0 ]; then
+    rm -f "${tmp}" || true
+    log "Download produced empty file; retry later"
+    return 1
+  fi
+
+  mv -f "${tmp}" "${MODEL_FULL_PATH}"
+  log "Downloaded model: ${MODEL_FULL_PATH} (${size} bytes)"
+  return 0
+}
+
 log "Waiting for model: ${MODEL_FULL_PATH}"
 deadline=$(( $(date +%s) + LLAMA_WAIT_SECONDS ))
 
 while [ ! -f "${MODEL_FULL_PATH}" ]; do
   validate_model_path_state
+  download_model_once || true
   if [ "$(date +%s)" -ge "$deadline" ]; then
     print_model_diagnostics
     log "Timeout after ${LLAMA_WAIT_SECONDS}s. Exiting."

@@ -1,5 +1,21 @@
 # Tasks
 
+## 2026-02-15 (Sunday)
+### Docs & Ops (Runbook / Validation / Architecture)
+- [ ] Fix GitHub Actions billing/spending-limit block ("recent account payments have failed or your spending limit needs to be increased") so GHCR workflows can run again. (executed: pending)
+- [ ] Re-run `Build and Push to GHCR` for `ghcr.io/jianshelu/cres_ytdlp:canary` after billing is unblocked. (executed: pending)
+
+### llama
+- [ ] Verify Google Drive sync produced `/workspace/packages/models/llm/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` (regular file, readable, stable size), then restart `llama` and confirm `:8081` listener + `GET /health` OK. (executed: pending)
+- [ ] Verify `:canary` image contains required llama shared libs under `/app` (`libllama.so*`, `libggml*.so*`, `libmtmd*.so*`) so `ldd /app/llama-server` has no `not found`. (executed: pending)
+- [ ] Publish updated image that extends `LLAMA_WAIT_SECONDS` default to avoid 30-minute llama timeout flapping while post-boot model sync runs. (executed: pending)
+- [x] Implement automatic LLM model download in `scripts/start-llama.sh` using `LLM_MODEL_URL` + `.part` + atomic rename into `/workspace/packages/models/llm/`. (executed: 2026-02-15 20:32:00 -05:00)
+
+### Whisper
+- [x] Implement transcript min-length filter (`TRANSCRIPT_MIN_CHARS`) in `src/backend/activities.py` to skip degenerate transcripts from batch combined artifacts. (executed: 2026-02-14 20:44:47 -05:00)
+- [ ] Re-run `batch wifi densepose` and confirm `queries/wifi-densepose/combined/combined-output.json` excludes the 1-word transcript and no `key_sentences` item equals `\"You\"`. (executed: pending)
+- [ ] Tune `TRANSCRIPT_MIN_CHARS` and propagate it to the worker env once validated. (executed: pending)
+
 ## 2026-02-14 (Saturday)
 ### Docs & Ops (Runbook / Validation / Architecture)
 - [x] Fix `Dockerfile.base` first-stage `apt-get install` to enforce non-interactive `dpkg` behavior (`DEBIAN_FRONTEND=noninteractive` with `--force-confdef/--force-confold`). (executed: 2026-02-14 16:06:22 -05:00)

@@ -1046,6 +1046,8 @@ async def build_batch_combined_output(params: tuple) -> dict:
 
     transcript_items = []
     transcripts = []
+    skipped_transcripts = []
+    min_transcript_chars = max(0, int(os.getenv("TRANSCRIPT_MIN_CHARS", "80")))
 
     # Gather transcript texts from MinIO based on child workflow outputs.
     for item in child_results:
@@ -1068,6 +1070,14 @@ async def build_batch_combined_output(params: tuple) -> dict:
             text = (data.get("text") or "").strip()
             if not text:
                 continue
+            if min_transcript_chars and len(text) < min_transcript_chars:
+                skipped_transcripts.append({
+                    "video_object": object_name,
+                    "transcript_key": transcript_key,
+                    "text_len": len(text),
+                    "reason": f"too-short (<{min_transcript_chars} chars)",
+                })
+                continue
             transcripts.append(text)
             transcript_items.append({
                 "video_object": object_name,
@@ -1086,6 +1096,14 @@ async def build_batch_combined_output(params: tuple) -> dict:
                 data = json.loads(payload.decode("utf-8"))
                 text = (data.get("text") or "").strip()
                 if not text:
+                    continue
+                if min_transcript_chars and len(text) < min_transcript_chars:
+                    skipped_transcripts.append({
+                        "video_object": object_name,
+                        "transcript_key": legacy_key,
+                        "text_len": len(text),
+                        "reason": f"too-short (<{min_transcript_chars} chars)",
+                    })
                     continue
                 transcripts.append(text)
                 transcript_items.append({
@@ -1108,6 +1126,8 @@ async def build_batch_combined_output(params: tuple) -> dict:
             "count": 0,
             "replaceCount": 0,
             "transcripts": [],
+            "skippedCount": len(skipped_transcripts),
+            "skipped_transcripts": skipped_transcripts,
             "combined_transcription": "",
             "combined_keywords": [],
             "combined_sentence": "",
@@ -1226,6 +1246,8 @@ async def build_batch_combined_output(params: tuple) -> dict:
         "count": len(transcripts),
         "replaceCount": replace_count,
         "transcripts": transcript_items,
+        "skippedCount": len(skipped_transcripts),
+        "skipped_transcripts": skipped_transcripts,
         "combined_transcription": combined_text,
         "combined_keywords": [kw.model_dump() for kw in top_keywords],
         "combined_sentence": combined_sentence,
@@ -1281,6 +1303,7 @@ async def build_batch_combined_output(params: tuple) -> dict:
                 "combined_keywords_key": combined_keywords_key,
                 "combined_sentence_key": combined_sentence_key,
                 "count": len(transcripts),
+                "skippedCount": len(skipped_transcripts),
             }
         }
     )
