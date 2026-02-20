@@ -490,17 +490,22 @@ jobs:
 
       - name: Run container smoke checks
         run: |
-          set -euxo pipefail
-          docker run -d --name app-smoke --network ledge-smoke \
-            -e CONTROL_PLANE_MODE=external \
-            -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
-            -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
-            -e MINIO_SECURE=false \
-            -e MINIO_ACCESS_KEY=cres \
-            -e MINIO_SECRET_KEY='Qh@113113' \
-            -e ENABLE_WEB=false \
-            ledge-smoke:${{ github.sha }}
-          docker exec app-smoke /bin/bash /workspace/scripts/container_smoke.sh
+            set -euxo pipefail
+            docker run -d --name app-smoke --network ledge-smoke \
+              -e CONTROL_PLANE_MODE=external \
+              -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
+              -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
+              -e MINIO_SECURE=false \
+              -e MINIO_ACCESS_KEY=cres \
+              -e MINIO_SECRET_KEY='${{ secrets.MINIO_SECRET_KEY }}' \
+              -e ENABLE_WEB=false \
+              ledge-smoke:${{ github.sha }}
+            docker exec \
+              -e API_PORT=8100 \
+              -e TEMPORAL_NAMESPACE=ledge-repo \
+              -e BASE_TASK_QUEUE=ledge \
+              -e SMOKE_REQUIRE_GPU_QUEUE=auto \
+              app-smoke /bin/bash /workspace/scripts/container_smoke.sh
 
       - name: Cleanup smoke containers
         if: always()
