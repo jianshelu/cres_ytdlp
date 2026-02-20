@@ -28,13 +28,16 @@ print("imports ok")
 PY
 
 echo "[smoke] wait FastAPI..."
+API_PORT="${API_PORT:-8100}"
+API_HEALTH_URL="${API_HEALTH_URL:-http://127.0.0.1:${API_PORT}/health}"
+
 for i in $(seq 1 60); do
-  if curl -fsS http://127.0.0.1:8000/docs >/dev/null 2>&1; then
+  if curl -fsS "${API_HEALTH_URL}" >/dev/null; then
     break
   fi
   sleep 1
 done
-curl -fsS http://127.0.0.1:8000/docs >/dev/null
+curl -fsS "http://127.0.0.1:${API_PORT}/docs" >/dev/null
 echo "fastapi docs ok"
 
 echo "[smoke] start workers on-demand..."
@@ -78,13 +81,14 @@ from temporalio.api.workflowservice.v1 import DescribeTaskQueueRequest
 from temporalio.api.taskqueue.v1 import TaskQueue
 
 addr = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
-base = (os.getenv("BASE_TASK_QUEUE", "video-processing") or "video-processing").strip()
+base = (os.getenv("BASE_TASK_QUEUE", "ledge").strip() or "ledge")
 expect_gpu = (os.getenv("SMOKE_EXPECT_GPU_QUEUE", "0").strip() == "1")
 queues = [f"{base}@cpu"]
 if expect_gpu:
     queues.append(f"{base}@gpu")
 print(f"queue check targets={queues} expect_gpu={expect_gpu}")
 
+namespace = os.getenv("TEMPORAL_NAMESPACE", "ledge-repo")
 async def has_poller(client, q):
     # GPU queue can be activity-only; validate either poller type is present.
     for queue_type in (
@@ -92,7 +96,7 @@ async def has_poller(client, q):
         TaskQueueType.TASK_QUEUE_TYPE_ACTIVITY,
     ):
         req = DescribeTaskQueueRequest(
-            namespace="default",
+            namespace=namespace,
             task_queue=TaskQueue(name=q),
             task_queue_type=queue_type,
         )
