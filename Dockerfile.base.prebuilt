@@ -8,6 +8,11 @@ ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 
 FROM ${LLAMA_ARTIFACT_IMAGE} AS llama_artifacts
 FROM ${VAST_RUNTIME_IMAGE}
+ARG TORCH_VERSION=2.6.0+cu124
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
+
+ENV TORCH_VERSION=${TORCH_VERSION}
+ENV TORCH_INDEX_URL=${TORCH_INDEX_URL}
 
 ARG VAST_RUNTIME_IMAGE=vastai/base-image:cuda-12.4.1-auto
 
