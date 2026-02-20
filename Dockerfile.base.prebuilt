@@ -20,17 +20,25 @@ RUN test -x /app/llama-server \
 
 # Install system dependencies (+ supervisor)
 # Vast.ai base can already carry a supervisord conffile; force non-interactive dpkg behavior.
-RUN test -n "${TORCH_VERSION}" \
- && test -n "${TORCH_INDEX_URL}" \
- && tr -d '\r' < /tmp/requirements.instance.txt > /tmp/requirements.instance.clean.txt \
- && if grep -nE '^[[:space:]]*torch==[[:space:]]*$|^[[:space:]]*pip/[[:space:]]*$' /tmp/requirements.instance.clean.txt; then exit 1; fi \
- && pip3 install --upgrade pip \
- && pip3 install --no-cache-dir -r /tmp/requirements.instance.clean.txt \
- && if ! python3 -c "import torch" >/dev/null 2>&1; then \
-      pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
-    fi \
- && python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)" \
- && rm -f /tmp/requirements.instance.txt /tmp/requirements.instance.clean.txt
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-venv ffmpeg curl wget git ca-certificates gnupg supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.instance.txt /tmp/requirements.instance.txt
+
+RUN set -eux; \
+  test -n "${TORCH_VERSION}"; \
+  test -n "${TORCH_INDEX_URL}"; \
+  test -s /tmp/requirements.instance.txt; \
+  tr -d '\r' < /tmp/requirements.instance.txt > /tmp/requirements.instance.clean.txt; \
+  if grep -nE '^[[:space:]]*torch==[[:space:]]*$|^[[:space:]]*pip/[[:space:]]*$' /tmp/requirements.instance.clean.txt; then exit 1; fi; \
+  pip3 install --upgrade pip; \
+  pip3 install --no-cache-dir -r /tmp/requirements.instance.clean.txt; \
+  if ! python3 -c "import torch" >/dev/null 2>&1; then \
+    pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
+  fi; \
+  python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)"; \
+  rm -f /tmp/requirements.instance.txt /tmp/requirements.instance.clean.txt
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confold" \
