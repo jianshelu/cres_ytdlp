@@ -1,10 +1,11 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
 # Build llama.cpp from source (CUDA) so runtime keeps /app/llama-server.
 ARG LLAMA_BUILDER_IMAGE=nvidia/cuda:12.4.1-devel-ubuntu22.04
-FROM ${LLAMA_BUILDER_IMAGE} AS llama_cpp_builder
 ARG LLAMA_CPP_REF=
 ARG LLAMA_CUDA_ARCH=86
 ARG LLAMA_BUILD_JOBS=2
+
+FROM ${LLAMA_BUILDER_IMAGE} AS llama_cpp_builder
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--force-confdef" \
