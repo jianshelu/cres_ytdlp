@@ -488,24 +488,34 @@ jobs:
           echo "MINIO_SMOKE_ENDPOINT=${minio_ip}:9000" >> "$GITHUB_ENV"
           echo "Resolved smoke endpoints: temporal=${temporal_ip}:7233, minio=${minio_ip}:9000"
 
-      - name: Run container smoke checks
-        run: |
-            set -euxo pipefail
-            docker run -d --name app-smoke --network ledge-smoke \
-              -e CONTROL_PLANE_MODE=external \
-              -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
-              -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
-              -e MINIO_SECURE=false \
-              -e MINIO_ACCESS_KEY=cres \
-              -e MINIO_SECRET_KEY='Qh@113113' \
-              -e ENABLE_WEB=false \
-              ledge-smoke:${{ github.sha }}
-            docker exec \
-              -e API_PORT=8100 \
-              -e TEMPORAL_NAMESPACE=ledge-repo \
-              -e BASE_TASK_QUEUE=ledge \
-              -e SMOKE_REQUIRE_GPU_QUEUE=auto \
-              app-smoke /bin/bash /workspace/scripts/container_smoke.sh
+          - name: Run container smoke checks
+            run: |
+              set -euxo pipefail
+              docker run -d --name app-smoke --network ledge-smoke \
+                -e CONTROL_PLANE_MODE=external \
+                -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
+                -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
+                -e MINIO_SECURE=false \
+                -e MINIO_ACCESS_KEY=cres \
+                -e MINIO_SECRET_KEY='Abc13113' \
+                -e ENABLE_WEB=false \
+                ledge-smoke:${{ github.sha }}
+              # Give process time to boot, then print diagnostics
+              sleep 8
+              docker ps -a
+              docker logs app-smoke || true
+              docker exec app-smoke sh -lc 'command -v supervisord || true'
+              docker exec app-smoke sh -lc 'command -v supervisorctl || true'
+              docker exec app-smoke sh -lc 'supervisorctl -c /etc/supervisor/supervisord.conf status || true'
+              docker exec app-smoke sh -lc 'ss -lntp || netstat -lntp || true'
+              docker exec app-smoke sh -lc 'ls -la /workspace/logs || true'
+              docker exec app-smoke sh -lc 'for f in /workspace/logs/*; do echo "=== $f ==="; tail -n 80 "$f"; done || true'
+              docker exec \
+                -e API_PORT=8100 \
+                -e TEMPORAL_NAMESPACE=ledge-repo \
+                -e BASE_TASK_QUEUE=ledge \
+                -e SMOKE_REQUIRE_GPU_QUEUE=auto \
+                app-smoke /bin/bash /workspace/scripts/container_smoke.sh
 
       - name: Cleanup smoke containers
         if: always()
