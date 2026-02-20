@@ -30,4 +30,4 @@ COPY --from=frontend-builder /web/package*.json /workspace/web/
 COPY --from=frontend-builder /web/node_modules /workspace/web/node_modules
 
 # Start all services via supervisord (single-container, self-healing)
-ENTRYPOINT ["/usr/bin/supervisord","-n","-c","/etc/supervisor/supervisord.conf"]
+ENTRYPOINT ["supervisord","-n","-c","/etc/supervisor/supervisord.conf"]
