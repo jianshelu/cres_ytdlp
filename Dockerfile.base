@@ -1,6 +1,7 @@
 # Dockerfile.base (supervisord-enabled, single-container multi-service)
 # Build llama.cpp from source (CUDA) so runtime keeps /app/llama-server.
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS llama_cpp_builder
+ARG LLAMA_BUILDER_IMAGE=nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM ${LLAMA_BUILDER_IMAGE} AS llama_cpp_builder
 ARG LLAMA_CPP_REF=
 ARG LLAMA_CUDA_ARCH=86
 ARG LLAMA_BUILD_JOBS=2
@@ -55,7 +56,8 @@ RUN set -eux; \
     strip --strip-unneeded /opt/llama-artifacts/llama-server /opt/llama-artifacts/libllama.so* /opt/llama-artifacts/libggml*.so* /opt/llama-artifacts/libmtmd*.so* || true
 
 # Use explicit Vast.ai CUDA base tag (auto placeholder format is invalid in Docker FROM).
-FROM vastai/base-image:cuda-12.4.1-auto
+ARG VAST_RUNTIME_IMAGE=vastai/base-image:cuda-12.4.1-auto
+FROM ${VAST_RUNTIME_IMAGE}
 ARG TORCH_VERSION=2.6.0+cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 

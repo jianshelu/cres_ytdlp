@@ -1,10 +1,11 @@
 # Dockerfile.base.prebuilt
 # Runtime base image route: do not compile llama.cpp in this build.
 # Reuse llama artifacts from a prebuilt base image and keep vast.ai as runtime base.
-ARG LLAMA_ARTIFACT_IMAGE=reywang/cres_ytdlp_norfolk:base-llama-src-latest
+ARG LLAMA_ARTIFACT_IMAGE=ghcr.io/jianshelu/ledge-repo-base:llama-src-latest
 FROM ${LLAMA_ARTIFACT_IMAGE} AS llama_artifacts
 
-FROM vastai/base-image:cuda-12.4.1-auto
+ARG VAST_RUNTIME_IMAGE=vastai/base-image:cuda-12.4.1-auto
+FROM ${VAST_RUNTIME_IMAGE}
 ARG TORCH_VERSION=2.6.0+cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 

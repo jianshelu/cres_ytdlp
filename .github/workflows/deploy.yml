@@ -438,27 +438,27 @@ jobs:
             BASE_IMAGE=${{ env.APP_BASE_IMAGE }}
           push: false
           load: true
-          tags: cres-smoke:${{ github.sha }}
+          tags: ledge-smoke:${{ github.sha }}
 
       - name: Validate app image layout (smoke)
         run: |
           set -euxo pipefail
-          docker run --rm --entrypoint test cres-smoke:${{ github.sha }} -f /workspace/src/api/main.py
-          docker run --rm --entrypoint test cres-smoke:${{ github.sha }} -f /workspace/src/backend/worker.py
+          docker run --rm --entrypoint test ledge-smoke:${{ github.sha }} -f /workspace/src/api/main.py
+          docker run --rm --entrypoint test ledge-smoke:${{ github.sha }} -f /workspace/src/backend/worker.py
 
       - name: Start smoke dependencies
         run: |
           set -euxo pipefail
-          docker network create cres-smoke || true
-          docker run -d --name temporal-smoke --network cres-smoke temporalio/temporal:1.5.1 server start-dev --ip 0.0.0.0
-          docker run -d --name minio-smoke --network cres-smoke \
+          docker network create ledge-smoke || true
+          docker run -d --name temporal-smoke --network ledge-smoke temporalio/temporal:1.5.1 server start-dev --ip 0.0.0.0
+          docker run -d --name minio-smoke --network ledge-smoke \
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
 
           temporal_ip=""
           for i in $(seq 1 60); do
-            temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "cres-smoke" "IPAddress"}}' temporal-smoke 2>/dev/null || true)"
+            temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' temporal-smoke 2>/dev/null || true)"
             if [ -n "$temporal_ip" ] && [ "$temporal_ip" != "<no value>" ]; then
               break
             fi
@@ -467,7 +467,7 @@ jobs:
 
           minio_ip=""
           for i in $(seq 1 60); do
-            minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "cres-smoke" "IPAddress"}}' minio-smoke 2>/dev/null || true)"
+            minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' minio-smoke 2>/dev/null || true)"
             if [ -n "$minio_ip" ] && [ "$minio_ip" != "<no value>" ]; then
               break
             fi
@@ -475,7 +475,7 @@ jobs:
           done
 
           if [ -z "$temporal_ip" ] || [ -z "$minio_ip" ] || [ "$temporal_ip" = "<no value>" ] || [ "$minio_ip" = "<no value>" ]; then
-            echo "Failed to resolve dependency container IPs on cres-smoke"
+            echo "Failed to resolve dependency container IPs on ledge-smoke"
             docker ps -a
             docker logs temporal-smoke || true
             docker logs minio-smoke || true
@@ -491,7 +491,7 @@ jobs:
       - name: Run container smoke checks
         run: |
           set -euxo pipefail
-          docker run -d --name app-smoke --network cres-smoke \
+          docker run -d --name app-smoke --network ledge-smoke \
             -e CONTROL_PLANE_MODE=external \
             -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
             -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
@@ -499,14 +499,14 @@ jobs:
             -e MINIO_ACCESS_KEY=cres \
             -e MINIO_SECRET_KEY='Qh@113113' \
             -e ENABLE_WEB=false \
-            cres-smoke:${{ github.sha }}
+            ledge-smoke:${{ github.sha }}
           docker exec app-smoke /bin/bash /workspace/scripts/container_smoke.sh
 
       - name: Cleanup smoke containers
         if: always()
         run: |
           docker rm -f app-smoke temporal-smoke minio-smoke || true
-          docker network rm cres-smoke || true
+          docker network rm ledge-smoke || true
 
       - name: Reclaim disk space before app publish build
         if: github.event_name != 'pull_request'
@@ -516,7 +516,7 @@ jobs:
           df -h
           docker system df || true
 
-          docker image rm cres-smoke:${{ github.sha }} || true
+          docker image rm ledge-smoke:${{ github.sha }} || true
           docker builder prune -af || true
           docker image prune -af || true
           docker volume prune -f || true
