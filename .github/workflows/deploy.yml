@@ -497,7 +497,7 @@ jobs:
               -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
               -e MINIO_SECURE=false \
               -e MINIO_ACCESS_KEY=cres \
-              -e MINIO_SECRET_KEY='${{ secrets.MINIO_SECRET_KEY }}' \
+              -e MINIO_SECRET_KEY= 'Qh@113113' \
               -e ENABLE_WEB=false \
               ledge-smoke:${{ github.sha }}
             docker exec \
