@@ -39,26 +39,27 @@ RUN set -eux; \
   fi; \
   python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)"; \
   rm -f /tmp/requirements.instance.txt /tmp/requirements.instance.clean.txt
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    -o Dpkg::Options::="--force-confdef" \
-    -o Dpkg::Options::="--force-confold" \
-    python3 \
-    python3-pip \
-    python3-venv \
-    ffmpeg \
-    curl \
-    wget \
-    git \
-    ca-certificates \
-    gnupg \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/*
+
+# Install system dependencies (avoid supervisor dpkg conflict on vast base)
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      -o Dpkg::Options::="--force-confdef" \
+      -o Dpkg::Options::="--force-confold" \
+      python3 python3-pip python3-venv ffmpeg curl wget git ca-certificates gnupg; \
+    if ! command -v supervisord >/dev/null 2>&1; then \
+      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        -o Dpkg::Options::="--force-confdef" \
+        -o Dpkg::Options::="--force-confold" \
+        supervisor; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 20 (NodeSource)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confdef" \-o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confold" \
     nodejs \
  && rm -rf /var/lib/apt/lists/*
