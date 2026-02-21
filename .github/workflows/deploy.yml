@@ -457,6 +457,22 @@ jobs:
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
+          docker exec temporal-smoke sh -lc '
+            set -e
+            if command -v tctl >/dev/null 2>&1; then
+              for i in $(seq 1 60); do
+                if tctl --address 127.0.0.1:7233 --ns default namespace describe >/dev/null 2>&1; then
+                  break
+                fi
+                sleep 1
+              done
+              tctl --address 127.0.0.1:7233 --ns ledge-repo namespace describe >/dev/null 2>&1 || \
+                tctl --address 127.0.0.1:7233 --ns ledge-repo namespace register --rd 1
+            else
+              echo "tctl not found in temporal-smoke image" >&2
+              exit 1
+            fi
+          '
           temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' temporal-smoke)"
           minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' minio-smoke)"
           echo "temporal_addr=${temporal_ip}:7233" >> "$GITHUB_OUTPUT"
