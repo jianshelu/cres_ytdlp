@@ -471,6 +471,7 @@ jobs:
             -e MINIO_SECURE=false \
             -e MINIO_ACCESS_KEY=cres \
             -e MINIO_SECRET_KEY='Qh@113113' \
+            -e LLAMA_DISABLE=1 \
             -e ENABLE_WEB=false \
             ledge-smoke:${{ github.sha }}
           docker exec \
