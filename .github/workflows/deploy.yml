@@ -478,7 +478,13 @@ jobs:
             -e TEMPORAL_NAMESPACE=ledge-repo \
             -e BASE_TASK_QUEUE=ledge \
             -e SMOKE_REQUIRE_GPU_QUEUE=auto \
-            app-smoke /bin/bash /workspace/scripts/container_smoke.sh
+            app-smoke /bin/bash /workspace/scripts/container_smoke.sh || {
+              docker logs app-smoke || true
+              docker exec app-smoke sh -lc 'supervisorctl -c /etc/supervisor/supervisord.conf status || true'
+              docker exec app-smoke sh -lc 'tail -n 200 /workspace/logs/fastapi-error.log /workspace/logs/fastapi.log 2>/dev/null || true'
+              docker exec app-smoke sh -lc 'ss -lntp || netstat -lntp || true'
+              exit 1
+            }
             
       - name: Cleanup smoke containers
         if: always()
