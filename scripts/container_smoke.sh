@@ -71,6 +71,10 @@ echo "[smoke] gpu queue expectation: ${SMOKE_EXPECT_GPU_QUEUE} (SMOKE_REQUIRE_GP
 
 if command -v supervisorctl >/dev/null 2>&1; then
   supervisorctl -c /etc/supervisor/supervisord.conf start worker-cpu || true
+  if [ "${WORKER_GPU_OPTIONAL:-0}" = "1" ] && [ "${SMOKE_EXPECT_GPU_QUEUE}" = "0" ]; then
+    echo "[smoke] stop optional worker-gpu (no GPU expected)"
+    supervisorctl -c /etc/supervisor/supervisord.conf stop worker-gpu || true
+  fi
   if [[ "${SMOKE_EXPECT_GPU_QUEUE}" == "1" ]]; then
     supervisorctl -c /etc/supervisor/supervisord.conf start worker-gpu || true
   else
