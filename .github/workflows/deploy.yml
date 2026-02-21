@@ -484,6 +484,7 @@ jobs:
               docker logs app-smoke || true
               docker exec app-smoke sh -lc 'supervisorctl -c /etc/supervisor/supervisord.conf status || true'
               docker exec app-smoke sh -lc 'tail -n 200 /workspace/logs/fastapi-error.log /workspace/logs/fastapi.log 2>/dev/null || true'
+              docker exec app-smoke sh -lc 'tail -n 200 /var/log/worker-cpu.err /var/log/worker-cpu.log /var/log/worker-gpu.err /var/log/worker-gpu.log /var/log/llama.err /var/log/llama.log 2>/dev/null || true'
               docker exec app-smoke sh -lc 'ss -lntp || netstat -lntp || true'
               exit 1
             }
