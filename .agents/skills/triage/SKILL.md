@@ -14,9 +14,9 @@ Detailed troubleshooting and extended checks live in `./REFERENCE.md`.
 | Node | Role | Address | Notes |
 |---|---|---|---|
 | Norfolk | Dev host | `192.168.2.131` | VS Code + Codex client only; no services hosted |
-| huihuang | Control plane + web | `192.168.2.130` | Project root: `C:\Users\rama\cres_ytdlp_norfolk` |
+| huihuang | Control plane + web | `192.168.2.140` | Runs Temporal + MinIO + control API + web |
 | Vast.ai GPU | Floating compute | Public worker node | Runs compute worker + llama.cpp + Whisper + Compute API |
-| github | Remote Codebase | Private repo | Project version control and Docker Image Building initializtion |
+| github | Remote Codebase | Private repo | Image builds in `cres_ytdlp` GHCR |
 
 ## 2) SSH Access Model (Authoritative)
 | From | To | Method |
@@ -33,19 +33,19 @@ Always initiate this hop from `huihuang` (not directly from Norfolk).
 
 | Service | Private endpoint | Public endpoint | Rule |
 |---|---|---|---|
-| Temporal | `192.168.2.130:7233` | `64.229.113.233:7233` | GPU must use public endpoint |
-| MinIO | `192.168.2.130:9000` | `64.229.113.233:9000` | GPU must use public endpoint |
-| Control FastAPI | `192.168.2.130:8000` | `64.229.113.233:8000` | GPU must use public endpoint |
-| Web UI | `192.168.2.130:3000` | none | LAN only; never expose publicly |
+| Temporal | `192.168.2.140:7233` | `64.229.113.233:7233` | GPU must use public endpoint |
+| MinIO | `192.168.2.140:9000` | `64.229.113.233:9000` | GPU must use public endpoint |
+| Control FastAPI | `192.168.2.140:8100` | `64.229.113.233:8100` | GPU must use public endpoint |
+| Web UI | `192.168.2.140:3100` | none | LAN only; never expose publicly |
 
-Router (`192.168.2.1`) forwards only `7233`, `9000`, and `8000` to `192.168.2.130`.
+Router (`192.168.2.1`) forwards only `7233`, `9000`, and `8100` to `192.168.2.140`.
 
 ## 4) FastAPI Separation (Hard Constraint)
 
 | Host | API role | Port | Exposure |
 |---|---|---|---|
-| huihuang | Control API | `8000` | Public via NAT |
-| GPU node | Compute API | `8000` | Not public |
+| huihuang | Control API | `8100` | Public via NAT |
+| GPU node | Compute API | `8100` | Not public |
 
 Control API handles trigger/management/dispatch.
 Compute API handles inference and GPU compute.
@@ -79,8 +79,10 @@ Never route GPU tasks to `@cpu`.
 4. Web UI stays LAN only.
 5. Dual FastAPI separation is mandatory.
 6. Queue suffix routing is mandatory.
-7. Never commit secrets/tokens.
-8. Use minimal diffs; avoid broad rewrites.
+7. Build and push GPU image in `cres_ytdlp` GHCR, with runtime profile switch `PROJECT_PROFILE=cres|ledge`.
+8. Never commit secrets/tokens.
+9. Use minimal diffs; avoid broad rewrites.
+10. During SSH tunnel file sync to GPU instances, never upload sensitive files (keys, tokens, auth configs, `.env*`, `*credentials*`, `*secret*`, `hf.json`, SSH private keys); only sync an explicit allowlist.
 
 ## 8) Required Output Format When Invoked
 
@@ -103,4 +105,3 @@ Never route GPU tasks to `@cpu`.
 
 For expanded validation commands, network flow examples, and troubleshooting playbook:
 - `./REFERENCE.md`
-

@@ -1,5 +1,5 @@
-# Dockerfile (supervisord PID1; starts all services)
-ARG BASE_IMAGE=ghcr.io/jianshelu/ledge-repo-base:llama-prebuilt-latest
+# Dockerfile (application image built from prepared runtime base)
+ARG BASE_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:llama-prebuilt-latest
 FROM ${BASE_IMAGE} AS base
 
 WORKDIR /workspace
@@ -18,16 +18,16 @@ RUN npm run build
 FROM base
 WORKDIR /workspace
 
-# Project code and root scripts
+# Project code and startup scripts
 COPY . ./
-RUN chmod +x /workspace/onstart.sh /workspace/start_remote.sh /workspace/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh /workspace/scripts/start-llama.sh /workspace/scripts/with_compute_env.sh /workspace/scripts/container_smoke.sh
 
 # Frontend runtime assets
-RUN mkdir -p /workspace/web
+RUN mkdir -p /workspace/web /workspace/logs /workspace/scripts
 COPY --from=frontend-builder /web/.next /workspace/web/.next
 COPY --from=frontend-builder /web/public /workspace/web/public
 COPY --from=frontend-builder /web/package*.json /workspace/web/
 COPY --from=frontend-builder /web/node_modules /workspace/web/node_modules
 
-# Start all services via supervisord (single-container, self-healing)
-ENTRYPOINT ["supervisord","-n","-c","/etc/supervisor/supervisord.conf"]
+# Start services through standard profile-aware entrypoint
+ENTRYPOINT ["/workspace/entrypoint.sh"]

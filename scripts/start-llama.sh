@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ "${LLAMA_DISABLE:-0}" = "1" ]; then
+  echo "[llama] LLAMA_DISABLE=1, skipping llama start"
+  exit 0
+fi
+
 # Defaults: model sync happens after deploy
 LLM_MODEL_PATH="${LLM_MODEL_PATH:-/workspace/packages/models/llm}"
 LLM_MODEL_FILE="${LLM_MODEL_FILE:-Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf}"

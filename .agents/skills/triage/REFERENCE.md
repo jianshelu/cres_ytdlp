@@ -13,13 +13,13 @@ If there is a conflict, `SKILL.md` remains authoritative.
 
 | Step | Description |
 |---|---|
-| 1 | Norfolk connects to huihuang via SSH (`id_id_ed25519_huihuang`) |
+| 1 | Norfolk connects to huihuang via SSH (`id_ed25519_huihuang`) |
 | 2 | huihuang connects to Vast.ai GPU via SSH (`id_huihuang92vastai`) |
 | 3 | huihuang accesses github via SSH (`id_huihuang2github`) |
 
 ### Remote Repo
 
-`github (Private) : 
+`github (Private) :
 - https: 'https://github.com/jianshelu/cres_ytdlp.git'
 - SSH: 'git@github.com:jianshelu/cres_ytdlp.git'
 - huihuang key: `~/.ssh/id_huihuang2github`
@@ -84,11 +84,11 @@ Fallback behavior:
 - Confirm `@gpu` worker is registered in Temporal.
 - `nc -zv 64.229.113.233 7233`
 - `curl http://64.229.113.233:9000`
-- `curl http://localhost:8000`
+- `curl http://localhost:8100`
 
 ### On Norfolk
 
-- `curl http://192.168.2.130:3000`
+- `curl http://192.168.2.140:3100`
 
 ## Troubleshooting Patterns
 
@@ -107,4 +107,3 @@ A change is stable when:
 - No OOM kills or restart loops occur.
 - llama server stays responsive.
 - Worker connection to Temporal remains healthy.
-

@@ -99,7 +99,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
     XDG_CACHE_HOME=/workspace/.cache
 
-RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
+RUN mkdir -p /workspace/packages/models/llm /workspace/.cache /workspace/logs /workspace/scripts
 
 # Install instance runtime Python dependencies in base image
 COPY requirements.instance.txt /tmp/requirements.instance.txt
@@ -116,7 +116,8 @@ RUN pip3 install --upgrade pip \
  && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete 2>/dev/null || true)
 
 # Supervisor config + llama wrapper
-COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf
+COPY scripts/supervisord.conf /etc/supervisor/supervisord.cres.conf
+COPY scripts/supervisord.ledge.conf /etc/supervisor/supervisord.ledge.conf
 COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh
 COPY scripts/with_compute_env.sh /workspace/scripts/with_compute_env.sh
 RUN chmod +x /usr/local/bin/start-llama.sh /workspace/scripts/with_compute_env.sh

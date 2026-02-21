@@ -1,84 +1,59 @@
-#!/bin/bash
-set -e
-WORKSPACE_ROOT="${WORKSPACE_ROOT:-/workspace}"
-if [ ! -w "$WORKSPACE_ROOT" ]; then
-    WORKSPACE_ROOT="$(pwd)"
-fi
-PID_DIR="$WORKSPACE_ROOT/run"
-mkdir -p "$PID_DIR"
-CONTROL_PLANE_MODE="${CONTROL_PLANE_MODE:-external}"
-TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-64.229.113.233:7233}"
-MINIO_ENDPOINT="${MINIO_ENDPOINT:-64.229.113.233:9000}"
-MINIO_SECURE="${MINIO_SECURE:-false}"
-MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY:-minioadmin}"
-MINIO_SECRET_KEY="${MINIO_SECRET_KEY:-minioadmin}"
-REINDEX_URL="${REINDEX_URL:-http://64.229.113.233:8000/admin/reindex}"
-BASE_TASK_QUEUE="${BASE_TASK_QUEUE:-video-processing}"
-export WORKSPACE_ROOT
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "Starting services..."
+cd /workspace
 
-# Install Deno if not present (required for yt-dlp to solve YouTube n-challenge)
-if [ ! -f /root/.deno/bin/deno ]; then
-    echo "Installing Deno for yt-dlp..."
-    apt-get install -y unzip > /dev/null 2>&1 || true
-    curl -fsSL https://deno.land/install.sh | sh > /dev/null 2>&1
-fi
-export PATH="/root/.deno/bin:$PATH"
+mkdir -p /workspace/logs /workspace/run /workspace/scripts
 
-# Install yt-dlp-ejs if not present
-python3 -c "import yt_dlp_ejs" 2>/dev/null || pip3 install yt-dlp-ejs > /dev/null 2>&1
+PROJECT_PROFILE="${PROJECT_PROFILE:-cres}"
+case "${PROJECT_PROFILE}" in
+  cres)
+    default_project_root="/workspace"
+    default_supervisord_config="/etc/supervisor/supervisord.cres.conf"
+    default_api_role="compute"
+    ;;
+  ledge)
+    default_project_root="/workspace/ledge-repo"
+    default_supervisord_config="/etc/supervisor/supervisord.ledge.conf"
+    default_api_role="compute"
+    ;;
+  *)
+    echo "[entrypoint] unsupported PROJECT_PROFILE=${PROJECT_PROFILE} (expected: cres|ledge)" >&2
+    exit 1
+    ;;
+esac
 
-if [ "$CONTROL_PLANE_MODE" != "external" ]; then
-    echo "CONTROL_PLANE_MODE=$CONTROL_PLANE_MODE is not supported in this image. Forcing external mode."
-    CONTROL_PLANE_MODE="external"
-fi
-echo "Using external control plane endpoints."
-echo "TEMPORAL_ADDRESS=$TEMPORAL_ADDRESS"
-echo "MINIO_ENDPOINT=$MINIO_ENDPOINT"
+export PROJECT_ROOT="${PROJECT_ROOT:-${default_project_root}}"
+SUPERVISORD_CONFIG="${SUPERVISORD_CONFIG:-${default_supervisord_config}}"
 
-export CONTROL_PLANE_MODE TEMPORAL_ADDRESS MINIO_ENDPOINT MINIO_SECURE MINIO_ACCESS_KEY MINIO_SECRET_KEY REINDEX_URL BASE_TASK_QUEUE
+# Safe defaults for compute-node style runtime.
+export PYTHONPATH="${PYTHONPATH:-${PROJECT_ROOT}}"
+export API_ROLE="${API_ROLE:-${default_api_role}}"
+export AUTO_REINDEX_ON_START="${AUTO_REINDEX_ON_START:-false}"
+export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-64.229.113.233:7233}"
+export MINIO_ENDPOINT="${MINIO_ENDPOINT:-64.229.113.233:9000}"
+export MINIO_SECURE="${MINIO_SECURE:-false}"
 
-# Start LLM Server if model is present
-# Start LLM Server if model is present
-if [ -n "$LLM_MODEL_PATH" ]; then
-    MODEL_FILE=""
-    if [ -f "$LLM_MODEL_PATH" ]; then
-        MODEL_FILE="$LLM_MODEL_PATH"
-    elif [ -d "$LLM_MODEL_PATH" ]; then
-        MODEL_FILE=$(find "$LLM_MODEL_PATH" -name "*.gguf" | head -n 1)
-    fi
+# CI/no-GPU hosts can opt out cleanly; runtime can override.
+export WORKER_GPU_OPTIONAL="${WORKER_GPU_OPTIONAL:-1}"
+export LLAMA_DISABLE="${LLAMA_DISABLE:-0}"
 
-    if [ -n "$MODEL_FILE" ] && [ -f "$MODEL_FILE" ]; then
-        echo "Starting LLM server..."
-        LLAMA_BIN=$(which llama-server || echo "/usr/bin/llama-server")
-        if [ ! -f "$LLAMA_BIN" ] && [ -f "/app/llama-server" ]; then
-            LLAMA_BIN="/app/llama-server"
-        fi
-        
-        export LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
-        $LLAMA_BIN --model "$MODEL_FILE" --host 0.0.0.0 --port 8081 -ngl 999 --threads 8 -b 512 > /var/log/llama.log 2>&1 &
-        echo $! > "$PID_DIR/cres_llama.pid"
-        echo "LLM server starting with model: $MODEL_FILE"
-    else
-        echo "No .gguf model found at $LLM_MODEL_PATH, skipping LLM server start."
-    fi
-else
-    echo "LLM_MODEL_PATH is empty, skipping LLM server start."
+SUPERVISORD_BIN="$(command -v supervisord || true)"
+if [ -z "${SUPERVISORD_BIN}" ]; then
+  echo "[entrypoint] supervisord not found in PATH" >&2
+  exit 1
 fi
 
-# Start FastAPI
-echo "Starting FastAPI..."
-python3 -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 > /var/log/fastapi.log 2>&1 &
-echo $! > "$PID_DIR/cres_fastapi.pid"
+if [ ! -f "${SUPERVISORD_CONFIG}" ]; then
+  echo "[entrypoint] missing ${SUPERVISORD_CONFIG}" >&2
+  exit 1
+fi
 
-# Start Temporal Worker (Background)
-echo "Starting Temporal Worker..."
-# Wait a bit for Temporal Server to be fully ready (though we waited for cluster health above)
-python3 -m src.backend.worker > /var/log/worker.log 2>&1 &
-echo $! > "$PID_DIR/cres_worker.pid"
+if [ ! -d "${PROJECT_ROOT}" ]; then
+  echo "[entrypoint] missing PROJECT_ROOT=${PROJECT_ROOT}" >&2
+  exit 1
+fi
 
-echo "Services started successfully."
+ln -sf "${SUPERVISORD_CONFIG}" /etc/supervisor/supervisord.conf
 
-# Execute the main command
-exec "$@"
+exec "${SUPERVISORD_BIN}" -n -c "${SUPERVISORD_CONFIG}"
