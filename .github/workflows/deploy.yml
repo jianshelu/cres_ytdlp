@@ -13,7 +13,6 @@ on:
       - "scripts/start-llama.sh"
       - "scripts/with_compute_env.sh"
       - "scripts/container_smoke.sh"
-      - "scripts/container_smoke.sh"
       - "onstart.sh"
       - "start_remote.sh"
       - "src/**"
@@ -481,7 +480,7 @@ jobs:
             -e TASK_QUEUE_CPU=ledge-cpu \
             -e TASK_QUEUE_GPU=ledge-gpu \
             -e SMOKE_REQUIRE_GPU_QUEUE=auto \
-            app-smoke /bin/bash -lc 'if [ -f /workspace/container_smoke.sh ]; then /bin/bash /workspace/container_smoke.sh; else /bin/bash /workspace/scripts/container_smoke.sh; fi' || {
+            app-smoke /bin/bash /workspace/scripts/container_smoke.sh || {
               docker logs app-smoke || true
               docker exec app-smoke sh -lc 'supervisorctl -c /etc/supervisor/supervisord.conf status || true'
               docker exec app-smoke sh -lc 'tail -n 200 /workspace/logs/fastapi-error.log /workspace/logs/fastapi.log 2>/dev/null || true'
