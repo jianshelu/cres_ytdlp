@@ -475,9 +475,15 @@ jobs:
           [ -n "$minio_ip" ] && [ "$minio_ip" != "<no value>" ]
           echo "TEMPORAL_SMOKE_ADDR=${temporal_ip}:7233" >> "$GITHUB_ENV"
           echo "MINIO_SMOKE_ENDPOINT=${minio_ip}:9000" >> "$GITHUB_ENV"
+      
       - name: Run container smoke checks
         run: |
           set -euxo pipefail
+          sleep 8
+          docker logs app-smoke || true
+          docker exec app-smoke sh -lc 'command -v supervisorctl && supervisorctl -c /etc/supervisor/supervisord.conf status || true'
+          docker exec app-smoke sh -lc 'ss -lntp || netstat -lntp || true'
+          docker exec app-smoke sh -lc 'cat /etc/supervisor/supervisord.conf || true'
           docker run -d --name app-smoke --network ledge-smoke \
             -e CONTROL_PLANE_MODE=external \
             -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
