@@ -149,6 +149,9 @@ async def has_poller(client, q):
     # GPU queue can be activity-only; validate either poller type is present.
     for queue_type in (
         TaskQueueType.TASK_QUEUE_TYPE_WORKFLOW,
+        TaskQueueType.TASK_QUEUE_TYPE_ACTIVITY,
+    ):
+        req = DescribeTaskQueueRequest(
             namespace=namespace,
             task_queue=TaskQueue(name=q),
             task_queue_type=queue_type,
