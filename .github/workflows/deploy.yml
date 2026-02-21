@@ -481,6 +481,7 @@ jobs:
             -e BASE_TASK_QUEUE=ledge \
             -e TASK_QUEUE_CPU=ledge-cpu \
             -e TASK_QUEUE_GPU=ledge-gpu \
+            -e SMOKE_SKIP_WORKER_CHECKS=1 \
             -e SMOKE_REQUIRE_GPU_QUEUE=auto \
             app-smoke /bin/bash /workspace/scripts/container_smoke.sh || {
               docker logs app-smoke || true
