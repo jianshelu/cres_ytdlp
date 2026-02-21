@@ -23,7 +23,7 @@ COPY . ./
 RUN chmod +x /workspace/onstart.sh /workspace/start_remote.sh /workspace/entrypoint.sh
 
 # Frontend runtime assets
-RUN mkdir -p /workspace/web
+RUN mkdir -p /workspace/web /workspace/logs /workspace/scripts
 COPY --from=frontend-builder /web/.next /workspace/web/.next
 COPY --from=frontend-builder /web/public /workspace/web/public
 COPY --from=frontend-builder /web/package*.json /workspace/web/
