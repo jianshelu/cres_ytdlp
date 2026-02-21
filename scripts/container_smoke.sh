@@ -85,10 +85,15 @@ python3 - <<'PY'
 import asyncio
 import os
 from temporalio.client import Client
+from temporalio.service import RPCError, RPCStatusCode
 from temporalio.api.enums.v1 import TaskQueueType
-from temporalio.api.workflowservice.v1 import DescribeTaskQueueRequest
+from temporalio.api.workflowservice.v1 import (
+    DescribeNamespaceRequest,
+    DescribeTaskQueueRequest,
+    RegisterNamespaceRequest,
+)
 from temporalio.api.taskqueue.v1 import TaskQueue
-
+from google.protobuf.duration_pb2 import Duration
 addr = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
 base = (os.getenv("BASE_TASK_QUEUE", "ledge").strip() or "ledge")
 expect_gpu = (os.getenv("SMOKE_EXPECT_GPU_QUEUE", "0").strip() == "1")
@@ -98,6 +103,27 @@ if expect_gpu:
 print(f"queue check targets={queues} expect_gpu={expect_gpu}")
 
 namespace = os.getenv("TEMPORAL_NAMESPACE", "ledge-repo")
+async def ensure_namespace(client, ns):
+    try:
+        await client.workflow_service.describe_namespace(
+            DescribeNamespaceRequest(namespace=ns)
+        )
+        return
+    except RPCError as e:
+        if e.status != RPCStatusCode.NOT_FOUND:
+            raise
+    try:
+        await client.workflow_service.register_namespace(
+            RegisterNamespaceRequest(
+                namespace=ns,
+                workflow_execution_retention_period=Duration(seconds=86400),
+            )
+        )
+        print(f"namespace created: {ns}")
+    except RPCError as e:
+        if e.status != RPCStatusCode.ALREADY_EXISTS:
+            raise
+
 async def has_poller(client, q):
     # GPU queue can be activity-only; validate either poller type is present.
     for queue_type in (
@@ -119,6 +145,7 @@ async def main():
     for _ in range(60):
         try:
             client = await Client.connect(addr)
+            await ensure_namespace(client, namespace)
         except Exception as e:
             last_err = e
             await asyncio.sleep(1)
