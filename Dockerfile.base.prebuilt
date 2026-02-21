@@ -5,7 +5,6 @@ ARG LLAMA_ARTIFACT_IMAGE=ghcr.io/jianshelu/cres_ytdlp-base:llama-src-latest
 ARG VAST_RUNTIME_IMAGE=vastai/base-image:cuda-12.4.1-auto
 ARG TORCH_VERSION=2.6.0+cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
-
 FROM ${LLAMA_ARTIFACT_IMAGE} AS llama_artifacts
 FROM ${VAST_RUNTIME_IMAGE}
 
@@ -13,7 +12,6 @@ ARG TORCH_VERSION=2.6.0+cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 
 WORKDIR /workspace
-
 # Reuse compiled llama-server artifacts from external image.
 COPY --from=llama_artifacts /app/ /app/
 RUN test -x /app/llama-server \
