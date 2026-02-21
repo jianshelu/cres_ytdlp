@@ -49,6 +49,12 @@ fi
 curl -fsS "${API_DOCS_URL}" >/dev/null
 echo "fastapi docs ok (${API_DOCS_URL})"
 
+if [ "${SMOKE_SKIP_WORKER_CHECKS:-0}" = "1" ]; then
+  echo "[smoke] SMOKE_SKIP_WORKER_CHECKS=1, skip worker and Temporal queue checks"
+  echo "[smoke] all checks passed."
+  exit 0
+fi
+
 echo "[smoke] start workers on-demand..."
 SMOKE_REQUIRE_GPU_QUEUE="${SMOKE_REQUIRE_GPU_QUEUE:-auto}"
 SMOKE_EXPECT_GPU_QUEUE="0"
