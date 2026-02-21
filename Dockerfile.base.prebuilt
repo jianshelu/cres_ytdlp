@@ -5,25 +5,17 @@ ARG LLAMA_ARTIFACT_IMAGE=ghcr.io/jianshelu/ledge-repo-base:llama-src-latest
 ARG VAST_RUNTIME_IMAGE=vastai/base-image:cuda-12.4.1-auto
 ARG TORCH_VERSION=2.6.0+cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
-
 FROM ${LLAMA_ARTIFACT_IMAGE} AS llama_artifacts
 FROM ${VAST_RUNTIME_IMAGE}
 ARG TORCH_VERSION=2.6.0+cu124
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
-
-ENV TORCH_VERSION=${TORCH_VERSION}
-ENV TORCH_INDEX_URL=${TORCH_INDEX_URL}
-
-ARG VAST_RUNTIME_IMAGE=vastai/base-image:cuda-12.4.1-auto
-
 WORKDIR /workspace
-
 # Reuse compiled llama-server artifacts from external image.
 COPY --from=llama_artifacts /app/ /app/
 RUN test -x /app/llama-server \
  && ln -sf /app/llama-server /usr/local/bin/llama-server
-
-# Install system dependencies (avoid supervisor dpkg conflict on vast base)
+# Install system dependencies (+ supervisor). Some Vast images already include
+# supervisor; install it only when missing to avoid dpkg conffile conflicts.
 RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -36,10 +28,22 @@ RUN set -eux; \
         -o Dpkg::Options::="--force-confold" \
         supervisor; \
     fi; \
+    command -v supervisord >/dev/null 2>&1; \
     rm -rf /var/lib/apt/lists/*
-
+# Install Node.js 20 (NodeSource)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    nodejs \
+ && rm -rf /var/lib/apt/lists/*
+# Default model/cache paths
+ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
+    XDG_CACHE_HOME=/workspace/.cache
+RUN mkdir -p /workspace/packages/models/llm /workspace/.cache /workspace/logs /workspace/scripts
+# Install instance runtime Python dependencies in base image
 COPY requirements.instance.txt /tmp/requirements.instance.txt
-
 RUN set -eux; \
   test -n "${TORCH_VERSION}"; \
   test -n "${TORCH_INDEX_URL}"; \
@@ -52,39 +56,11 @@ RUN set -eux; \
     pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
   fi; \
   python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)"; \
-  rm -f /tmp/requirements.instance.txt /tmp/requirements.instance.clean.txt
-
-# Install Node.js 20 (NodeSource)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
- && apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    -o Dpkg::Options::="--force-confdef" \-o Dpkg::Options::="--force-confdef" \
-    -o Dpkg::Options::="--force-confold" \
-    nodejs \
- && rm -rf /var/lib/apt/lists/*
-
-# Default model/cache paths
-ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
-    XDG_CACHE_HOME=/workspace/.cache
-
-RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
-
-# Install instance runtime Python dependencies in base image
-COPY requirements.instance.txt /tmp/requirements.instance.txt
-RUN pip3 install --upgrade pip \
- && pip3 install --no-cache-dir -r /tmp/requirements.instance.txt \
- && if ! python3 -c "import torch" >/dev/null 2>&1; then \
-      pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
-    fi \
- && python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)" \
- && rm -f /tmp/requirements.instance.txt \
- && rm -rf /root/.cache/pip \
- && (find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true) \
- && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete 2>/dev/null || true) \
- && (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete 2>/dev/null || true)
-
-RUN command -v supervisord >/dev/null 2>&1
-
+  rm -f /tmp/requirements.instance.txt /tmp/requirements.instance.clean.txt; \
+  rm -rf /root/.cache/pip; \
+  (find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true); \
+  (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete 2>/dev/null || true); \
+  (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete 2>/dev/null || true)
 # Supervisor config + llama wrapper
 COPY scripts/supervisord.conf /etc/supervisor/supervisord.conf
 COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh
