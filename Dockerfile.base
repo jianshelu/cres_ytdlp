@@ -99,7 +99,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
     XDG_CACHE_HOME=/workspace/.cache
 
-RUN mkdir -p /workspace/packages/models/llm /workspace/.cache
+RUN mkdir -p /workspace/packages/models/llm /workspace/.cache /workspace/logs /workspace/scripts
 
 # Install instance runtime Python dependencies in base image
 COPY requirements.instance.txt /tmp/requirements.instance.txt
