@@ -478,6 +478,8 @@ jobs:
             -e API_PORT=8100 \
             -e TEMPORAL_NAMESPACE=ledge-repo \
             -e BASE_TASK_QUEUE=ledge \
+            -e TASK_QUEUE_CPU=ledge-cpu \
+            -e TASK_QUEUE_GPU=ledge-gpu \
             -e SMOKE_REQUIRE_GPU_QUEUE=auto \
             app-smoke /bin/bash -lc 'if [ -f /workspace/container_smoke.sh ]; then /bin/bash /workspace/container_smoke.sh; else /bin/bash /workspace/scripts/container_smoke.sh; fi' || {
               docker logs app-smoke || true
