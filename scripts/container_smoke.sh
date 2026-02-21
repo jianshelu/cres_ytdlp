@@ -15,6 +15,7 @@ mods = [
     "yt_dlp",
     "faster_whisper",
     "torch",
+    "pypinyin",
 ]
 missing = []
 for m in mods:
