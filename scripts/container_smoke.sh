@@ -95,11 +95,22 @@ from temporalio.api.workflowservice.v1 import (
 from temporalio.api.taskqueue.v1 import TaskQueue
 from google.protobuf.duration_pb2 import Duration
 addr = os.getenv("TEMPORAL_ADDRESS", "localhost:7233")
-base = (os.getenv("BASE_TASK_QUEUE", "ledge").strip() or "ledge")
 expect_gpu = (os.getenv("SMOKE_EXPECT_GPU_QUEUE", "0").strip() == "1")
-queues = [f"{base}@cpu"]
+task_queue_cpu = os.getenv("TASK_QUEUE_CPU", "").strip()
+task_queue_gpu = os.getenv("TASK_QUEUE_GPU", "").strip()
+if not task_queue_cpu or not task_queue_gpu:
+    try:
+        from src.shared.constants import TASK_QUEUE_CPU as DEFAULT_CPU_QUEUE
+        from src.shared.constants import TASK_QUEUE_GPU as DEFAULT_GPU_QUEUE
+        task_queue_cpu = task_queue_cpu or DEFAULT_CPU_QUEUE
+        task_queue_gpu = task_queue_gpu or DEFAULT_GPU_QUEUE
+    except Exception:
+        base = (os.getenv("BASE_TASK_QUEUE", "ledge").strip() or "ledge")
+        task_queue_cpu = task_queue_cpu or f"{base}@cpu"
+        task_queue_gpu = task_queue_gpu or f"{base}@gpu"
+queues = [task_queue_cpu]
 if expect_gpu:
-    queues.append(f"{base}@gpu")
+    queues.append(task_queue_gpu)
 print(f"queue check targets={queues} expect_gpu={expect_gpu}")
 
 namespace = os.getenv("TEMPORAL_NAMESPACE", "ledge-repo")
@@ -123,19 +134,32 @@ async def ensure_namespace(client, ns):
     except RPCError as e:
         if e.status != RPCStatusCode.ALREADY_EXISTS:
             raise
-
+    # Namespace creation on start-dev can be eventually consistent.
+    for _ in range(30):
+        try:
+            await client.workflow_service.describe_namespace(
+                DescribeNamespaceRequest(namespace=ns)
+            )
+            return
+        except RPCError as e:
+            if e.status != RPCStatusCode.NOT_FOUND:
+                raise
+            await asyncio.sleep(1)
 async def has_poller(client, q):
     # GPU queue can be activity-only; validate either poller type is present.
     for queue_type in (
         TaskQueueType.TASK_QUEUE_TYPE_WORKFLOW,
-        TaskQueueType.TASK_QUEUE_TYPE_ACTIVITY,
-    ):
-        req = DescribeTaskQueueRequest(
             namespace=namespace,
             task_queue=TaskQueue(name=q),
             task_queue_type=queue_type,
         )
-        rsp = await client.workflow_service.describe_task_queue(req)
+        try:
+            rsp = await client.workflow_service.describe_task_queue(req)
+        except RPCError as e:
+            # Namespace can still be propagating right after registration.
+            if e.status == RPCStatusCode.NOT_FOUND:
+                return False
+            raise
         if rsp.pollers:
             return True
     return False
