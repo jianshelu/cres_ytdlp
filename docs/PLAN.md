@@ -13,6 +13,7 @@ Time Zone Standard: `America/Toronto`.
 
 | Date | Models/Systems | Plans | Status | Completion Time (America/Toronto) |
 | :--- | :--- | :--- | :--- | :--- |
+| 2026-02-21 | Docker/GHCR + Compute Runtime | [Dual-Profile Runtime Bootstrap for Ledge on Cres GHCR Image](<#2026-02-21---dual-profile-runtime-bootstrap-for-ledge-on-cres-ghcr-image>) | `[DONE]` | 18:27:18 |
 | 2026-02-14 | Docker/DockerHub | [Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)](<#2026-02-14---docker-hub-publish-pipeline-(backup-ghcr-+-docker-hub-migration)>) | `[IN PROGRESS]` | - |
 | 2026-02-14 | Docker/GHCR | [Docker App Build Reproducibility Guards (Layout Gate + Base Digest Pin + npm ci)](<#2026-02-14---docker-app-build-reproducibility-guards-(layout-gate-+-base-digest-pin-+-npm-ci)>) | `[DONE]` | 16:06:22 |
 | 2026-02-14 | Platform | [Disable Default Entrypoint Fallback to Prevent Dual Startup Chains](<#2026-02-14---disable-default-entrypoint-fallback-to-prevent-dual-startup-chains>) | `[DONE]` | 16:06:22 |
@@ -70,6 +71,52 @@ Time Zone Standard: `America/Toronto`.
 | 2026-02-12 | Docker/GHCR | [CI Minimal Image Base Reuse Fix](<#2026-02-12---ci-minimal-image-base-reuse-fix>) | `[PENDING]` | - |
 | 2026-02-12 | Workers/Queues | [Queue Routing, Secret Hygiene, and Active-Instance Scheduling](<#2026-02-12---queue-routing,-secret-hygiene,-and-active-instance-scheduling>) | `[PENDING]` | - |
 | 2026-02-11 | Platform | [Root Cleanup and Source-of-Truth Normalization](<#2026-02-11---root-cleanup-and-source-of-truth-normalization>) | `[PENDING]` | - |
+
+## 2026-02-21 - Dual-Profile Runtime Bootstrap for Ledge on Cres GHCR Image
+- Executed time: 2026-02-21 18:27:18 -05:00
+
+- Objective: keep image build/publish in `cres_ytdlp` GHCR while enabling compute-node runtime to boot either `cres` or `ledge` profiles safely.
+- Root cause:
+  - `ledge` profile startup failed when `/workspace/ledge-repo` was absent in the container image.
+  - `start-llama.sh` only checked `/workspace/packages/llama.cpp/server`, while prebuilt images expose binary at `/usr/local/bin/llama-server` (symlink to `/app/llama-server`).
+  - `scripts/supervisord.conf` drifted to `BASE_TASK_QUEUE="ledge"`, causing `cres` profile queue mismatch.
+- Changes:
+  - `entrypoint.sh`
+    - Added profile-aware source-tree validation (`cres` vs `ledge` required files).
+    - Added `ledge` auto-bootstrap path via `LEDGE_REPO_URL`/`LEDGE_REPO_REF` (+ optional `LEDGE_GIT_SSH_KEY_PATH` or `LEDGE_GIT_SSH_COMMAND`) and HTTPS token path via `LEDGE_GITHUB_TOKEN`.
+    - Added clear fail-fast diagnostics when `ledge` source tree is unavailable.
+  - `scripts/start-llama.sh`
+    - Added deterministic binary resolution fallback order:
+      - `${LLAMA_SERVER}`
+      - `/usr/local/bin/llama-server`
+      - `/app/llama-server`
+      - `/workspace/packages/llama.cpp/server`
+    - Removed duplicated `LLAMA_DISABLE` guard and hardened script with `set -euo pipefail`.
+  - `scripts/supervisord.conf`
+    - Restored `cres` default queue base to `BASE_TASK_QUEUE="video-processing"` for CPU/GPU workers.
+  - `.github/workflows/deploy.yml`
+    - Smoke runtime now sets `PROJECT_ROOT` according to selected profile (`/workspace` for `cres`, `/workspace/ledge-repo` for `ledge`).
+  - `.env.example`
+    - Documented dual-profile runtime env (`PROJECT_PROFILE`, `PROJECT_ROOT`) and ledge bootstrap vars (`LEDGE_REPO_URL`, `LEDGE_REPO_REF`, `LEDGE_GIT_SSH_KEY_PATH`, `LEDGE_GITHUB_TOKEN`).
+
+### Validation
+
+- Script/YAML syntax:
+  - `bash -n entrypoint.sh scripts/start-llama.sh scripts/with_compute_env.sh scripts/container_smoke.sh`
+  - `python3 -c "import yaml, pathlib; yaml.safe_load(pathlib.Path('.github/workflows/deploy.yml').read_text())"`
+- Static checks:
+  - `rg --line-number "project_has_layout|clone_ledge_repo|LEDGE_REPO_URL|LEDGE_GIT_SSH_KEY_PATH" entrypoint.sh`
+  - `rg --line-number "resolve_llama_server|/usr/local/bin/llama-server|/app/llama-server" scripts/start-llama.sh`
+  - `rg --line-number "BASE_TASK_QUEUE=\"video-processing\"" scripts/supervisord.conf`
+  - `rg --line-number "PROJECT_ROOT=\"/workspace\"|PROJECT_ROOT=\"/workspace/ledge-repo\"" .github/workflows/deploy.yml`
+  - `rg --line-number "PROJECT_PROFILE|PROJECT_ROOT|LEDGE_REPO_URL|LEDGE_GITHUB_TOKEN" .env.example`
+
+### Rollback
+
+1. Revert `entrypoint.sh` to strict local-root-only behavior (remove ledge bootstrap/validation helpers).
+2. Revert `scripts/start-llama.sh` to previous single-path binary lookup.
+3. Revert `scripts/supervisord.conf` queue base from `video-processing` back to previous value if required.
+4. Revert `.github/workflows/deploy.yml` smoke `PROJECT_ROOT` selection block.
 
 ## 2026-02-14 - Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)
 
@@ -1977,8 +2024,4 @@ Time Zone Standard: `America/Toronto`.
 4. Re-run launchers:
    - `C:\Users\rama\start_web_huihuang.ps1`
    - `C:\Users\rama\run_fastapi_norfolk.cmd`
-
-
-
-
 

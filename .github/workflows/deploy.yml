@@ -489,18 +489,20 @@ jobs:
           BASE_TASK_QUEUE="video-processing"
           TASK_QUEUE_CPU="video-processing@cpu"
           TASK_QUEUE_GPU="video-processing@gpu"
+          PROJECT_ROOT="/workspace"
           if [ "${PROJECT_PROFILE}" = "ledge" ]; then
             TEMPORAL_NAMESPACE="ledge-repo"
             BASE_TASK_QUEUE="ledge"
             TASK_QUEUE_CPU="ledge-cpu"
             TASK_QUEUE_GPU="ledge-gpu"
+            PROJECT_ROOT="/workspace/ledge-repo"
           fi
 
           docker rm -f app-smoke || true
           docker run -d --name app-smoke --network compute-smoke \
             -e CONTROL_PLANE_MODE=external \
             -e PROJECT_PROFILE="${PROJECT_PROFILE}" \
-            -e PROJECT_ROOT=/workspace \
+            -e PROJECT_ROOT="${PROJECT_ROOT}" \
             -e TEMPORAL_ADDRESS='${{ steps.smoke_deps.outputs.temporal_addr }}' \
             -e MINIO_ENDPOINT='${{ steps.smoke_deps.outputs.minio_endpoint }}' \
             -e MINIO_SECURE=false \
