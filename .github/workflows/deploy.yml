@@ -447,6 +447,7 @@ jobs:
           docker run --rm --entrypoint test ledge-smoke:${{ github.sha }} -f /workspace/src/backend/worker.py
 
       - name: Start smoke dependencies
+        id: smoke_deps
         run: |
           set -euxo pipefail
           docker network create ledge-smoke || true
@@ -455,51 +456,30 @@ jobs:
             -e MINIO_ROOT_USER=cres \
             -e MINIO_ROOT_PASSWORD='Qh@113113' \
             quay.io/minio/minio:latest server /data --address :9000 --console-address :9001
-          temporal_ip=""
-          for i in $(seq 1 60); do
-            temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' temporal-smoke 2>/dev/null || true)"
-            if [ -n "$temporal_ip" ] && [ "$temporal_ip" != "<no value>" ]; then
-              break
-            fi
-            sleep 1
-          done
-          minio_ip=""
-          for i in $(seq 1 60); do
-            minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' minio-smoke 2>/dev/null || true)"
-            if [ -n "$minio_ip" ] && [ "$minio_ip" != "<no value>" ]; then
-              break
-            fi
-            sleep 1
-          done
-          [ -n "$temporal_ip" ] && [ "$temporal_ip" != "<no value>" ]
-          [ -n "$minio_ip" ] && [ "$minio_ip" != "<no value>" ]
-          echo "TEMPORAL_SMOKE_ADDR=${temporal_ip}:7233" >> "$GITHUB_ENV"
-          echo "MINIO_SMOKE_ENDPOINT=${minio_ip}:9000" >> "$GITHUB_ENV"
-      
+          temporal_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' temporal-smoke)"
+          minio_ip="$(docker inspect -f '{{index .NetworkSettings.Networks "ledge-smoke" "IPAddress"}}' minio-smoke)"
+          echo "temporal_addr=${temporal_ip}:7233" >> "$GITHUB_OUTPUT"
+          echo "minio_endpoint=${minio_ip}:9000" >> "$GITHUB_OUTPUT"
+      - name: Run container smoke checks
+        run: |
           set -euxo pipefail
           docker rm -f app-smoke || true
           docker run -d --name app-smoke --network ledge-smoke \
             -e CONTROL_PLANE_MODE=external \
-            -e TEMPORAL_ADDRESS="${TEMPORAL_SMOKE_ADDR}" \
-            -e MINIO_ENDPOINT="${MINIO_SMOKE_ENDPOINT}" \
+            -e TEMPORAL_ADDRESS='${{ steps.smoke_deps.outputs.temporal_addr }}' \
+            -e MINIO_ENDPOINT='${{ steps.smoke_deps.outputs.minio_endpoint }}' \
             -e MINIO_SECURE=false \
             -e MINIO_ACCESS_KEY=cres \
             -e MINIO_SECRET_KEY='Qh@113113' \
             -e ENABLE_WEB=false \
             ledge-smoke:${{ github.sha }}
-          sleep 8
-          docker ps -a
-          docker logs app-smoke || true
-          docker exec app-smoke sh -lc 'command -v supervisorctl && supervisorctl -c /etc/supervisor/supervisord.conf status || true'
-          docker exec app-smoke sh -lc 'ss -lntp || netstat -lntp || true'
-          docker exec app-smoke sh -lc 'cat /etc/supervisor/supervisord.conf || true'
           docker exec \
             -e API_PORT=8100 \
             -e TEMPORAL_NAMESPACE=ledge-repo \
             -e BASE_TASK_QUEUE=ledge \
             -e SMOKE_REQUIRE_GPU_QUEUE=auto \
             app-smoke /bin/bash /workspace/scripts/container_smoke.sh
-
+            
       - name: Cleanup smoke containers
         if: always()
         run: |
