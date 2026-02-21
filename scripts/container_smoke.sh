@@ -28,17 +28,25 @@ print("imports ok")
 PY
 
 echo "[smoke] wait FastAPI..."
-API_PORT="${API_PORT:-8100}"
-API_HEALTH_URL="${API_HEALTH_URL:-http://127.0.0.1:${API_PORT}/health}"
-
-for i in $(seq 1 60); do
-  if curl -fsS "${API_HEALTH_URL}" >/dev/null; then
-    break
-  fi
-  sleep 1
+API_HEALTH_URL=""
+for p in 8100 8000; do
+  for i in $(seq 1 30); do
+    if curl -fsS "http://127.0.0.1:${p}/health" >/dev/null; then
+      API_HEALTH_URL="http://127.0.0.1:${p}/health"
+      API_DOCS_URL="http://127.0.0.1:${p}/docs"
+      break 2
+    fi
+    sleep 1
+  done
 done
-curl -fsS "http://127.0.0.1:${API_PORT}/docs" >/dev/null
-echo "fastapi docs ok"
+if [ -z "${API_HEALTH_URL}" ]; then
+  echo "[smoke] FastAPI not reachable on 8100/8000"
+  command -v supervisorctl >/dev/null 2>&1 && supervisorctl -c /etc/supervisor/supervisord.conf status || true
+  ss -lntp || netstat -lntp || true
+  exit 7
+fi
+curl -fsS "${API_DOCS_URL}" >/dev/null
+echo "fastapi docs ok (${API_DOCS_URL})"
 
 echo "[smoke] start workers on-demand..."
 SMOKE_REQUIRE_GPU_QUEUE="${SMOKE_REQUIRE_GPU_QUEUE:-auto}"
