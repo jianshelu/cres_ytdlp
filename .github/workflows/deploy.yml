@@ -15,6 +15,7 @@ on:
       - "scripts/with_compute_env.sh"
       - "scripts/container_smoke.sh"
       - "entrypoint.sh"
+      - "compute/ledge/**"
       - "src/**"
       - "web/**"
       - ".github/workflows/deploy.yml"
@@ -455,6 +456,10 @@ jobs:
           set -euxo pipefail
           docker run --rm --entrypoint test compute-smoke:${{ github.sha }} -f /workspace/src/api/main.py
           docker run --rm --entrypoint test compute-smoke:${{ github.sha }} -f /workspace/src/backend/worker.py
+          docker run --rm --entrypoint test compute-smoke:${{ github.sha }} -f /workspace/ledge-repo/src/api/compute/main.py
+          docker run --rm --entrypoint test compute-smoke:${{ github.sha }} -f /workspace/ledge-repo/src/backend/worker.py
+          docker run --rm --entrypoint test compute-smoke:${{ github.sha }} -f /workspace/ledge-repo/src/backend/worker_cpu.py
+          docker run --rm --entrypoint test compute-smoke:${{ github.sha }} -f /workspace/ledge-repo/src/backend/activities/stt_activity.py
 
       - name: Start smoke dependencies
         id: smoke_deps
@@ -478,10 +483,14 @@ jobs:
             PROJECT_PROFILE="${{ inputs.project_profile }}"
           fi
 
-          # This repository ships cres source only; ledge profile is supported at runtime
-          # when a ledge code tree is mounted as PROJECT_ROOT.
-          if [ "${PROJECT_PROFILE}" = "ledge" ] && [ ! -f src/api/compute/main.py ]; then
-            echo "Ledge code tree not present in this repo; fallback smoke profile to cres"
+          # Ledge bundle is GPU-runtime focused (workers + compute API + llama dependencies).
+          # CI smoke runs on cres profile for deterministic FastAPI checks in this workflow.
+          if [ "${PROJECT_PROFILE}" = "ledge" ]; then
+            if [ ! -f compute/ledge/src/backend/worker.py ] || [ ! -f compute/ledge/src/api/compute/main.py ]; then
+              echo "Ledge compute bundle not present in this repo; fallback smoke profile to cres"
+            else
+              echo "Ledge GPU compute bundle detected; use cres profile for FastAPI smoke"
+            fi
             PROJECT_PROFILE="cres"
           fi
 
@@ -490,13 +499,6 @@ jobs:
           TASK_QUEUE_CPU="video-processing@cpu"
           TASK_QUEUE_GPU="video-processing@gpu"
           PROJECT_ROOT="/workspace"
-          if [ "${PROJECT_PROFILE}" = "ledge" ]; then
-            TEMPORAL_NAMESPACE="ledge-repo"
-            BASE_TASK_QUEUE="ledge"
-            TASK_QUEUE_CPU="ledge-cpu"
-            TASK_QUEUE_GPU="ledge-gpu"
-            PROJECT_ROOT="/workspace/ledge-repo"
-          fi
 
           docker rm -f app-smoke || true
           docker run -d --name app-smoke --network compute-smoke \

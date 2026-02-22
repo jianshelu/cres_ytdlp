@@ -1,0 +1,11 @@
+temporal:
+  host: "192.168.2.140"
+  port: 7233
+  namespace: "ledge-repo"
+  task_queue:
+    cpu: "ledge-cpu"
+    gpu: "ledge-gpu"
+  # GPU uses public endpoint
+  public:
+    host: "64.229.113.233"
+    port: 7233

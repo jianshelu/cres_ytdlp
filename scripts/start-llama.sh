@@ -49,12 +49,15 @@ fi
 echo "[llama] Starting llama.cpp server with model: ${MODEL_PATH}"
 echo "[llama] Using binary: ${LLAMA_SERVER_BIN}"
 
+LLAMA_LIB_DIR="$(dirname "$LLAMA_SERVER_BIN")"
+export LD_LIBRARY_PATH="/app:${LLAMA_LIB_DIR}:${LD_LIBRARY_PATH:-}"
+
 exec "$LLAMA_SERVER_BIN" \
     --model "$MODEL_PATH" \
     --host 0.0.0.0 \
     --port 8081 \
-    --ngl 999 \
+    -ngl 999 \
     --ctx-size 4096 \
-    --batch-size 512 \
+    -b 512 \
     --threads 8 \
     --log-disable

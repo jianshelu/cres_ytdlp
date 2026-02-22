@@ -1,0 +1,10 @@
+minio:
+  endpoint: "192.168.2.140:9000"
+  public_endpoint: "64.229.113.233:9000"
+  access_key: "${MINIO_ACCESS_KEY}"
+  secret_key: "${MINIO_SECRET_KEY}"
+  secure: false
+  buckets:
+    audio: "ledge-repo"
+    models: "ledge-repo"
+    output: "ledge-repo"

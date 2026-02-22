@@ -23,7 +23,9 @@ project_has_layout() {
       [ -f "$root/src/api/compute/main.py" ] \
         && [ -f "$root/src/backend/worker.py" ] \
         && [ -f "$root/src/backend/worker_cpu.py" ] \
-        && [ -d "$root/src/shared" ]
+        && [ -f "$root/src/backend/activities/stt_activity.py" ] \
+        && [ -f "$root/src/backend/workflows/voice_workflow.py" ] \
+        && [ -f "$root/src/shared/config.py" ]
       ;;
     *)
       return 1

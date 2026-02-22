@@ -1,0 +1,17 @@
+models:
+  llm:
+    path: "/workspace/packages/models/llm"
+    model: "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+    exists_check: true
+  
+  whisper:
+    path: "/workspace/packages/models/whisperx"
+    type: "faster-whisper"
+    size: "large-v3"
+    exists_check: true
+  
+  tts:
+    path: "/workspace/packages/models/tts"
+    type: "coqui-tts"
+    model: "tts_models/multilingual/multi-dataset/xtts_v2"
+    exists_check: false

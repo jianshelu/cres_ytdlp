@@ -20,6 +20,7 @@ WORKDIR /workspace
 
 # Project code and startup scripts
 COPY . ./
+COPY compute/ledge/ /workspace/ledge-repo/
 RUN chmod +x /workspace/entrypoint.sh /workspace/scripts/start-llama.sh /workspace/scripts/with_compute_env.sh /workspace/scripts/container_smoke.sh
 
 # Frontend runtime assets
