@@ -103,7 +103,8 @@ RUN mkdir -p /workspace/packages/models/llm /workspace/.cache /workspace/logs /w
 
 # Install instance runtime Python dependencies in base image
 COPY requirements.instance.txt /tmp/requirements.instance.txt
-RUN pip3 install --upgrade pip \
+RUN pip3 install --upgrade pip setuptools wheel \
+ && pip3 install --no-cache-dir --ignore-installed "blinker==1.9.0" \
  && pip3 install --no-cache-dir --extra-index-url "${TORCH_INDEX_URL}" -r /tmp/requirements.instance.txt \
  && if ! python3 -c "import torch" >/dev/null 2>&1; then \
       pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
