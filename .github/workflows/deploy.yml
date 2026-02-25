@@ -39,12 +39,11 @@ on:
         type: boolean
         default: false
       project_profile:
-        description: "Runtime profile for smoke (cres or ledge)"
+        description: "Runtime profile for smoke (ledge only)"
         required: false
         type: choice
-        default: cres
+        default: ledge
         options:
-          - cres
           - ledge
         
 env:
@@ -360,6 +359,12 @@ jobs:
               '    "yt_dlp",' \
               '    "faster_whisper",' \
               '    "pypinyin",' \
+              '    "TTS",' \
+              '    "transformers",' \
+              '    "tokenizers",' \
+              '    "scipy",' \
+              '    "numpy",' \
+              '    "torchaudio",' \
               '    "torch",' \
               ']' \
               'missing = []' \
@@ -478,27 +483,12 @@ jobs:
       - name: Run container smoke checks
         run: |
           set -euxo pipefail
-          PROJECT_PROFILE="cres"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.project_profile }}" ]; then
-            PROJECT_PROFILE="${{ inputs.project_profile }}"
-          fi
-
-          # Ledge bundle is GPU-runtime focused (workers + compute API + llama dependencies).
-          # CI smoke runs on cres profile for deterministic FastAPI checks in this workflow.
-          if [ "${PROJECT_PROFILE}" = "ledge" ]; then
-            if [ ! -f compute/ledge/src/backend/worker.py ] || [ ! -f compute/ledge/src/api/compute/main.py ]; then
-              echo "Ledge compute bundle not present in this repo; fallback smoke profile to cres"
-            else
-              echo "Ledge GPU compute bundle detected; use cres profile for FastAPI smoke"
-            fi
-            PROJECT_PROFILE="cres"
-          fi
-
-          TEMPORAL_NAMESPACE="default"
-          BASE_TASK_QUEUE="video-processing"
-          TASK_QUEUE_CPU="video-processing@cpu"
-          TASK_QUEUE_GPU="video-processing@gpu"
-          PROJECT_ROOT="/workspace"
+          PROJECT_PROFILE="ledge"
+          TEMPORAL_NAMESPACE="ledge-repo"
+          BASE_TASK_QUEUE="ledge"
+          TASK_QUEUE_CPU="ledge-cpu"
+          TASK_QUEUE_GPU="ledge-gpu"
+          PROJECT_ROOT="/workspace/ledge-repo"
 
           docker rm -f app-smoke || true
           docker run -d --name app-smoke --network compute-smoke \

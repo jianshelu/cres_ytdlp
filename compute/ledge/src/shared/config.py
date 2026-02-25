@@ -56,7 +56,7 @@ class InstanceConfig(BaseModel):
     host: str = ""
     port: int = 22
     user: str = "root"
-    ssh_key: str = "~/.ssh/id_huihuang92vastai"
+    ssh_key: str = "~/.ssh/id_iris92vastai"
     remote_path: str = "/workspace/ledge-repo"
     last_updated: Optional[str] = None
     notes: Optional[str] = None

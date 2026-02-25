@@ -1,8 +1,10 @@
 """TTS Activity - Text-to-Speech using Coqui TTS."""
 
+import os
+
 from temporalio import activity
 
-from src.shared import TTSRequest, TTSResponse, get_logger
+from src.shared import MODEL_PATHS, TTSRequest, TTSResponse, get_logger
 
 logger = get_logger("tts_activity")
 
@@ -55,9 +57,20 @@ async def tts_synthesize(request: TTSRequest) -> TTSResponse:
         
         import time
         import tempfile
-        
+
+        tts_home = os.environ.get("TTS_HOME") or MODEL_PATHS["tts"]
+        os.environ.setdefault("TTS_HOME", tts_home)
+        os.makedirs(tts_home, exist_ok=True)
+
         tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2")
-        
+
+        speaker = request.speaker
+        if not speaker:
+            speaker_manager = getattr(getattr(tts.synthesizer, "tts_model", None), "speaker_manager", None)
+            available_speakers = list(getattr(speaker_manager, "name_to_id", []) or [])
+            if available_speakers:
+                speaker = available_speakers[0]
+
         start_time = time.time()
         
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
@@ -66,6 +79,7 @@ async def tts_synthesize(request: TTSRequest) -> TTSResponse:
         tts.tts_to_file(
             text=request.text,
             language=request.language,
+            speaker=speaker,
             file_path=output_path,
             speed=request.speed,
         )
@@ -73,7 +87,6 @@ async def tts_synthesize(request: TTSRequest) -> TTSResponse:
         with open(output_path, "rb") as f:
             audio_data = f.read()
         
-        import os
         os.unlink(output_path)
         
         duration = time.time() - start_time

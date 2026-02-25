@@ -15,6 +15,7 @@ from .constants import (
 from .models import (
     STTRequest,
     STTResponse,
+    TranscribeWorkflowInput,
     TTSRequest,
     TTSResponse,
     LLMRequest,
@@ -57,6 +58,7 @@ __all__ = [
     "RUNTIME_LIMITS",
     "STTRequest",
     "STTResponse",
+    "TranscribeWorkflowInput",
     "TTSRequest",
     "TTSResponse",
     "LLMRequest",

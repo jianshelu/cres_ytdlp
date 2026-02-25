@@ -16,6 +16,12 @@ mods = [
     "faster_whisper",
     "torch",
     "pypinyin",
+    "TTS",
+    "transformers",
+    "tokenizers",
+    "scipy",
+    "numpy",
+    "torchaudio",
 ]
 missing = []
 for m in mods:
@@ -117,7 +123,7 @@ if not task_queue_cpu or not task_queue_gpu:
         task_queue_cpu = task_queue_cpu or DEFAULT_CPU_QUEUE
         task_queue_gpu = task_queue_gpu or DEFAULT_GPU_QUEUE
     except Exception:
-        base = (os.getenv("BASE_TASK_QUEUE", "video-processing").strip() or "video-processing")
+        base = (os.getenv("BASE_TASK_QUEUE", "ledge").strip() or "ledge")
         task_queue_cpu = task_queue_cpu or f"{base}@cpu"
         task_queue_gpu = task_queue_gpu or f"{base}@gpu"
 
@@ -126,7 +132,7 @@ if expect_gpu:
     queues.append(task_queue_gpu)
 print(f"queue check targets={queues} expect_gpu={expect_gpu}")
 
-namespace = os.getenv("TEMPORAL_NAMESPACE", "default")
+namespace = os.getenv("TEMPORAL_NAMESPACE", "ledge-repo")
 
 
 async def ensure_namespace(client, ns):

@@ -58,7 +58,7 @@ RUN set -eux; \
   tr -d '\r' < /tmp/requirements.instance.txt > /tmp/requirements.instance.clean.txt; \
   if grep -nE '^[[:space:]]*torch==[[:space:]]*$|^[[:space:]]*pip/[[:space:]]*$' /tmp/requirements.instance.clean.txt; then exit 1; fi; \
   pip3 install --upgrade pip; \
-  pip3 install --no-cache-dir -r /tmp/requirements.instance.clean.txt; \
+  pip3 install --no-cache-dir --extra-index-url "${TORCH_INDEX_URL}" -r /tmp/requirements.instance.clean.txt; \
   if ! python3 -c "import torch" >/dev/null 2>&1; then \
     pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
   fi; \

@@ -14,9 +14,23 @@ def _coerce_temporal_bytes(value):
 
 
 class STTRequest(BaseModel):
-    audio_data: bytes
+    audio_data: bytes = b""
+    audio_bucket: Optional[str] = None
+    audio_object: Optional[str] = None
     language: Optional[str] = None
     model_size: str = "/workspace/packages/models/whisperx/faster-whisper-large-v2"
+
+    @field_validator("audio_data", mode="before")
+    @classmethod
+    def normalize_audio_data(cls, value):
+        return _coerce_temporal_bytes(value)
+
+
+class TranscribeWorkflowInput(BaseModel):
+    audio_data: bytes = b""
+    audio_bucket: Optional[str] = None
+    audio_object: Optional[str] = None
+    language: Optional[str] = None
 
     @field_validator("audio_data", mode="before")
     @classmethod

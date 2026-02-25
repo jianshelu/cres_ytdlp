@@ -5,7 +5,7 @@ from datetime import timedelta
 from temporalio import workflow
 
 from src.backend.activities import stt_transcribe
-from src.shared.models import STTRequest, VoiceWorkflowInput
+from src.shared.models import STTRequest, TranscribeWorkflowInput
 
 
 @workflow.defn
@@ -13,10 +13,15 @@ class TranscribeWorkflow:
     """Workflow that performs STT only."""
 
     @workflow.run
-    async def run(self, input_data: VoiceWorkflowInput) -> dict:
+    async def run(self, input_data: TranscribeWorkflowInput) -> dict:
         stt_result = await workflow.execute_activity(
             stt_transcribe,
-            STTRequest(audio_data=input_data.audio_data, language=input_data.language),
+            STTRequest(
+                audio_data=input_data.audio_data,
+                audio_bucket=input_data.audio_bucket,
+                audio_object=input_data.audio_object,
+                language=input_data.language,
+            ),
             start_to_close_timeout=timedelta(seconds=240),
         )
 

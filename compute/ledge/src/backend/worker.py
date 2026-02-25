@@ -10,7 +10,13 @@ from datetime import timedelta
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from src.shared import settings, TASK_QUEUE_GPU, get_logger
+from src.shared import (
+    STTRequest,
+    TranscribeWorkflowInput,
+    settings,
+    TASK_QUEUE_GPU,
+    get_logger,
+)
 from src.backend.activities import stt_transcribe, tts_synthesize
 from src.backend.activities.llm_activity import llm_generate
 from src.backend.workflows import VoiceConversationWorkflow, TranscribeWorkflow
@@ -24,7 +30,30 @@ def _build_worker_identity() -> str:
     return f"gpu{random_id}@{instance_name}"
 
 
+def _assert_required_model_fields(model_cls: type, *, required_fields: set[str]) -> None:
+    model_fields = getattr(model_cls, "model_fields", {})
+    missing_fields = sorted(field for field in required_fields if field not in model_fields)
+    if not missing_fields:
+        return
+
+    available_fields = ", ".join(sorted(model_fields.keys())) if model_fields else "<none>"
+    error_message = (
+        f"{model_cls.__name__} schema mismatch on GPU worker startup: "
+        f"missing required fields {missing_fields}; available fields: {available_fields}. "
+        "Sync src/shared and src/backend to the same revision before starting the worker."
+    )
+    logger.error(error_message)
+    raise RuntimeError(error_message)
+
+
+def _assert_schema_compatibility() -> None:
+    required_fields = {"audio_bucket", "audio_object"}
+    _assert_required_model_fields(STTRequest, required_fields=required_fields)
+    _assert_required_model_fields(TranscribeWorkflowInput, required_fields=required_fields)
+
+
 async def main():
+    _assert_schema_compatibility()
     endpoint = os.getenv("TEMPORAL_ADDRESS", settings.temporal.public_endpoint)
     worker_identity = _build_worker_identity()
     workflow_task_concurrency = int(os.getenv("LEDGE_WORKER_WORKFLOW_TASK_CONCURRENCY", "4"))
