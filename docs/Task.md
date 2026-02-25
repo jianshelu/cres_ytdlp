@@ -15,6 +15,9 @@ Time Zone Standard: `America/Toronto`.
 - [x] Implement drift fail-fast gate for `compute/ledge` so app image is sourced only from synced `main` content. (executed: 2026-02-25)
 - [x] Configure app-image traceability labels and runtime source marker (`org.opencontainers.image.source`, `org.opencontainers.image.version`, `LEDGE_SOURCE_SHA`). (executed: 2026-02-25)
 - [x] Document channel-repo source pinning and compute-only image boundary in `README.md` and `docs/PLAN.md`. (executed: 2026-02-25)
+- [x] Remove cross-repo checkout/sync/drift/cleanup from `.github/workflows/deploy.yml` so GH Actions no longer pulls `jianshelu/ledge-repo`. (executed: 2026-02-25)
+- [x] Implement local pre-sync script `scripts/sync_ledge_allowlist.sh` for `/srv/ledge-repo -> /srv/project/cres_ytdlp/compute/ledge` allowlist sync on iris. (executed: 2026-02-25)
+- [x] Document mandatory local pre-sync release rule in `README.md` and `compute/README.md` before commit/push-triggered GHCR build. (executed: 2026-02-25)
 
 ## 2026-02-15 (Sunday)
 ### Docs & Ops (Runbook / Validation / Architecture)
@@ -192,4 +195,3 @@ Time Zone Standard: `America/Toronto`.
 - [ ] Deploy re-trigger of failed "Oracle" workflows.
 - [ ] Verify successful download and transcription for retried Oracle workflows.
 - [x] Document migration of legacy ledger items into structured Task.md sections.
-

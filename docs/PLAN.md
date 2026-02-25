@@ -13,7 +13,7 @@ Time Zone Standard: `America/Toronto`.
 
 | Date | Models/Systems | Plans | Status | Completion Time (America/Toronto) |
 | :--- | :--- | :--- | :--- | :--- |
-| 2026-02-25 | Docker/GHCR + Compute Runtime | [Channel Build Syncs Compute Source from `ledge-repo@main`](<#2026-02-25---channel-build-syncs-compute-source-from-ledge-repomain>) | `[DONE]` | - |
+| 2026-02-25 | Docker/GHCR + Compute Runtime | [Channel Build Uses Local Pre-Sync (No Cross-Repo Checkout)](<#2026-02-25---channel-build-uses-local-pre-sync-(no-cross-repo-checkout)>) | `[DONE]` | - |
 | 2026-02-21 | Docker/GHCR + Compute Runtime | [Dual-Profile Runtime Bootstrap for Ledge on Cres GHCR Image](<#2026-02-21---dual-profile-runtime-bootstrap-for-ledge-on-cres-ghcr-image>) | `[DONE]` | 18:27:18 |
 | 2026-02-14 | Docker/DockerHub | [Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)](<#2026-02-14---docker-hub-publish-pipeline-(backup-ghcr-+-docker-hub-migration)>) | `[IN PROGRESS]` | - |
 | 2026-02-14 | Docker/GHCR | [Docker App Build Reproducibility Guards (Layout Gate + Base Digest Pin + npm ci)](<#2026-02-14---docker-app-build-reproducibility-guards-(layout-gate-+-base-digest-pin-+-npm-ci)>) | `[DONE]` | 16:06:22 |
@@ -134,16 +134,23 @@ Time Zone Standard: `America/Toronto`.
 5. Remove vendored `compute/ledge/**` bundle and `Dockerfile` copy line to `/workspace/ledge-repo`.
 6. Revert `scripts/supervisord.ledge.conf` fastapi autostart behavior if startup policy changes.
 
-## 2026-02-25 - Channel Build Syncs Compute Source from `ledge-repo@main`
+## 2026-02-25 - Channel Build Uses Local Pre-Sync (No Cross-Repo Checkout)
 
-- Objective: eliminate manual instance sync dependency and dual-repo drift for image source by making build input derive directly from `ledge-repo/main`.
+- Objective: keep `cres_ytdlp` as the only GHCR build channel and remove GitHub Actions dependency on cross-repo checkout from `jianshelu/ledge-repo`.
 - Changes:
   - `.github/workflows/deploy.yml`
-    - Added pre-build checkout of `jianshelu/ledge-repo@main` into `_ledge_main`.
-    - Added allowlist sync to `compute/ledge/` from `_ledge_main` (`src/backend`, `src/shared`, `src/api/compute`, `configs/models.yaml`, `configs/minio.yaml`, `configs/temporal.yaml`, `requirements.instance.txt`).
-    - Added sync-change reporting: print `compute/ledge` changes after sync for traceability without blocking build.
-    - Added app-image label traceability: `org.opencontainers.image.source=jianshelu/ledge-repo` and `org.opencontainers.image.version=${LEDGE_SOURCE_SHA}`.
-    - Added `LEDGE_SOURCE_SHA` build arg passthrough for smoke and publish builds.
+    - Removed cross-repo checkout/sync/drift/cleanup steps for `_ledge_main`.
+    - Added local metadata step to derive `LEDGE_SOURCE_SHA` from tracked `compute/ledge` tree.
+    - Kept base/app build, smoke, and publish flow unchanged.
+    - Updated app-image source label to `${{ github.repository }}`.
+  - `scripts/sync_ledge_allowlist.sh`
+    - Added release pre-sync helper for iris local path sync:
+      - source: `/srv/ledge-repo`
+      - target: `/srv/project/cres_ytdlp/compute/ledge`
+      - allowlist: `src/backend/`, `src/shared/`, `src/api/compute/`, `configs/models.yaml`, `configs/minio.yaml`, `configs/temporal.yaml`, `requirements.instance.txt`
+  - `README.md` + `compute/README.md`
+    - Documented fixed release rule: local pre-sync in iris is mandatory before commit/push.
+    - Clarified release can proceed without pushing `ledge-repo`, as long as local sync is completed.
   - `Dockerfile`
     - Added `ARG LEDGE_SOURCE_SHA` and `ENV LEDGE_SOURCE_SHA`.
   - `entrypoint.sh`
@@ -154,19 +161,18 @@ Time Zone Standard: `America/Toronto`.
 ### Validation
 
 - `bash -n entrypoint.sh`
+- `bash -n scripts/sync_ledge_allowlist.sh`
 - `python3 -c "import yaml, pathlib; yaml.safe_load(pathlib.Path('.github/workflows/deploy.yml').read_text())"`
 - Manual workflow validation on GitHub Actions logs:
-  - checkout `ledge-repo@main` completed
-  - allowlist synced to `compute/ledge/`
-  - sync step reports either changed files or already-matched status
+  - no `Syncing repository: jianshelu/ledge-repo`
+  - build and smoke complete from `cres_ytdlp` repo content
   - startup logs show `LEDGE_SOURCE_SHA`
 
 ### Rollback
 
-1. Remove pre-build `_ledge_main` checkout and allowlist sync steps in `.github/workflows/deploy.yml`.
-2. Remove sync-change reporting step for `compute/ledge`.
-3. Revert app-image labels/version to previous values.
-4. Revert `LEDGE_SOURCE_SHA` build arg/env and entrypoint log line.
+1. Revert `.github/workflows/deploy.yml` to the stable version around `61547cf`.
+2. Keep using local pre-sync flow for `compute/ledge` before push.
+3. Re-run GHCR build and confirm smoke passes.
 
 ## 2026-02-14 - Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)
 

@@ -303,78 +303,15 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Checkout ledge main source
-        uses: actions/checkout@v4
-        with:
-          repository: jianshelu/ledge-repo
-          ref: main
-          fetch-depth: 1
-          path: _ledge_main
-
-      - name: Sync ledge main allowlist into compute/ledge
-        id: sync_ledge_main
-        run: |
-          set -euxo pipefail
-          LEDGE_SOURCE_SHA="$(git -C _ledge_main rev-parse HEAD)"
-          echo "ledge_source_sha=${LEDGE_SOURCE_SHA}" >> "$GITHUB_OUTPUT"
-          echo "LEDGE_SOURCE_SHA=${LEDGE_SOURCE_SHA}" >> "$GITHUB_ENV"
-
-          rm -rf compute/ledge
-          mkdir -p compute/ledge
-
-          (
-            cd "${GITHUB_WORKSPACE}/_ledge_main"
-            rsync -a --relative \
-              src/backend \
-              src/shared \
-              src/api/compute \
-              configs/models.yaml \
-              configs/minio.yaml \
-              configs/temporal.yaml \
-              requirements.instance.txt \
-              "${GITHUB_WORKSPACE}/compute/ledge/"
-          )
-
-      - name: Drift gate for compute/ledge allowlist sync
-        run: |
-          set -euxo pipefail
-          expected_dir="${GITHUB_WORKSPACE}/_expected_compute_ledge"
-          rm -rf "$expected_dir"
-          mkdir -p "$expected_dir"
-
-          (
-            cd "${GITHUB_WORKSPACE}/_ledge_main"
-            rsync -a --relative \
-              src/backend \
-              src/shared \
-              src/api/compute \
-              configs/models.yaml \
-              configs/minio.yaml \
-              configs/temporal.yaml \
-              requirements.instance.txt \
-              "$expected_dir/"
-          )
-
-          if ! diff -qr "$expected_dir" "${GITHUB_WORKSPACE}/compute/ledge"; then
-            echo "compute/ledge drift detected after ledge main sync"
-            exit 1
-          fi
-
-      - name: Cleanup ledge sync workspace
-        if: always()
+      - name: Set local source metadata
         run: |
           set -euo pipefail
-          rm -rf "${GITHUB_WORKSPACE}/_ledge_main" "${GITHUB_WORKSPACE}/_expected_compute_ledge"
-
-      - name: Report synced compute/ledge changes
-        run: |
-          set -euo pipefail
-          if [ -n "$(git status --porcelain --untracked-files=no -- compute/ledge)" ]; then
-            echo "compute/ledge updated from ledge main for this build:"
-            git status --short -- compute/ledge
+          if git rev-parse HEAD:compute/ledge >/dev/null 2>&1; then
+            LEDGE_SOURCE_SHA="$(git rev-parse HEAD:compute/ledge)"
           else
-            echo "compute/ledge already matched ledge main allowlist."
+            LEDGE_SOURCE_SHA="${GITHUB_SHA}"
           fi
+          echo "LEDGE_SOURCE_SHA=${LEDGE_SOURCE_SHA}" >> "$GITHUB_ENV"
 
       - name: Reclaim disk space before app build
         run: |
@@ -634,7 +571,7 @@ jobs:
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.source=jianshelu/ledge-repo
+            org.opencontainers.image.source=${{ github.repository }}
             org.opencontainers.image.version=${{ env.LEDGE_SOURCE_SHA }}
             org.opencontainers.image.ledge_source_sha=${{ env.LEDGE_SOURCE_SHA }}
             org.opencontainers.image.created=${{ github.event.created_at }}
