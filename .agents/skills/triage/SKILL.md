@@ -83,6 +83,9 @@ Never route GPU tasks to `@cpu`.
 8. Never commit secrets/tokens.
 9. Use minimal diffs; avoid broad rewrites.
 10. During SSH tunnel file sync to GPU instances, never upload sensitive files (keys, tokens, auth configs, `.env*`, `*credentials*`, `*secret*`, `hf.json`, SSH private keys); only sync an explicit allowlist.
+11. GHCR build/publish source of truth is `cres_ytdlp`; do not shift image build pipeline into `ledge-repo`.
+12. Image packaging boundary: include only GPU runtime required services (`llama.cpp`, compute FastAPI, `@cpu/@gpu` workers, supervisord/runtime scripts, runtime configs).
+13. Non-GPU/control-plane code is synchronized from control host over SSH allowlist when required, not bundled by default for GPU image runtime.
 
 ## 8) Required Output Format When Invoked
 

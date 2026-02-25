@@ -9,6 +9,13 @@
 
 Time Zone Standard: `America/Toronto`.
 
+## 2026-02-25 (Wednesday)
+### Docs & Ops (Runbook / Validation / Architecture)
+- [x] Implement `deploy.yml` pre-build sync to checkout `jianshelu/ledge-repo@main` and materialize compute allowlist into `compute/ledge/`. (executed: 2026-02-25)
+- [x] Implement drift fail-fast gate for `compute/ledge` so app image is sourced only from synced `main` content. (executed: 2026-02-25)
+- [x] Configure app-image traceability labels and runtime source marker (`org.opencontainers.image.source`, `org.opencontainers.image.version`, `LEDGE_SOURCE_SHA`). (executed: 2026-02-25)
+- [x] Document channel-repo source pinning and compute-only image boundary in `README.md` and `docs/PLAN.md`. (executed: 2026-02-25)
+
 ## 2026-02-15 (Sunday)
 ### Docs & Ops (Runbook / Validation / Architecture)
 - [ ] Fix GitHub Actions billing/spending-limit block ("recent account payments have failed or your spending limit needs to be increased") so GHCR workflows can run again. (executed: pending)
@@ -185,5 +192,4 @@ Time Zone Standard: `America/Toronto`.
 - [ ] Deploy re-trigger of failed "Oracle" workflows.
 - [ ] Verify successful download and transcription for retried Oracle workflows.
 - [x] Document migration of legacy ledger items into structured Task.md sections.
-
 

@@ -18,6 +18,10 @@ RUN npm run build
 FROM base
 WORKDIR /workspace
 
+ARG LEDGE_SOURCE_SHA=unknown
+ENV LEDGE_SOURCE_SHA=${LEDGE_SOURCE_SHA}
+LABEL org.opencontainers.image.ledge_source_sha="${LEDGE_SOURCE_SHA}"
+
 # Project code and startup scripts
 COPY . ./
 COPY compute/ledge/ /workspace/ledge-repo/

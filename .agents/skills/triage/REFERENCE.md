@@ -32,6 +32,27 @@ If there is a conflict, `SKILL.md` remains authoritative.
 | huihuang | Temporal, MinIO, web UI, Control API |
 | GPU node | GPU worker, optional CPU worker, llama.cpp, Whisper, Compute API |
 
+## Image/Sync Boundary
+
+### Build ownership
+
+- GHCR image build/publish is owned by `cres_ytdlp` workflows.
+
+### Image-default content (GPU runtime required)
+
+- `src/backend/**` (workers, activities, workflows)
+- `src/shared/**`
+- `src/api/compute/**`
+- runtime scripts/supervisor config used on GPU startup
+- runtime configs (`configs/temporal.yaml`, `configs/minio.yaml`, `configs/models.yaml`)
+
+### Non-image default content (sync on demand)
+
+- `src/api/control/**`
+- web/control-plane utilities and non-GPU operational modules
+
+Sync source of truth is control host via SSH allowlist.
+
 ## Worker Design
 
 ### Queue naming and routing

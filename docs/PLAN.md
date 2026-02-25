@@ -13,6 +13,7 @@ Time Zone Standard: `America/Toronto`.
 
 | Date | Models/Systems | Plans | Status | Completion Time (America/Toronto) |
 | :--- | :--- | :--- | :--- | :--- |
+| 2026-02-25 | Docker/GHCR + Compute Runtime | [Channel Build Syncs Compute Source from `ledge-repo@main`](<#2026-02-25---channel-build-syncs-compute-source-from-ledge-repomain>) | `[DONE]` | - |
 | 2026-02-21 | Docker/GHCR + Compute Runtime | [Dual-Profile Runtime Bootstrap for Ledge on Cres GHCR Image](<#2026-02-21---dual-profile-runtime-bootstrap-for-ledge-on-cres-ghcr-image>) | `[DONE]` | 18:27:18 |
 | 2026-02-14 | Docker/DockerHub | [Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)](<#2026-02-14---docker-hub-publish-pipeline-(backup-ghcr-+-docker-hub-migration)>) | `[IN PROGRESS]` | - |
 | 2026-02-14 | Docker/GHCR | [Docker App Build Reproducibility Guards (Layout Gate + Base Digest Pin + npm ci)](<#2026-02-14---docker-app-build-reproducibility-guards-(layout-gate-+-base-digest-pin-+-npm-ci)>) | `[DONE]` | 16:06:22 |
@@ -91,13 +92,23 @@ Time Zone Standard: `America/Toronto`.
       - `/usr/local/bin/llama-server`
       - `/app/llama-server`
       - `/workspace/packages/llama.cpp/server`
+    - Exported `LD_LIBRARY_PATH` with `/app` and binary directory for bundled llama shared libraries.
+    - Enforced compatible CLI flags (`-ngl`, `-b`) for current bundled llama-server binary.
     - Removed duplicated `LLAMA_DISABLE` guard and hardened script with `set -euo pipefail`.
   - `scripts/supervisord.conf`
     - Restored `cres` default queue base to `BASE_TASK_QUEUE="video-processing"` for CPU/GPU workers.
   - `.github/workflows/deploy.yml`
-    - Smoke runtime now sets `PROJECT_ROOT` according to selected profile (`/workspace` for `cres`, `/workspace/ledge-repo` for `ledge`).
+    - Smoke runtime now validates vendored ledge bundle layout and keeps execution smoke on `cres` profile for CI portability.
+    - Added `compute/ledge/**` path trigger and image-layout checks for vendored ledge bundle.
+  - `Dockerfile` + `compute/ledge/**`
+    - Vendored ledge **GPU runtime-only** bundle into this repo and copy to `/workspace/ledge-repo` during app-image build.
+    - Included only services required for GPU-side runtime (`llama.cpp`, compute FastAPI, cpu/gpu workers, supervisord wiring).
+    - Non-GPU control-plane code is excluded from image bundle and should be synchronized over SSH from control host when needed.
+    - This removes mandatory runtime clone for `PROJECT_PROFILE=ledge` boot path.
   - `.env.example`
     - Documented dual-profile runtime env (`PROJECT_PROFILE`, `PROJECT_ROOT`) and ledge bootstrap vars (`LEDGE_REPO_URL`, `LEDGE_REPO_REF`, `LEDGE_GIT_SSH_KEY_PATH`, `LEDGE_GITHUB_TOKEN`).
+  - `scripts/supervisord.ledge.conf`
+    - Keep compute `fastapi` enabled (`autostart=true`) alongside workers and llama runtime.
 
 ### Validation
 
@@ -109,6 +120,9 @@ Time Zone Standard: `America/Toronto`.
   - `rg --line-number "resolve_llama_server|/usr/local/bin/llama-server|/app/llama-server" scripts/start-llama.sh`
   - `rg --line-number "BASE_TASK_QUEUE=\"video-processing\"" scripts/supervisord.conf`
   - `rg --line-number "PROJECT_ROOT=\"/workspace\"|PROJECT_ROOT=\"/workspace/ledge-repo\"" .github/workflows/deploy.yml`
+  - `rg --line-number "compute/ledge|/workspace/ledge-repo/src/backend/worker.py|/workspace/ledge-repo/src/api/compute/main.py" Dockerfile .github/workflows/deploy.yml`
+  - `rg --line-number "autostart=true" scripts/supervisord.ledge.conf`
+  - `python3 -m py_compile compute/ledge/src/backend/worker.py compute/ledge/src/backend/activities/stt_activity.py compute/ledge/src/backend/workflows/voice_workflow.py`
   - `rg --line-number "PROJECT_PROFILE|PROJECT_ROOT|LEDGE_REPO_URL|LEDGE_GITHUB_TOKEN" .env.example`
 
 ### Rollback
@@ -116,7 +130,43 @@ Time Zone Standard: `America/Toronto`.
 1. Revert `entrypoint.sh` to strict local-root-only behavior (remove ledge bootstrap/validation helpers).
 2. Revert `scripts/start-llama.sh` to previous single-path binary lookup.
 3. Revert `scripts/supervisord.conf` queue base from `video-processing` back to previous value if required.
-4. Revert `.github/workflows/deploy.yml` smoke `PROJECT_ROOT` selection block.
+4. Revert `.github/workflows/deploy.yml` smoke `PROJECT_ROOT` selection block and `compute/ledge/**` trigger/layout checks.
+5. Remove vendored `compute/ledge/**` bundle and `Dockerfile` copy line to `/workspace/ledge-repo`.
+6. Revert `scripts/supervisord.ledge.conf` fastapi autostart behavior if startup policy changes.
+
+## 2026-02-25 - Channel Build Syncs Compute Source from `ledge-repo@main`
+
+- Objective: eliminate manual instance sync dependency and dual-repo drift for image source by making build input derive directly from `ledge-repo/main`.
+- Changes:
+  - `.github/workflows/deploy.yml`
+    - Added pre-build checkout of `jianshelu/ledge-repo@main` into `_ledge_main`.
+    - Added allowlist sync to `compute/ledge/` from `_ledge_main` (`src/backend`, `src/shared`, `src/api/compute`, `configs/models.yaml`, `configs/minio.yaml`, `configs/temporal.yaml`, `requirements.instance.txt`).
+    - Added sync-change reporting: print `compute/ledge` changes after sync for traceability without blocking build.
+    - Added app-image label traceability: `org.opencontainers.image.source=jianshelu/ledge-repo` and `org.opencontainers.image.version=${LEDGE_SOURCE_SHA}`.
+    - Added `LEDGE_SOURCE_SHA` build arg passthrough for smoke and publish builds.
+  - `Dockerfile`
+    - Added `ARG LEDGE_SOURCE_SHA` and `ENV LEDGE_SOURCE_SHA`.
+  - `entrypoint.sh`
+    - Added startup log line `LEDGE_SOURCE_SHA` for runtime provenance checks.
+  - `README.md`
+    - Added channel-build policy and compute-only image-boundary documentation.
+
+### Validation
+
+- `bash -n entrypoint.sh`
+- `python3 -c "import yaml, pathlib; yaml.safe_load(pathlib.Path('.github/workflows/deploy.yml').read_text())"`
+- Manual workflow validation on GitHub Actions logs:
+  - checkout `ledge-repo@main` completed
+  - allowlist synced to `compute/ledge/`
+  - sync step reports either changed files or already-matched status
+  - startup logs show `LEDGE_SOURCE_SHA`
+
+### Rollback
+
+1. Remove pre-build `_ledge_main` checkout and allowlist sync steps in `.github/workflows/deploy.yml`.
+2. Remove sync-change reporting step for `compute/ledge`.
+3. Revert app-image labels/version to previous values.
+4. Revert `LEDGE_SOURCE_SHA` build arg/env and entrypoint log line.
 
 ## 2026-02-14 - Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)
 
@@ -2024,4 +2074,3 @@ Time Zone Standard: `America/Toronto`.
 4. Re-run launchers:
    - `C:\Users\rama\start_web_huihuang.ps1`
    - `C:\Users\rama\run_fastapi_norfolk.cmd`
-

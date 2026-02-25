@@ -27,6 +27,7 @@ Always apply `$triage` first. This skill does not override topology, endpoint, q
 5. Never commit secrets, tokens, or private keys.
 6. Use log evidence first, then patch.
 7. Never treat model sync as successful without post-sync file checks (regular file, readable, non-zero stable size).
+8. Keep instance image bundle focused on GPU runtime required services; do not expand by default with non-GPU/control-plane modules.
 
 ## 3) Default Workflow
 
@@ -52,6 +53,7 @@ Always apply `$triage` first. This skill does not override topology, endpoint, q
 - If `llama` flaps roughly every 30 minutes, correlate with model wait timeout before changing performance knobs.
 - Verify GPU worker polls expected queue suffix and can execute activities.
 - Verify no control-plane or exposure-rule drift was introduced.
+- Verify image/runtime bundle contains required GPU files (`src/backend`, `src/shared`, `src/api/compute`, runtime configs/scripts).
 
 ## 5) Required Output When Invoked
 

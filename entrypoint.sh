@@ -176,6 +176,8 @@ export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-64.229.113.233:7233}"
 export MINIO_ENDPOINT="${MINIO_ENDPOINT:-64.229.113.233:9000}"
 export MINIO_SECURE="${MINIO_SECURE:-false}"
 
+echo "[entrypoint] LEDGE_SOURCE_SHA=${LEDGE_SOURCE_SHA:-unknown}"
+
 # CI/no-GPU hosts can opt out cleanly; runtime can override.
 export WORKER_GPU_OPTIONAL="${WORKER_GPU_OPTIONAL:-1}"
 export LLAMA_DISABLE="${LLAMA_DISABLE:-0}"

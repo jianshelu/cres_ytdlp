@@ -27,6 +27,7 @@ Always apply `$triage` first. This skill does not override topology, NAT, endpoi
 6. Prefer evidence-first diagnosis (logs/health/queue state) before patching.
 7. Redact secrets/tokens from logs before sharing excerpts.
 8. Never commit secrets, tokens, or private keys.
+9. Keep control-plane code as sync-over-SSH concern for GPU instances; do not broaden default GHCR image bundle beyond GPU runtime required services.
 
 ## 3) Default Workflow
 
