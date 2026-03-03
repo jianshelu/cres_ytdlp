@@ -4,6 +4,7 @@ FROM ${BASE_RUNTIME_IMAGE}
 
 ARG TORCH_VERSION=2.5.1
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG TTS_VERSION=0.22.0
 
 WORKDIR /workspace
 
@@ -62,6 +63,7 @@ RUN set -eux; \
   pip3 install --no-cache-dir "cython<3" "setuptools_scm"; \
   SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0 PIP_NO_BUILD_ISOLATION=1 \
     pip3 install --no-cache-dir --extra-index-url "${TORCH_INDEX_URL}" -r /tmp/requirements.instance.arm64.clean.txt; \
+  pip3 install --no-cache-dir --no-deps "TTS==${TTS_VERSION}"; \
   if ! python3 -c "import torch" >/dev/null 2>&1; then \
     pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
   fi; \
