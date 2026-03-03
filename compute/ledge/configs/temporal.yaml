@@ -5,7 +5,7 @@ temporal:
   task_queue:
     cpu: "ledge-cpu"
     gpu: "ledge-gpu"
-  # GPU uses public endpoint
+  # GPU uses Tailscale endpoint
   public:
-    host: "64.229.113.233"
+    host: "100.110.64.13"
     port: 7233

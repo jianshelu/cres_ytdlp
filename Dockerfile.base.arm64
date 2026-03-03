@@ -1,0 +1,67 @@
+# Dockerfile.base.arm64 (CPU-only runtime base)
+ARG BASE_RUNTIME_IMAGE=ubuntu:22.04
+FROM ${BASE_RUNTIME_IMAGE}
+
+ARG TORCH_VERSION=2.5.1
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+
+WORKDIR /workspace
+
+# Install system dependencies (+ supervisor)
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ffmpeg \
+    curl \
+    wget \
+    git \
+    ca-certificates \
+    gnupg \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 (NodeSource)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
+# Default model/cache paths
+ENV LLM_MODEL_PATH=/workspace/packages/models/llm \
+    XDG_CACHE_HOME=/workspace/.cache
+
+RUN mkdir -p /workspace/packages/models/llm /workspace/.cache /workspace/logs /workspace/scripts
+
+# Install instance runtime Python dependencies in base image (CPU-only torch index)
+COPY requirements.instance.arm64.txt /tmp/requirements.instance.arm64.txt
+RUN set -eux; \
+  test -n "${TORCH_VERSION}"; \
+  test -n "${TORCH_INDEX_URL}"; \
+  test -s /tmp/requirements.instance.arm64.txt; \
+  tr -d '\r' < /tmp/requirements.instance.arm64.txt > /tmp/requirements.instance.arm64.clean.txt; \
+  if grep -nE '^[[:space:]]*torch==[[:space:]]*$|^[[:space:]]*pip/[[:space:]]*$' /tmp/requirements.instance.arm64.clean.txt; then exit 1; fi; \
+  pip3 install --upgrade pip setuptools wheel; \
+  pip3 install --no-cache-dir --ignore-installed "blinker==1.9.0"; \
+  pip3 install --no-cache-dir --extra-index-url "${TORCH_INDEX_URL}" -r /tmp/requirements.instance.arm64.clean.txt; \
+  if ! python3 -c "import torch" >/dev/null 2>&1; then \
+    pip3 install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"; \
+  fi; \
+  python3 -c "import torch; print('torch available:', torch.__version__, 'cuda:', torch.version.cuda)"; \
+  rm -f /tmp/requirements.instance.arm64.txt /tmp/requirements.instance.arm64.clean.txt; \
+  rm -rf /root/.cache/pip; \
+  (find /usr/local/lib/python3.10/dist-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true); \
+  (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyc" -delete 2>/dev/null || true); \
+  (find /usr/local/lib/python3.10/dist-packages -type f -name "*.pyo" -delete 2>/dev/null || true)
+
+# Supervisor config + llama wrapper
+COPY scripts/supervisord.conf /etc/supervisor/supervisord.cres.conf
+COPY scripts/supervisord.ledge.conf /etc/supervisor/supervisord.ledge.conf
+COPY scripts/start-llama.sh /usr/local/bin/start-llama.sh
+COPY scripts/with_compute_env.sh /workspace/scripts/with_compute_env.sh
+RUN chmod +x /usr/local/bin/start-llama.sh /workspace/scripts/with_compute_env.sh

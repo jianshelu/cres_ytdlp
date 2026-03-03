@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Compute-side safe defaults for split-host deployment.
-export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-64.229.113.233:7233}"
-export MINIO_ENDPOINT="${MINIO_ENDPOINT:-64.229.113.233:9000}"
+export TEMPORAL_ADDRESS="${TEMPORAL_ADDRESS:-100.110.64.13:7233}"
+export MINIO_ENDPOINT="${MINIO_ENDPOINT:-100.110.64.13:9000}"
 export MINIO_SECURE="${MINIO_SECURE:-false}"
 
 # Fallback source for template environments that only expose values to PID 1.

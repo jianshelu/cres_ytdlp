@@ -13,6 +13,7 @@ Time Zone Standard: `America/Toronto`.
 
 | Date | Models/Systems | Plans | Status | Completion Time (America/Toronto) |
 | :--- | :--- | :--- | :--- | :--- |
+| 2026-03-03 | Docker/GHCR + ARM64 | [ARM64 Tews Base App Tags + Cres AMD Tags](<#2026-03-03---arm64-tews-base-app-tags-+-cres-amd-tags>) | `[DONE]` | - |
 | 2026-02-25 | Docker/GHCR + Compute Runtime | [Channel Build Uses Local Pre-Sync (No Cross-Repo Checkout)](<#2026-02-25---channel-build-uses-local-pre-sync-(no-cross-repo-checkout)>) | `[DONE]` | - |
 | 2026-02-21 | Docker/GHCR + Compute Runtime | [Dual-Profile Runtime Bootstrap for Ledge on Cres GHCR Image](<#2026-02-21---dual-profile-runtime-bootstrap-for-ledge-on-cres-ghcr-image>) | `[DONE]` | 18:27:18 |
 | 2026-02-14 | Docker/DockerHub | [Docker Hub Publish Pipeline (Backup GHCR + Docker Hub Migration)](<#2026-02-14---docker-hub-publish-pipeline-(backup-ghcr-+-docker-hub-migration)>) | `[IN PROGRESS]` | - |
@@ -72,6 +73,33 @@ Time Zone Standard: `America/Toronto`.
 | 2026-02-12 | Docker/GHCR | [CI Minimal Image Base Reuse Fix](<#2026-02-12---ci-minimal-image-base-reuse-fix>) | `[PENDING]` | - |
 | 2026-02-12 | Workers/Queues | [Queue Routing, Secret Hygiene, and Active-Instance Scheduling](<#2026-02-12---queue-routing,-secret-hygiene,-and-active-instance-scheduling>) | `[PENDING]` | - |
 | 2026-02-11 | Platform | [Root Cleanup and Source-of-Truth Normalization](<#2026-02-11---root-cleanup-and-source-of-truth-normalization>) | `[PENDING]` | - |
+
+## 2026-03-03 - ARM64 Tews Base App Tags + Cres AMD Tags
+
+- Objective: add ARM64 CPU base/app publish for tews tags and add cres tags on amd64 app builds without touching CUDA base routes.
+- Changes:
+  - `Dockerfile.base.arm64`
+    - CPU-only arm64 base with non-interactive apt, Node.js, and CPU torch index.
+  - `requirements.instance.arm64.txt`
+    - CPU-only dependency list (no `+cu` wheels).
+  - `.github/workflows/deploy.yml`
+    - Add arm64 base/app build jobs for tews tags.
+    - Add amd64 app tags for `cres` and `cres-<sha>`.
+    - Include new ARM64 Dockerfile in build guards.
+  - `scripts/build_tews_arm64.sh`
+    - Default base image to `tews-arm64-latest`.
+
+### Validation
+
+- `python3 -c "import yaml, pathlib; yaml.safe_load(pathlib.Path('.github/workflows/deploy.yml').read_text())"`
+- `rg --line-number "Dockerfile.base.arm64|requirements.instance.arm64.txt|tews-arm64|cres-" .github/workflows/deploy.yml`
+- `rg --line-number "TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu" Dockerfile.base.arm64`
+
+### Rollback
+
+1. Remove arm64 base/app jobs from `.github/workflows/deploy.yml` and delete `Dockerfile.base.arm64` + `requirements.instance.arm64.txt`.
+2. Revert `scripts/build_tews_arm64.sh` base image default back to the previous tag.
+3. Remove `cres` and `cres-<sha>` tags from the amd64 app metadata list.
 
 ## 2026-02-21 - Dual-Profile Runtime Bootstrap for Ledge on Cres GHCR Image
 - Executed time: 2026-02-21 18:27:18 -05:00
